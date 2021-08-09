@@ -21,13 +21,10 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
     private var updatingCache = false
 
     private fun CommandSender.sendHelp() {
-        send("${ChatColor.YELLOW}----------------------------------------")
-        send("${ChatColor.AQUA}/sab ${ChatColor.GRAY}- ${ChatColor.GREEN}this")
-        send("${ChatColor.AQUA}/sab creategroup <グループ名> ${ChatColor.GRAY}- ${ChatColor.GREEN}グループを作成")
-        send("${ChatColor.AQUA}/sab deletegroup <グループ名> ${ChatColor.GRAY}- ${ChatColor.GREEN}グループを削除")
-        send("${ChatColor.AQUA}/sab group <グループ名> add <鯖名> ${ChatColor.GRAY}- ${ChatColor.GREEN}指定した鯖をグループに追加")
-        send("${ChatColor.AQUA}/sab group <グループ名> remove <鯖名> ${ChatColor.GRAY}- ${ChatColor.GREEN}指定した鯖をグループから除外")
-        send("${ChatColor.YELLOW}----------------------------------------")
+        send("${ChatColor.AQUA}/sab creategroup <group>")
+        send("${ChatColor.AQUA}/sab deletegroup <group>")
+        send("${ChatColor.AQUA}/sab group <group> add <server>")
+        send("${ChatColor.AQUA}/sab group <group> remove <server>")
     }
 
     override fun execute(sender: CommandSender, args: Array<String>) {
@@ -38,7 +35,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
         }
         if (args.isEmpty()) {
             sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.GREEN} v${ChatColor.AQUA}${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
-            sender.send("$PREFIX${ChatColor.GREEN}Execute ${ChatColor.AQUA}/sab help${ChatColor.GREEN} for the command list.")
+            sender.send("$PREFIX${ChatColor.GREEN}Use ${ChatColor.AQUA}/sab help${ChatColor.GREEN} to view commands.")
             return
         }
         when (args[0]) {

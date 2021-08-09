@@ -34,6 +34,6 @@ object SABConfig {
         val password = obj.getString("password") ?: "naetao"
         val verifyServerCertificate = obj.getBoolean("verifyServerCertificate", false)
         val useSSL = obj.getBoolean("useSSL", true)
-        val keepAlive = obj.getInt("keepAlive", 300)
+        val keepAlive = obj.getInt("keepAlive", 300) // in seconds
     }
 }

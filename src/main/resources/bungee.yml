@@ -2,14 +2,3 @@ name: SpicyAzisaBan
 main: net.azisaba.spicyAzisaBan.SpicyAzisaBan
 version: 0.0.1
 author: acrylic-style
-permissions:
-  - sab.ban.perm
-  - sab.ban.temp
-  - sab.ipban.perm
-  - sab.ipban.temp
-  - sab.mute.perm
-  - sab.mute.temp
-  - sab.warning.perm
-  - sab.warning.temp
-  - sab.kick
-  - sab.note

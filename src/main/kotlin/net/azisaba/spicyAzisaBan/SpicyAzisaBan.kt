@@ -42,6 +42,12 @@ class SpicyAzisaBan: Plugin() {
         connection.connect(props)
         settings = Settings()
         logger.info("Connected.")
+        val version = settings.getDatabaseVersion().complete()
+        if (version > SQLConnection.CURRENT_DATABASE_VERSION) {
+            error("Cannot load the database that was used in a newer version of the plugin! Please update the plugin.\n" +
+                    "Version stored in the database: $version\n" +
+                    "Version stored in the plugin: ${SQLConnection.CURRENT_DATABASE_VERSION}")
+        }
         DatabaseMigration.run().complete()
         timer.scheduleAtFixedRate(object: TimerTask() {
             override fun run() {
@@ -60,7 +66,14 @@ class SpicyAzisaBan: Plugin() {
         logger.info("Hewwwwwwwwwoooooo!")
     }
 
+    override fun onDisable() {
+        connection.close()
+    }
+
     class Settings {
+
+        // Database version: Used to convert old database versions. Do not edit.
+
         fun getDatabaseVersion(): Promise<Int> =
             instance.connection.settings.findOne(FindOptions.Builder().addWhere("key", "database_version").build())
                 .then { it?.getInteger("valueInt") ?: SQLConnection.CURRENT_DATABASE_VERSION }
@@ -71,6 +84,22 @@ class SpicyAzisaBan: Plugin() {
                     .addWhere("key", "database_version")
                     .addValue("key", "database_version")
                     .addValue("valueInt", i)
+                    .build()
+            ).then { }
+
+        // Failsafe: If true, the plugin will prevent players from joining the server if the database is down.
+
+        fun isFailsafe(): Promise<Boolean> =
+            instance.connection.settings.findOne(FindOptions.Builder().addWhere("key", "failsafe").build())
+                .then { it?.getInteger("valueInt") ?: 1 }
+                .then { it != 0 }
+
+        fun setFailsafe(flag: Boolean): Promise<Unit> =
+            instance.connection.settings.upsert(
+                UpsertOptions.Builder()
+                    .addWhere("key", "failsafe")
+                    .addValue("key", "failsafe")
+                    .addValue("valueInt", if (flag) 1 else 0)
                     .build()
             ).then { }
     }

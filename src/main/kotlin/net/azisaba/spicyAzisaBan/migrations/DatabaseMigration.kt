@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import util.promise.rewrite.Promise
 
 interface DatabaseMigration {
@@ -28,6 +29,9 @@ interface DatabaseMigration {
                 }
             }
             val version = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
+            if (version != SQLConnection.CURRENT_DATABASE_VERSION) {
+                SpicyAzisaBan.instance.logger.warning("Database migration could not upgrade the database version from $version to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
+            }
             val time = System.currentTimeMillis() - start
             SpicyAzisaBan.instance.logger.info("Completed database migrations (current database version: $version, took ${time}ms)")
             SpicyAzisaBan.instance.settings.setDatabaseVersion(version)
