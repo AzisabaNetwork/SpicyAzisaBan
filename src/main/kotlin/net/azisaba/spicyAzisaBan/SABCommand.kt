@@ -13,7 +13,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
 
-object SABCommand: Command("spicyazisaban", "sab.command.spicyazisaban", "sab"), TabExecutor {
+object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
     private val commands = listOf("creategroup", "deletegroup", "group")
     private val groupCommands = listOf("add", "remove")
     private var cachedGroups = DataCache<List<String>>()
@@ -31,7 +31,16 @@ object SABCommand: Command("spicyazisaban", "sab.command.spicyazisaban", "sab"),
     }
 
     override fun execute(sender: CommandSender, args: Array<String>) {
-        if (args.isEmpty()) return sender.sendHelp()
+        if (!sender.hasPermission("sab.command.spicyazisaban")) {
+            sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.GREEN} v${ChatColor.AQUA}${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
+            sender.send("$PREFIX${ChatColor.GREEN}You do not have permission to run commands.")
+            return
+        }
+        if (args.isEmpty()) {
+            sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.GREEN} v${ChatColor.AQUA}${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
+            sender.send("$PREFIX${ChatColor.GREEN}Execute ${ChatColor.AQUA}/sab help${ChatColor.GREEN} for the command list.")
+            return
+        }
         when (args[0]) {
             "creategroup" -> {
                 if (args.size <= 1) return sender.sendHelp()

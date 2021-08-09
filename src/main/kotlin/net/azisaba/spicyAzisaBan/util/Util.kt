@@ -9,6 +9,24 @@ object Util {
         sendMessage(*TextComponent.fromLegacyText(message))
     }
 
+    private var preloadedPermissions = false
+
+    fun preloadPermissions(sender: CommandSender) {
+        if (preloadedPermissions) return
+        sender.hasPermission("sab.command.spicyazisaban")
+        sender.hasPermission("sab.ban.perm")
+        sender.hasPermission("sab.ban.temp")
+        sender.hasPermission("sab.ipban.perm")
+        sender.hasPermission("sab.ipban.temp")
+        sender.hasPermission("sab.mute.perm")
+        sender.hasPermission("sab.mute.temp")
+        sender.hasPermission("sab.warning.perm")
+        sender.hasPermission("sab.warning.temp")
+        sender.hasPermission("sab.kick")
+        sender.hasPermission("sab.note")
+        preloadedPermissions = true
+    }
+
     fun formatDateTime(millis: Long): String {
         val cal = Calendar.getInstance()
         cal.timeInMillis = millis

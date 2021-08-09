@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.md_5.bungee.api.plugin.Plugin
@@ -54,6 +55,7 @@ class SpicyAzisaBan: Plugin() {
                 }
             }
         }, SABConfig.database.keepAlive * 1000L, SABConfig.database.keepAlive * 1000L)
+        proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
         proxy.pluginManager.registerCommand(this, SABCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
