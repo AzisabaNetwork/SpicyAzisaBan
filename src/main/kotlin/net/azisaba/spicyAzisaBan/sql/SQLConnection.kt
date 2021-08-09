@@ -30,7 +30,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         val dupe = arrayOf(
             TableDefinition.Builder("id", DataType.BIGINT).setAutoIncrement(true).setPrimaryKey(true).build(), // punish id
             TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(), // player name
-            TableDefinition.Builder("uuid", DataType.STRING).setAllowNull(false).build(), // player uuid
+            TableDefinition.Builder("target", DataType.STRING).setAllowNull(false).build(), // player uuid or IP if ip ban
             TableDefinition.Builder("reason", DataType.STRING).setAllowNull(false).build(), // punish reason
             TableDefinition.Builder("operator", DataType.STRING).setAllowNull(false).build(), // operator uuid
             TableDefinition.Builder("type", DataType.STRING).setAllowNull(false).build(), // type (see PunishmentType)
