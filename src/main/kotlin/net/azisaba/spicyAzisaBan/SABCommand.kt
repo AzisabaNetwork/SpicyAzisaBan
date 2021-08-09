@@ -1,19 +1,3 @@
-/*
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/gpl-3.0.html>.
- */
-
 package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
@@ -29,7 +13,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
 
-object SABCommand: Command("spicyazisaban", "spicyazisaban.command.spicyazisaban", "sab"), TabExecutor {
+object SABCommand: Command("spicyazisaban", "sab.command.spicyazisaban", "sab"), TabExecutor {
     private val commands = listOf("creategroup", "deletegroup", "group")
     private val groupCommands = listOf("add", "remove")
     private var cachedGroups = DataCache<List<String>>()
