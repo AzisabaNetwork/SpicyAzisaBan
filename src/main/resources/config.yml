@@ -1,0 +1,9 @@
+database:
+  host: localhost
+  name: spicyazisaban
+  user: spicyazisaban
+  password: naetao
+  verifyServerCertificate: false
+  useSSL: true
+  # Send keep alive every n seconds
+  keepAlive: 300
