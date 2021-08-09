@@ -1,5 +1,5 @@
 # SpicyAzisaBan
 
 ## The code:
-![AWEKJRLKJFLKASNFAWIJGAWEFJAWEKFJAKFAASJFKA!](https://um.acrylicstyle.xyz/local/2021-08/00-37/the-cake.webp)
+![AWEKJRLKJFLKASNFAWIJGAWEFJAWEKFJAKFAASJFKA!](https://cdn.acrylicstyle.xyz/img/upload/local/2021-08/01-19/the-cake.png)
 
