@@ -12,10 +12,15 @@ import java.sql.SQLException
 import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
+    companion object {
+        const val CURRENT_DATABASE_VERSION = 1
+    }
+
     lateinit var punishments: Table
     lateinit var punishmentHistory: Table
     lateinit var groups: Table
     lateinit var serverGroup: Table
+    lateinit var settings: Table
 
     fun isConnected() =
         try {
@@ -45,14 +50,22 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             "groups",
             arrayOf(
                 TableDefinition.Builder("id", DataType.STRING).setAllowNull(false).setPrimaryKey(true).build(),
-            )
+            ),
         )
         serverGroup = this.define(
             "serverGroup",
             arrayOf(
                 TableDefinition.Builder("server", DataType.STRING).setAllowNull(false).setPrimaryKey(true).build(),
                 TableDefinition.Builder("group", DataType.STRING).setAllowNull(false).build(),
-            )
+            ),
+        )
+        settings = this.define(
+            "settings",
+            arrayOf(
+                TableDefinition.Builder("key", DataType.STRING).setPrimaryKey(true).build(),
+                TableDefinition.Builder("valueString", DataType.STRING).build(),
+                TableDefinition.Builder("valueInt", DataType.INT).build(),
+            ),
         )
         this.sync()
     }
