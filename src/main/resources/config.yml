@@ -7,3 +7,5 @@ database:
   useSSL: true
   # Send keep alive every n seconds
   keepAlive: 300
+  # If true, the plugin will prevent players from joining the server if database is inaccessible.
+  failsafe: true

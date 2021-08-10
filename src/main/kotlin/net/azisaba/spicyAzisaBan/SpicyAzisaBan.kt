@@ -1,8 +1,10 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
+import net.azisaba.spicyAzisaBan.util.Util
 import net.md_5.bungee.api.plugin.Plugin
 import net.md_5.bungee.api.ChatColor
 import util.promise.rewrite.Promise
@@ -15,9 +17,16 @@ import java.util.TimerTask
 
 class SpicyAzisaBan: Plugin() {
     companion object {
+        private val startTime = System.currentTimeMillis()
+        @JvmField
         val GROUP_PATTERN = "^[a-zA-Z0-9+_\\-]{1,32}$".toRegex()
+        @JvmField
         val PREFIX = "${ChatColor.RED}${ChatColor.BOLD}SpicyAzisaBan ${ChatColor.DARK_GRAY}${ChatColor.BOLD}≫ ${ChatColor.RESET}"
+        @JvmStatic
         lateinit var instance: SpicyAzisaBan
+
+        @JvmStatic
+        fun getUptime(): String = Util.unProcessTime(System.currentTimeMillis() - startTime)
     }
 
     private val timer = Timer()
@@ -84,22 +93,6 @@ class SpicyAzisaBan: Plugin() {
                     .addWhere("key", "database_version")
                     .addValue("key", "database_version")
                     .addValue("valueInt", i)
-                    .build()
-            ).then { }
-
-        // Failsafe: If true, the plugin will prevent players from joining the server if the database is down.
-
-        fun isFailsafe(): Promise<Boolean> =
-            instance.connection.settings.findOne(FindOptions.Builder().addWhere("key", "failsafe").build())
-                .then { it?.getInteger("valueInt") ?: 1 }
-                .then { it != 0 }
-
-        fun setFailsafe(flag: Boolean): Promise<Unit> =
-            instance.connection.settings.upsert(
-                UpsertOptions.Builder()
-                    .addWhere("key", "failsafe")
-                    .addValue("key", "failsafe")
-                    .addValue("valueInt", if (flag) 1 else 0)
                     .build()
             ).then { }
     }

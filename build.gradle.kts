@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.1"
+version = "0.0.2"
 
 repositories {
     mavenLocal()
@@ -20,11 +20,17 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
     implementation("xyz.acrylicstyle:minecraft-util:0.5.3")
     compileOnly("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
+    testImplementation("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
 }
 
 tasks {
     compileKotlin { kotlinOptions.jvmTarget = "1.8" }
     compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
+
+    test {
+        useJUnitPlatform()
+    }
 
     shadowJar {
         relocate("kotlin", "net.azisaba.spicyAzisaBan.libs.kotlin")

@@ -24,7 +24,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
 
     fun isConnected() =
         try {
-            connection != null && !connection.isClosed
+            connection != null && !connection.isClosed && connection.isValid(1000)
         } catch (e: SQLException) {
             false
         }
@@ -43,7 +43,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             TableDefinition.Builder("end", DataType.BIGINT).setAllowNull(false).build(), // -1 means permanent, otherwise temporary
             TableDefinition.Builder("server", DataType.STRING).build(), // null = global; can be group name
         )
-        // when group disappears after the punishment
+        // remove punishments associated with group when group disappears after the punishment
         punishments = this.define("punishments", dupe)
         punishmentHistory = this.define("punishmentHistory", dupe)
         groups = this.define(

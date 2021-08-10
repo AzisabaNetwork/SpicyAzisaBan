@@ -1,6 +1,6 @@
 package net.azisaba.spicyAzisaBan.punishment
 
-enum class PunishmentType(val text: String, base: PunishmentType?, temp: Boolean, perm: String) {
+enum class PunishmentType(val text: String, val base: PunishmentType?, val temp: Boolean, val perm: String) {
     BAN("Ban", null, false, "sab.ban.perm"),
     TEMP_BAN("Tempban", BAN, true, "sab.ban.temp"),
     IP_BAN("Ipban", null, false, "sab.ipban.perm"),
@@ -12,4 +12,6 @@ enum class PunishmentType(val text: String, base: PunishmentType?, temp: Boolean
     KICK("Kick", null, false, "sab.kick"),
     NOTE("Note", null, false, "sab.note"),
     ;
+
+    fun isIPBased() = this == IP_BAN || this.base == IP_BAN
 }

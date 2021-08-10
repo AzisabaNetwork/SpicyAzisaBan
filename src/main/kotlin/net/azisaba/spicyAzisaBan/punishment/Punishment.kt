@@ -49,6 +49,10 @@ data class Punishment(
             SpicyAzisaBan.instance.connection.punishments.findAll(FindOptions.Builder().addWhere("target", target).build())
                 .then { it.map { td -> fromTableData(td) } }
 
+        fun fetchActivePunishmentsByTargetAndType(target: String, type: PunishmentType): Promise<List<Punishment>> =
+            SpicyAzisaBan.instance.connection.punishments.findAll(FindOptions.Builder().addWhere("target", target).addWhere("type", type.name).build())
+                .then { it.map { td -> fromTableData(td) } }
+
         fun fetchPunishmentById(id: Long): Promise<Punishment?> =
             SpicyAzisaBan.instance.connection.punishmentHistory.findOne(FindOptions.Builder().addWhere("id", id).build())
                 .then { it?.let { fromTableData(it) } }

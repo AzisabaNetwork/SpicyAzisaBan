@@ -1,24 +1,32 @@
 package net.azisaba.spicyAzisaBan.util
 
+import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
+import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.connection.ProxiedPlayer
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.Calendar
+import kotlin.IllegalArgumentException
+import kotlin.math.floor
 
 object Util {
     /**
      * Sends a message to sender.
      */
     fun CommandSender.send(message: String) {
-        sendMessage(*TextComponent.fromLegacyText(message))
+        sendMessage(*TextComponent.fromLegacyText(message.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
     }
 
-    private var preloadedPermissions = false
+    private var lastPreloadedPermissions = 0L
 
     /**
      * (Pre)load permissions so permissions will show up on LuckPerms suggestions.
      */
     fun preloadPermissions(sender: CommandSender) {
-        if (preloadedPermissions) return
+        if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
         sender.hasPermission("sab.command.spicyazisaban")
         sender.hasPermission("sab.ban.perm")
         sender.hasPermission("sab.ban.temp")
@@ -30,7 +38,11 @@ object Util {
         sender.hasPermission("sab.warning.temp")
         sender.hasPermission("sab.kick")
         sender.hasPermission("sab.note")
-        preloadedPermissions = true
+        SpicyAzisaBan.instance.connection.getAllGroups().then {
+            it.forEach { group -> sender.hasPermission("sab.punish.group.$group") }
+        }
+        ProxyServer.getInstance().servers.keys.forEach { server -> sender.hasPermission("sab.punish.server.$server") }
+        lastPreloadedPermissions = System.currentTimeMillis()
     }
 
     /**
@@ -103,4 +115,80 @@ object Util {
         }
         this[Calendar.MONTH] = month
     }
+
+    fun InetSocketAddress.getIPAddress() = address.getIPAddress()
+
+    fun InetAddress.getIPAddress() = hostAddress.replaceFirst("(.*)%.*".toRegex(), "$1")
+
+    fun ProxiedPlayer.getIPAddress(): String {
+        require(socketAddress is InetSocketAddress) { "Player $name is connecting via unix socket" }
+        return (socketAddress as InetSocketAddress).getIPAddress()
+    }
+
+    fun <T> List<T>.concat(vararg another: List<T>) = this.toMutableList().apply { another.forEach { addAll(it) } }
+
+    /**
+     * @sample net.azisaba.spicyAzisaBan.test.ProcessTimeTest
+     */
+    @Throws(IllegalArgumentException::class)
+    fun processTime(s: String): Long {
+        var time = 0L
+        var rawNumber = ""
+        val reader = StringReader(s)
+        while (!reader.isEOF()) {
+            val c = reader.readFirst()
+            if (c.isDigit()) {
+                rawNumber += c
+            } else {
+                if (rawNumber.isEmpty()) throw IllegalArgumentException("Unexpected non-digit character: '$c' at index ${reader.index}")
+                // mo
+                if (c == 'm' && !reader.isEOF() && reader.peek() == 'o') {
+                    reader.skip()
+                    time += month * rawNumber.toLong()
+                    rawNumber = ""
+                    continue
+                }
+                // y(ear), d(ay), h(our), m(inute), s(econd)
+                time += when (c) {
+                    'y' -> year * rawNumber.toLong()
+                    // mo is not here
+                    'd' -> day * rawNumber.toLong()
+                    'h' -> hour * rawNumber.toLong()
+                    'm' -> minute * rawNumber.toLong()
+                    's' -> second * rawNumber.toLong()
+                    else -> throw IllegalArgumentException("Unexpected character: '$c' at index ${reader.index}")
+                }
+                rawNumber = ""
+            }
+        }
+        return time
+    }
+
+    fun unProcessTime(l: Long): String {
+        var s = ""
+        var time = l
+        if (time > day) {
+            val t = floor(time / day.toDouble()).toLong()
+            s += "${t}d "
+            time -= t * day
+        }
+        if (time > hour) {
+            val t = floor(time / hour.toDouble()).toLong()
+            s += "${t}h "
+            time -= t * hour
+        }
+        if (time > minute) {
+            val t = floor(time / minute.toDouble()).toLong()
+            s += "${t}m "
+            time -= t * minute
+        }
+        if (time > second) {
+            val t = floor(time / second.toDouble()).toLong()
+            s += "${t}s"
+            time -= t * second
+        }
+        return s
+    }
+
+    fun Boolean.toMinecraft() = if (this) "${ChatColor.GREEN}true" else "${ChatColor.RED}false"
 }
