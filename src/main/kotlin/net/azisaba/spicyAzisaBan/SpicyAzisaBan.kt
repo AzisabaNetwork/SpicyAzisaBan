@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.plugin.Plugin
 import net.md_5.bungee.api.ChatColor
 import util.promise.rewrite.Promise
@@ -21,7 +22,7 @@ class SpicyAzisaBan: Plugin() {
         @JvmField
         val GROUP_PATTERN = "^[a-zA-Z0-9+_\\-]{1,32}$".toRegex()
         @JvmField
-        val PREFIX = "${ChatColor.RED}${ChatColor.BOLD}SpicyAzisaBan ${ChatColor.DARK_GRAY}${ChatColor.BOLD}≫ ${ChatColor.RESET}"
+        val PREFIX = SABMessages.General.Prefix.translate()
         @JvmStatic
         lateinit var instance: SpicyAzisaBan
 

@@ -1,10 +1,12 @@
 package net.azisaba.spicyAzisaBan.commands
 
 import net.azisaba.spicyAzisaBan.SABConfig
+import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
+import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -41,8 +43,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission("sab.command.spicyazisaban")) {
-            sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
-            sender.send("$PREFIX${ChatColor.GREEN}You do not have permission to run commands.")
+            sender.send("$PREFIX${SABMessages.General.NoPerms.translate()}")
             return
         }
         if (args.isEmpty()) {

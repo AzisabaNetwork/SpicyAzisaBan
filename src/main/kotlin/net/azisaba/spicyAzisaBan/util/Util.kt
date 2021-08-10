@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.util
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -28,16 +29,11 @@ object Util {
     fun preloadPermissions(sender: CommandSender) {
         if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
         sender.hasPermission("sab.command.spicyazisaban")
-        sender.hasPermission("sab.ban.perm")
-        sender.hasPermission("sab.ban.temp")
-        sender.hasPermission("sab.ipban.perm")
-        sender.hasPermission("sab.ipban.temp")
-        sender.hasPermission("sab.mute.perm")
-        sender.hasPermission("sab.mute.temp")
-        sender.hasPermission("sab.warning.perm")
-        sender.hasPermission("sab.warning.temp")
-        sender.hasPermission("sab.kick")
-        sender.hasPermission("sab.note")
+        sender.hasPermission("sab.exempt")
+        PunishmentType.values().forEach { type ->
+            sender.hasPermission(type.perm)
+            sender.hasPermission("sab.notification.${type.id}")
+        }
         SpicyAzisaBan.instance.connection.getAllGroups().then {
             it.forEach { group -> sender.hasPermission("sab.punish.group.$group") }
         }
@@ -191,4 +187,6 @@ object Util {
     }
 
     fun Boolean.toMinecraft() = if (this) "${ChatColor.GREEN}true" else "${ChatColor.RED}false"
+
+    fun String.translate() = ChatColor.translateAlternateColorCodes('&', this)!!
 }
