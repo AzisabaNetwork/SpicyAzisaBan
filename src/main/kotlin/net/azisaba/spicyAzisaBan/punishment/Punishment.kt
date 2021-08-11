@@ -15,7 +15,7 @@ data class Punishment(
     val type: PunishmentType,
     val start: Long,
     val end: Long,
-    val server: String?,
+    val server: String,
 ) {
     companion object {
         fun fromTableData(td: TableData): Punishment {
@@ -27,7 +27,7 @@ data class Punishment(
             val type = PunishmentType.valueOf(td.getString("type"))
             val start = td.getLong("start") ?: 0
             val end = td.getLong("end") ?: 0
-            val server = td.getString("server")
+            val server = td.getString("server")!!
             return Punishment(
                 id,
                 name,

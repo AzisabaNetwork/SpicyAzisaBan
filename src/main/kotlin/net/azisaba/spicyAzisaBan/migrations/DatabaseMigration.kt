@@ -6,7 +6,9 @@ import util.promise.rewrite.Promise
 
 interface DatabaseMigration {
     companion object {
-        private val migrations = listOf<DatabaseMigration>()
+        private val migrations = listOf<DatabaseMigration>(
+            V1,
+        )
 
         fun run(): Promise<Unit> = Promise.create { context ->
             val start = System.currentTimeMillis()
