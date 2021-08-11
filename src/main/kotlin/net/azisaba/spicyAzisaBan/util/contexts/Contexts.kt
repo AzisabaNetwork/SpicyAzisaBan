@@ -13,5 +13,10 @@ class Contexts<T : Context> private constructor(val key: String) {
          * server context. (to check whether the server is group)
          */
         val SERVER = Contexts<ServerContext>("server")
+
+        /**
+         * Returns reason but returns "none" if blank or null and can never fail.
+         */
+        val REASON = Contexts<ReasonContext>("reason")
     }
 }

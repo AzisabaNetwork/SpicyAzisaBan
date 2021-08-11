@@ -27,17 +27,14 @@ object GlobalBanCommand: Command("gban"), TabExecutor {
         if (!sender.hasPermission(PunishmentType.BAN.perm)) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
-        if (args.size < 2) {
-            return sender.send(SABMessages.Commands.Gban.usage.replaceVariables().translate())
-        }
+        if (args.isEmpty()) return sender.send(SABMessages.Commands.Gban.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         Promise.create<Unit> { context ->
-            val player = arguments.get(Contexts.PLAYER, sender).complete()
-            if (!player.isSuccess) return@create
-            val server = arguments.get(Contexts.SERVER, sender).complete()
-            if (!server.isSuccess) return@create
+            val player = arguments.get(Contexts.PLAYER, sender).complete().apply { if (!isSuccess) return@create }
+            val server = arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return@create }
+            val reason = arguments.get(Contexts.REASON, sender).complete()
             sender.send("Player: ${player.profile.name} (UUID: ${player.profile.uniqueId})")
-            sender.send("Reason: ${arguments.getString("reason")}")
+            sender.send("Reason: ${reason.text}")
             sender.send("Server: ${server.name} (isGroup: ${server.isGroup.toMinecraft()}${ChatColor.RESET})")
             sender.send("Silent: ${arguments.contains("-s").toMinecraft()}")
             context.resolve()
@@ -49,6 +46,7 @@ object GlobalBanCommand: Command("gban"), TabExecutor {
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
         if (s.startsWith("player=")) {
+            if (ProxyServer.getInstance().players.size > 500) return emptyList()
             return ProxyServer.getInstance().players.map { "player=${it.name}" }.filtr(s)
         } else if (s.startsWith("server=")) {
             return ProxyServer.getInstance()

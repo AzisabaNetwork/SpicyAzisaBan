@@ -18,6 +18,7 @@ import xyz.acrylicstyle.mcutil.mojang.MojangAPI
 fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender): Promise<T> {
     if (context == Contexts.PLAYER) return getPlayer(sender) as Promise<T>
     if (context == Contexts.SERVER) return getServer(sender) as Promise<T>
+    if (context == Contexts.REASON) return getReason() as Promise<T>
     return Promise.reject(IllegalArgumentException("Unknown context: " + context.key))
 }
 
@@ -61,4 +62,9 @@ private fun ArgumentParser.getServer(sender: CommandSender): Promise<ServerConte
         }
     }
     return@create context.resolve(ServerContext(true, server, isGroup))
+}
+
+private fun ArgumentParser.getReason(): Promise<ReasonContext> = Promise.create { context ->
+    val reason = getString("reason")
+    return@create context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
 }
