@@ -78,7 +78,9 @@ class SpicyAzisaBan: Plugin() {
     }
 
     override fun onDisable() {
+        logger.info("Closing database connection")
         connection.close()
+        logger.info("Goodbye, World!")
     }
 
     class Settings {
