@@ -3,7 +3,7 @@ package net.azisaba.spicyAzisaBan
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
-import net.azisaba.spicyAzisaBan.migrations.DatabaseMigration
+import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.translate

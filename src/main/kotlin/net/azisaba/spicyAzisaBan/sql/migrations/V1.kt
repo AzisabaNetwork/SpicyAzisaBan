@@ -1,4 +1,4 @@
-package net.azisaba.spicyAzisaBan.migrations
+package net.azisaba.spicyAzisaBan.sql.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 
