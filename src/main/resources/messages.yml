@@ -1,3 +1,15 @@
-General:
-  Prefix: "&c&lSpicyAzisaBan &8&l≫ &r"
-  NoPerms: "&cYou don't have permission for that!"
+# You can use there variables for all messages:
+# (except for variable itself like using %PREFIX% for general.prefix, they simply will be ignored)
+# %PREFIX% - general.prefix
+
+general:
+  prefix: "&c&lSpicyAzisaBan &8&l≫ &r"
+  missingPermissions: "%PREFIX%&c権限がありません!"
+
+commands:
+  general:
+    invalidGroup: "%PREFIX%&c無効なグループ名です。"
+    invalidServer: "%PREFIX%&c無効なサーバー名です。"
+    invalidPlayer: "%PREFIX%&cプレイヤーが見つかりません。"
+  gban:
+    usage: "%PREFIX%&a使用法: /gban [-s] <name=...> <reason=\"...\"> [server=...]"

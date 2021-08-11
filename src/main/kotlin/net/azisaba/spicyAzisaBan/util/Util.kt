@@ -1,12 +1,18 @@
 package net.azisaba.spicyAzisaBan.util
 
+import net.azisaba.spicyAzisaBan.SABMessages
+import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.util.contexts.Context
+import net.azisaba.spicyAzisaBan.util.contexts.Contexts
+import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
+import util.ArgumentParser
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.Calendar
@@ -29,7 +35,7 @@ object Util {
     fun preloadPermissions(sender: CommandSender) {
         if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
         sender.hasPermission("sab.command.spicyazisaban")
-        sender.hasPermission("sab.exempt")
+        sender.hasPermission("sab.punish.global")
         PunishmentType.values().forEach { type ->
             sender.hasPermission(type.perm)
             sender.hasPermission("sab.notification.${type.id}")
@@ -121,7 +127,7 @@ object Util {
         return (socketAddress as InetSocketAddress).getIPAddress()
     }
 
-    fun <T> List<T>.concat(vararg another: List<T>) = this.toMutableList().apply { another.forEach { addAll(it) } }
+    fun <T> Iterable<T>.concat(vararg another: List<T>?) = this.toMutableList().apply { another.filterNotNull().forEach { addAll(it) } }
 
     /**
      * @sample net.azisaba.spicyAzisaBan.test.ProcessTimeTest
@@ -189,4 +195,11 @@ object Util {
     fun Boolean.toMinecraft() = if (this) "${ChatColor.GREEN}true" else "${ChatColor.RED}false"
 
     fun String.translate() = ChatColor.translateAlternateColorCodes('&', this)!!
+
+    fun List<String>.filterArgKeys(args: Array<String>): List<String> {
+        val list = args.map { it.replace("(=.*)".toRegex(), "") }
+        return filter { s -> !list.contains(s.replace("(=.*)".toRegex(), "")) }
+    }
+
+    fun List<String>.filtr(s: String): List<String> = distinct().filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
 }

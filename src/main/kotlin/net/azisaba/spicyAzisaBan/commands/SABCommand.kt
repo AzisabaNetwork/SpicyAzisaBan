@@ -2,8 +2,10 @@ package net.azisaba.spicyAzisaBan.commands
 
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
+import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
+import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -14,7 +16,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
-import util.ref.DataCache
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
@@ -22,9 +23,6 @@ import xyz.acrylicstyle.sql.options.UpsertOptions
 object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
     private val commands = listOf("creategroup", "deletegroup", "group", "info")
     private val groupCommands = listOf("add", "remove", "info")
-    private var cachedGroups = DataCache<List<String>>()
-    @Volatile
-    private var updatingCache = false
 
     private fun CommandSender.sendHelp() {
         send("$PREFIX${ChatColor.GREEN}SpicyAzisaBan commands")
@@ -43,8 +41,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission("sab.command.spicyazisaban")) {
-            sender.send("$PREFIX${SABMessages.General.NoPerms.translate()}")
-            return
+            return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) {
             sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
@@ -56,7 +53,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                 if (args.size <= 1) return sender.sendHelp()
                 val groupName = args[1]
                 if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
-                    return sender.send("$PREFIX${ChatColor.RED}この名前は使用できません。")
+                    return sender.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
                 }
                 SpicyAzisaBan.instance.connection.getAllGroups()
                     .then { list ->
@@ -66,7 +63,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                         }
                     }
                     .then(SpicyAzisaBan.instance.connection.groups.insert(InsertOptions.Builder().addValue("id", groupName).build()))
-                    .thenDo { cachedGroups.set(null) }
+                    .thenDo { SpicyAzisaBan.instance.connection.cachedGroups.set(null) }
                     .then { sender.send("${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を作成しました。") }
                     .catch {
                         if (it::class.java == Exception::class.java) return@catch
@@ -78,18 +75,18 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                 if (args.size <= 1) return sender.sendHelp()
                 val groupName = args[1]
                 if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
-                    return sender.send("$PREFIX${ChatColor.RED}無効なグループ名です。")
+                    return sender.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
                 }
                 SpicyAzisaBan.instance.connection.getAllGroups()
                     .then { list ->
                         if (!list.any { it == groupName }) {
-                            sender.send("$PREFIX${ChatColor.RED}無効なグループ名です。")
+                            sender.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
                             throw Exception()
                         }
                     }
                     .then(SpicyAzisaBan.instance.connection.groups.delete(FindOptions.Builder().addWhere("id", groupName).build()))
                     .then(SpicyAzisaBan.instance.connection.serverGroup.delete(FindOptions.Builder().addWhere("group", groupName).build()))
-                    .thenDo { cachedGroups.set(null) }
+                    .thenDo { SpicyAzisaBan.instance.connection.cachedGroups.set(null) }
                     .then { sender.send("$PREFIX${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を削除しました。") }
                     .catch {
                         if (it::class.java == Exception::class.java) return@catch
@@ -101,18 +98,18 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                 if (args.size <= 2 || !groupCommands.contains(args[2])) return sender.sendGroupHelp()
                 val groupName = args[1]
                 if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
-                    return sender.send("$PREFIX${ChatColor.RED}無効なグループ名です。")
+                    return sender.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
                 }
                 SpicyAzisaBan.instance.connection.getAllGroups()
                     .then { list ->
                         if (!list.any { it == groupName }) {
-                            return@then sender.send("$PREFIX${ChatColor.RED}無効なグループ名です。")
+                            return@then sender.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
                         }
                         if (args[2] == "add" || args[2] == "remove") {
                             if (args.size <= 2) {
                                 return@then sender.sendGroupHelp()
                             } else if (!ProxyServer.getInstance().servers.map { it.value.name }.any { it == args[3] }) {
-                                return@then sender.send("$PREFIX${ChatColor.RED}無効なサーバー名です。")
+                                return@then sender.send(SABMessages.Commands.General.invalidServer.replaceVariables().translate())
                             }
                         }
                         when (args[2]) {
@@ -173,35 +170,16 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
         if (!sender.hasPermission("sab.command.spicyazisaban")) return emptyList()
         if (args.isEmpty()) return emptyList()
-        if (args.size == 1) return commands.filter(args[0])
+        if (args.size == 1) return commands.filtr(args[0])
         if (args[0] == "deletegroup" && args.size == 2) {
-            getGroups()?.let { return it.filter(args[1]) }
+            SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
         }
         if (args[0] == "group") {
-            if (args.size == 2) getGroups()?.let { return it.filter(args[1]) }
-            if (args.size == 3) return groupCommands.filter(args[2])
+            if (args.size == 2) SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
+            if (args.size == 3) return groupCommands.filtr(args[2])
             if (args.size == 4 && (args[2] == "add" || args[2] == "remove"))
-                return ProxyServer.getInstance().servers.values.map { it.name }.filter(args[3])
+                return ProxyServer.getInstance().servers.values.map { it.name }.filtr(args[3])
         }
         return emptyList()
     }
-
-    private fun getGroups(): List<String>? {
-        val groups = cachedGroups.get()
-        if (groups == null || cachedGroups.ttl - System.currentTimeMillis() < 10000) { // update if cache is expired or expiring in under 10 seconds
-            if (!updatingCache) {
-                updatingCache = true
-                SpicyAzisaBan.instance.connection.getAllGroups().then {
-                    cachedGroups = DataCache(it, System.currentTimeMillis() + 1000 * 60)
-                    updatingCache = false
-                }.catch {
-                    it.printStackTrace()
-                    updatingCache = false
-                }
-            }
-        }
-        return groups
-    }
-
-    private fun List<String>.filter(s: String): List<String> = filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
 }

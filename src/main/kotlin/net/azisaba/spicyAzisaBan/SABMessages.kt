@@ -24,9 +24,28 @@ object SABMessages {
         cfg = YamlConfiguration(file).asObject()
     }
 
+    fun String.replaceVariables() =
+        replace("%PREFIX%", SpicyAzisaBan.PREFIX)
+
     object General {
-        private val obj = cfg.getObject("General")
-        val Prefix = obj.getString("Prefix", "&c&lSpicyAzisaBan &8&l≫ &r")!!
-        val NoPerms = obj.getString("NoPerms", "&cYou don't have permission for that!")!!
+        private val obj = cfg.getObject("general")
+        val prefix = obj.getString("prefix", "&c&lSpicyAzisaBan &8&l≫ &r")!!
+        val missingPermissions = obj.getString("missingPermissions", "%PREFIX%&c権限がありません!")!!
+    }
+
+    object Commands {
+        private val obj = cfg.getObject("commands")
+
+        object General {
+            private val obj = Commands.obj.getObject("general")
+            val invalidGroup = obj.getString("invalidGroup", "%PREFIX%&c無効なグループ名です。")!!
+            val invalidServer = obj.getString("invalidServer", "%PREFIX%&c無効なサーバー名です。")!!
+            val invalidPlayer = obj.getString("invalidPlayer", "%PREFIX%&cプレイヤーが見つかりません。")!!
+        }
+
+        object Gban {
+            private val obj = Commands.obj.getObject("gban")
+            val usage = obj.getString("usage", "%PREFIX%&a使用法: /gban <Name>[+silent] <Reason...> [server=...]")!!
+        }
     }
 }

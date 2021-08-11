@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.migrations.DatabaseMigration
@@ -7,7 +8,6 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.plugin.Plugin
-import net.md_5.bungee.api.ChatColor
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
@@ -22,7 +22,7 @@ class SpicyAzisaBan: Plugin() {
         @JvmField
         val GROUP_PATTERN = "^[a-zA-Z0-9+_\\-]{1,32}$".toRegex()
         @JvmField
-        val PREFIX = SABMessages.General.Prefix.translate()
+        val PREFIX = SABMessages.General.prefix.translate()
         @JvmStatic
         lateinit var instance: SpicyAzisaBan
 
@@ -73,6 +73,7 @@ class SpicyAzisaBan: Plugin() {
         }, SABConfig.database.keepAlive * 1000L, SABConfig.database.keepAlive * 1000L)
         proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
         proxy.pluginManager.registerCommand(this, SABCommand)
+        proxy.pluginManager.registerCommand(this, GlobalBanCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

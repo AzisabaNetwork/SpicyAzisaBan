@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.sql
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.config.ServerInfo
 import util.promise.rewrite.Promise
+import util.ref.DataCache
 import xyz.acrylicstyle.sql.DataType
 import xyz.acrylicstyle.sql.Sequelize
 import xyz.acrylicstyle.sql.Table
@@ -68,6 +69,23 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             ),
         )
         this.sync()
+    }
+
+    var cachedGroups = DataCache<List<String>>()
+        private set
+    @Volatile private var updatingCache = false
+    fun getCachedGroups(): List<String>? {
+        val groups = cachedGroups.get()
+        if (groups == null || cachedGroups.ttl - System.currentTimeMillis() < 10000) { // update if cache is expired or expiring in under 10 seconds
+            if (!updatingCache) {
+                updatingCache = true
+                getAllGroups().then {
+                    cachedGroups = DataCache(groups, System.currentTimeMillis() + 1000 * 60)
+                    updatingCache = false
+                }
+            }
+        }
+        return groups
     }
 
     fun getGroupByServer(server: String): Promise<String?> =
