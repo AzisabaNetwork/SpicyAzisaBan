@@ -2,6 +2,9 @@ package net.azisaba.spicyAzisaBan.sql.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 
+/**
+ * v1 -> v2 converter
+ */
 object V1: DatabaseMigration {
     override val targetDatabaseVersion = 1
     override val name = "Add NOT NULL to 'server' in punishments and punishmentHistory table"
