@@ -11,6 +11,7 @@ general:
 
   # these are "words" and you can't use variables here
   global: "全サーバー"
+  permanent: "無期限"
   time:
     day: "%d日"
     hour: "%d時間"
@@ -23,6 +24,7 @@ commands:
     invalidServer: "%PREFIX%&c無効なサーバー名です。"
     invalidPlayer: "%PREFIX%&cプレイヤーが見つかりません。"
     invalidTime: "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。"
+    invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくありません。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
 
   # Available variables:

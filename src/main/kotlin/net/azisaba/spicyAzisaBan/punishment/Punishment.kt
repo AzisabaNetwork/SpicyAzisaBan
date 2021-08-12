@@ -14,6 +14,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
+import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import xyz.acrylicstyle.sql.TableData
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
@@ -30,9 +31,11 @@ data class Punishment(
     val start: Long,
     val end: Long,
     val server: String,
-    val flags: List<Flags> = listOf(),
+    val flags: MutableList<Flags> = mutableListOf(),
 ) {
     companion object {
+        val recentPunishedPlayers = mutableSetOf<SimplePlayerProfile>()
+
         fun fromTableData(td: TableData): Punishment {
             val id = td.getLong("id")!!
             val name = td.getString("name")!!
@@ -143,12 +146,19 @@ data class Punishment(
 
     init {
         if (type.isIPBased() && !target.isPunishableIP()) error("This IP address ($target) is banned from being banned")
+        if (!type.isIPBased()) {
+            try {
+                val uuid = getTargetUUID()
+                recentPunishedPlayers.add(SimplePlayerProfile(name, uuid))
+            } catch (e: IllegalArgumentException) {}
+        }
     }
 
-    fun getTargetUUID() {
-        if (type == PunishmentType.IP_BAN || type == PunishmentType.TEMP_IP_BAN) {
-            error("This punishment ($id) is not UUID-based ban! (e.g. IP ban)")
+    fun getTargetUUID(): UUID {
+        if (type.isIPBased()) {
+            throw IllegalArgumentException("This punishment ($id) is not UUID-based ban! (e.g. IP ban)")
         }
+        return UUID.fromString(target)
     }
 
     fun getVariables(): Promise<Map<String, String>> = operator.getProfile()
@@ -249,7 +259,7 @@ data class Punishment(
         fun and(flags: Flags) = listOf(this, flags)
 
         companion object {
-            fun fromDatabase(s: String): List<Flags> = if (s.isEmpty()) listOf() else s.split(",").map { valueOf(it) }.distinct()
+            fun fromDatabase(s: String): MutableList<Flags> = if (s.isEmpty()) mutableListOf() else s.split(",").map { valueOf(it) }.distinct().toMutableList()
 
             fun List<Flags>.toDatabase() = this.distinct().joinToString(",") { it.name }
             fun List<Flags>.and(flags: Flags) = this.toMutableList().apply { add(flags) }

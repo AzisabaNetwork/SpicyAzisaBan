@@ -56,6 +56,7 @@ object SABMessages {
         val missingPermissions = obj.getMessage("missingPermissions", "%PREFIX%&c権限がありません!")
         val error = obj.getMessage("error", "%PREFIX%&c処理中に不明なエラーが発生しました。")
         val global = obj.getMessage("global", "全サーバー")
+        val permanent = obj.getMessage("permanent", "無期限")
 
         object Time {
             private val obj = General.obj.getObj("time")

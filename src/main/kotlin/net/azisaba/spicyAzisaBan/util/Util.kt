@@ -174,7 +174,7 @@ object Util {
     }
 
     fun unProcessTime(l: Long): String {
-        if (l < 0L) return "∞"
+        if (l < 0L) return SABMessages.General.permanent
         var time = l
         var d = 0
         var h = 0

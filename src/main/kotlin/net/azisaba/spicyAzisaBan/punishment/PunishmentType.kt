@@ -7,6 +7,8 @@ enum class PunishmentType(val id: String, val base: PunishmentType?, val temp: B
     TEMP_IP_BAN("tempipban", IP_BAN, true, "sab.ipban.temp"),
     MUTE("mute", null, false, "sab.mute.perm"),
     TEMP_MUTE("tempmute", MUTE, true, "sab.mute.temp"),
+    IP_MUTE("ipmute", null, false, "sab.ipmute.perm"),
+    TEMP_IP_MUTE("tempipmute", IP_MUTE, true, "sab.ipmute.temp"),
     WARNING("warn", null, false, "sab.warning.perm"),
     TEMP_WARNING("tempwarn", WARNING, true, "sab.warning.temp"),
     KICK("kick", null, false, "sab.kick"),

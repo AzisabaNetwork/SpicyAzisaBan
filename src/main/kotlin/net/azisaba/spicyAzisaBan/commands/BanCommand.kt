@@ -48,7 +48,7 @@ object BanCommand: Command("ban"), TabExecutor {
                 player.profile.name,
                 player.profile.uniqueId.toString(),
                 reason.text,
-                sender.getUniqueId(),
+                sender.uniqueId,
                 PunishmentType.BAN,
                 System.currentTimeMillis(),
                 -1,
