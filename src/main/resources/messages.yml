@@ -8,6 +8,9 @@ general:
   prefix: "&c&lSpicyAzisaBan &8&l» &r"
   missingPermissions: "%PREFIX%&c権限がありません!"
   error: "%PREFIX%&c処理中に不明なエラーが発生しました。"
+
+  # these are "words" and you can't use variables here
+  global: "全サーバー"
   time:
     day: "%d日"
     hour: "%d時間"
@@ -19,6 +22,8 @@ commands:
     invalidGroup: "%PREFIX%&c無効なグループ名です。"
     invalidServer: "%PREFIX%&c無効なサーバー名です。"
     invalidPlayer: "%PREFIX%&cプレイヤーが見つかりません。"
+    invalidTime: "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。"
+    timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
 
   # Available variables:
   # %ID% - Punishment ID
@@ -28,25 +33,12 @@ commands:
   # %TYPE% - Punishment type
   # %REASON% - Punishment reason
   # %SERVER% - Target server or group that the punishment applies to ("global" if applies to an entire network)
-  gban:
-    # ban that applies for entire network
-    usage: "%PREFIX%&a使用法: /gban [-s] <player=...> <reason=\"...\"> [server=...]"
-    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にGlobal Banされました!"
-    notify:
-      - "&c&o%PLAYER%&r&7は、&e&o%OPERATOR%&r&7からGlobal Banされました。"
-      - "&7理由 &8> &7&o%REASON%"
-      - "&7ID &8> &7&o#%ID%"
-    layout:
-      - "%PREFIX%&7永久BANされました!"
-      - ""
-      - "&c対象サーバー &8&l» &7全サーバー"
-      - "&c理由 &8&l» &7%REASON%"
-      - ""
-      - "&7お問い合わせ:"
-      - "&eDiscord &8» &c&ncoming soon"
+  # %DURATION% - Times left until the punishment expires
+  # %TIME% - Duration of punishment
   ban:
     # ban that's specific to some groups/servers
     usage: "%PREFIX%&a使用法: /ban [-s] <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gban [-s] <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にBanされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。"
@@ -55,8 +47,28 @@ commands:
     layout:
       - "%PREFIX%&7永久BANされました!"
       - ""
-      - "&c対象サーバー &8&l» &7%SERVER%"
-      - "&c理由 &8&l» &7%REASON%"
+      - ""
+      - "&c対象サーバー &8&l» &7&o%SERVER%"
+      - "&c理由 &8&l» &7&o%REASON%"
+      - ""
+      - "&7お問い合わせ:"
+      - "&eDiscord &8» &c&ncoming soon"
+  tempban:
+    usage: "%PREFIX%&a使用法: /tempban [-s] <player=...> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gtempban [-s] <player=...> <reason=\"...\"> <time=...> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempBanされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+      - "&7期間 &8> &7&o%DURATION%"
+    layout:
+      - "%PREFIX%&7一時的にBANされました!"
+      - ""
+      - ""
+      - "&c対象サーバー &8&l» &7&o%SERVER%"
+      - "&c理由 &8&l» &7&o%REASON%"
+      - "&c期間 &8&l» &7&o%DURATION%"
       - ""
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"
@@ -70,6 +82,7 @@ commands:
       - "&7ID &8> &7#%ID%"
     layout:
       - "%PREFIX%&7永久IP BANされました!"
+      - ""
       - ""
       - "&c対象サーバー &8&l» &7%SERVER%"
       - "&c理由 &8&l» &7%REASON%"

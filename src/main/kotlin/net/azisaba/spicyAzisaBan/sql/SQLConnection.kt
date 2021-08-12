@@ -89,9 +89,11 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         return groups
     }
 
-    fun getGroupByServer(server: String): Promise<String?> =
-        serverGroup.findOne(FindOptions.Builder().addWhere("server", server).setLimit(1).build())
+    fun getGroupByServer(server: String): Promise<String?> {
+        if (server == "global") return Promise.resolve(null)
+        return serverGroup.findOne(FindOptions.Builder().addWhere("server", server).setLimit(1).build())
             .then { it?.getString("group") }
+    }
 
     fun getServersByGroup(groupId: String): Promise<List<ServerInfo>> =
         serverGroup.findAll(FindOptions.Builder().addWhere("group", groupId).build())

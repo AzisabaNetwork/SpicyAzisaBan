@@ -9,3 +9,6 @@ database:
   keepAlive: 300
   # If true, the plugin will prevent players from joining the server if database is inaccessible.
   failsafe: true
+serverNames:
+  # "server" (key) must be lowercase, not UPPERCASE.
+  server: FriendlyServerName

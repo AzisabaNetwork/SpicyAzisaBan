@@ -37,4 +37,6 @@ object SABConfig {
         val keepAlive = obj.getInt("keepAlive", 300) // in seconds
         val failsafe = obj.getBoolean("failsafe", true)
     }
+
+    val serverNames = cfg.getObject("serverNames")?.rawData?.mapKeys { it.key!! }?.mapValues { (_, value) -> value.toString() } ?: mapOf()
 }

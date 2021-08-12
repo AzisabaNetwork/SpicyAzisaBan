@@ -18,5 +18,7 @@ class Contexts<T : Context> private constructor(val key: String) {
          * Returns reason but returns "none" if blank or null and can never fail.
          */
         val REASON = Contexts<ReasonContext>("reason")
+
+        val TIME = Contexts<TimeContext>("time")
     }
 }

@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.util.contexts
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.CommandSender
@@ -19,6 +20,7 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender
     if (context == Contexts.PLAYER) return getPlayer(sender) as Promise<T>
     if (context == Contexts.SERVER) return getServer(sender) as Promise<T>
     if (context == Contexts.REASON) return getReason() as Promise<T>
+    if (context == Contexts.TIME) return getTime(sender) as Promise<T>
     return Promise.reject(IllegalArgumentException("Unknown context: " + context.key))
 }
 
@@ -67,4 +69,15 @@ private fun ArgumentParser.getServer(sender: CommandSender): Promise<ServerConte
 private fun ArgumentParser.getReason(): Promise<ReasonContext> = Promise.create { context ->
     val reason = getString("reason")
     return@create context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
+}
+
+private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> = Promise.create { context ->
+    val time = getString("time")
+    if (time.isNullOrBlank()) return@create context.resolve(TimeContext(true, -1L))
+    try {
+        return@create context.resolve(TimeContext(true, Util.processTime(time)))
+    } catch (e: IllegalArgumentException) {
+        sender.send(SABMessages.Commands.General.invalidTime.replaceVariables().translate())
+        return@create context.resolve(TimeContext(false, -1L))
+    }
 }

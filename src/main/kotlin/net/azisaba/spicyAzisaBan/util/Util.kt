@@ -14,8 +14,10 @@ import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import xyz.acrylicstyle.mcutil.mojang.MojangAPI
+import java.lang.NumberFormatException
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 import java.util.Calendar
 import java.util.UUID
 import kotlin.math.floor
@@ -121,6 +123,8 @@ object Util {
         this[Calendar.MONTH] = month
     }
 
+    fun SocketAddress.getIPAddress() = if (this is InetSocketAddress) this.getIPAddress() else null
+
     fun InetSocketAddress.getIPAddress() = address.getIPAddress()
 
     fun InetAddress.getIPAddress() = hostAddress.replaceFirst("(.*)%.*".toRegex(), "$1")
@@ -170,6 +174,7 @@ object Util {
     }
 
     fun unProcessTime(l: Long): String {
+        if (l < 0L) return "∞"
         var time = l
         var d = 0
         var h = 0
@@ -237,5 +242,45 @@ object Util {
 
     fun ProxiedPlayer.kick(reason: String) {
         this.disconnect(*TextComponent.fromLegacyText(reason.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
+    }
+
+    fun String.isPunishableIP(): Boolean {
+        val numbers = this.split(".").mapNotNull {
+            try {
+                Integer.parseInt(it, 10)
+            } catch (e: NumberFormatException) { null }
+        }
+        if (numbers.size != 4) return false
+        // Reserved IP addresses
+        // 0.0.0.0/8 (0.0.0.0 - 0.255.255.255)
+        if (numbers[0] == 0) return false
+        // 10.0.0.0/8 (10.0.0.0 - 10.255.255.255)
+        if (numbers[0] == 10) return false
+        // 100.64.0.0/10 (100.64.0.0 - 100.127.255.255)
+        if (numbers[0] == 100 && numbers[1] >= 64 && numbers[1] <= 127) return false
+        // 127.0.0.0/8 (127.0.0.0 - 127.255.255.255)
+        if (numbers[0] == 127) return false
+        // 169.254.0.0/16 (169.254.0.0 - 169.254.255.255)
+        if (numbers[0] == 169 && numbers[1] == 254) return false
+        // 192.0.0.0/24 (192.0.0.0 - 192.0.0.255)
+        if (numbers[0] == 192 && numbers[1] == 0 && numbers[2] == 0) return false
+        // 192.0.2.0/24 (192.0.2.0 - 192.0.2.255)
+        if (numbers[0] == 192 && numbers[1] == 0 && numbers[2] == 2) return false
+        // 192.88.99.0/24 (192.88.99.0 - 192.88.99.255)
+        if (numbers[0] == 192 && numbers[1] == 88 && numbers[2] == 99) return false
+        // 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)
+        if (numbers[0] == 192 && numbers[1] == 168) return false
+        // 198.18.0.0/15 (192.18.0.0 - 192.19.255.255)
+        if (numbers[0] == 198 && (numbers[1] == 18 || numbers[1] == 19)) return false
+        // 203.0.133.0/24 (203.0.133.0 - 203.0.133.255)
+        if (numbers[0] == 203 && numbers[1] == 0 && numbers[2] == 133) return false
+        // 224.0.0.0/4 (224.0.0.0 - 239.255.255.255)
+        if (numbers[0] in 224..239) return false
+        // 233.252.0.0/24
+        if (numbers[0] == 233 && numbers[1] == 252 && numbers[2] == 0) return false
+        // 240.0.0.0/4 (240.0.0.0 - 255.255.255.254)
+        // 255.255.255.255/32 (255.255.255.255)
+        if (numbers[0] >= 240) return false
+        return true
     }
 }

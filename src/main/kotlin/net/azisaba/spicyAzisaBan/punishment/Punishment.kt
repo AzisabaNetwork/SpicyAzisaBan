@@ -1,17 +1,17 @@
 package net.azisaba.spicyAzisaBan.punishment
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment.Flags.Companion.toDatabase
 import net.azisaba.spicyAzisaBan.util.Util
-import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getProfile
 import net.azisaba.spicyAzisaBan.util.Util.hasNotifyPermissionOf
+import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.connection.ProxiedPlayer
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.TableData
@@ -68,7 +68,7 @@ data class Punishment(
             val start = rs.getLong("start")
             val end = rs.getLong("end")
             val server = rs.getString("server")!!
-            val flags = Flags.fromDatabase(rs.getString("flags")!!)
+            val flags = Flags.fromDatabase(rs.getString("extra")!!)
             return Punishment(
                 id,
                 name,
@@ -83,16 +83,31 @@ data class Punishment(
             )
         }
 
-        fun canJoinServer(player: ProxiedPlayer, server: String): Promise<Punishment?> = Promise.create { context ->
-            val s = SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT * FROM `punishments` WHERE `target` = ? OR `target` = ?")
-            s.setString(1, player.uniqueId.toString())
-            s.setString(2, player.getIPAddress())
+        fun canJoinServer(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+            //SpicyAzisaBan.instance.logger.info("Checking for $uuid (trigger: joining server $server)")
+            val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
+            val s = SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)")
+            s.setString(1, uuid.toString())
+            s.setString(2, address ?: uuid.toString())
+            s.setString(3, server)
+            s.setString(4, group ?: server)
             val ps = mutableListOf<Punishment>()
             val rs = s.executeQuery()
             while (rs.next()) ps.add(fromResultSet(rs))
             s.close()
-            if (ps.isEmpty()) return@create context.resolve()
-            context.reject(IllegalArgumentException("no"))
+            if (ps.isEmpty()) return@create context.resolve(null)
+            var punishment: Punishment? = null
+            ps.filter { p -> p.type.isBan() }.forEach { p ->
+                if (p.isExpired()) {
+                    //SpicyAzisaBan.instance.logger.info("Removing ${p.id} from punishments")
+                    SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", p.id).build()).thenDo {
+                        SpicyAzisaBan.instance.logger.info("Removed punishment #${p.id} because it is expired")
+                    }
+                } else {
+                    punishment = p
+                }
+            }
+            context.resolve(punishment)
         }
 
         fun fetchActivePunishmentById(id: Long): Promise<Punishment?> =
@@ -126,6 +141,10 @@ data class Punishment(
                 .then { it.map { td -> fromTableData(td) } }
     }
 
+    init {
+        if (type.isIPBased() && !target.isPunishableIP()) error("This IP address ($target) is banned from being banned")
+    }
+
     fun getTargetUUID() {
         if (type == PunishmentType.IP_BAN || type == PunishmentType.TEMP_IP_BAN) {
             error("This punishment ($id) is not UUID-based ban! (e.g. IP ban)")
@@ -141,7 +160,9 @@ data class Punishment(
                 "operator" to profile.name,
                 "type" to type.id.replaceFirstChar { it.uppercase() },
                 "reason" to reason,
-                "server" to server,
+                "server" to if (server.lowercase() == "global") SABMessages.General.global else SABConfig.serverNames.getOrDefault(server.lowercase(), server.lowercase()),
+                "duration" to Util.unProcessTime(end - System.currentTimeMillis()),
+                "time" to Util.unProcessTime(end - start),
             )
         }
 
@@ -149,13 +170,9 @@ data class Punishment(
         getVariables()
             .then { variables ->
                 return@then when (type) {
-                    PunishmentType.BAN -> {
-                        if (server == "global") {
-                            SABMessages.Commands.GBan.layout.replaceVariables(variables).translate()
-                        } else {
-                            SABMessages.Commands.Ban.layout.replaceVariables(variables).translate()
-                        }
-                    }
+                    PunishmentType.BAN -> SABMessages.Commands.Ban.layout.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.layout.replaceVariables(variables).translate()
+                    PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.layout.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -168,13 +185,9 @@ data class Punishment(
         getVariables()
             .then { variables ->
                 return@then when (type) {
-                    PunishmentType.BAN -> {
-                        if (server == "global") {
-                            SABMessages.Commands.GBan.notify.replaceVariables(variables).translate()
-                        } else {
-                            SABMessages.Commands.Ban.notify.replaceVariables(variables).translate()
-                        }
-                    }
+                    PunishmentType.BAN -> SABMessages.Commands.Ban.notify.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.notify.replaceVariables(variables).translate()
+                    PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.notify.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -183,19 +196,20 @@ data class Punishment(
                 it.printStackTrace()
             }
 
+    fun notifyConsole() = getMessage().thenDo { message -> ProxyServer.getInstance().console.send(message) }.then {}
+
     fun notifyToAll() =
         getMessage().thenDo { message ->
             ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
                 player.send(message)
             }
-            ProxyServer.getInstance().console.send(message)
         }.then {}
 
-    fun isExpired() = end < System.currentTimeMillis()
+    fun isExpired() = end != -1L && end < System.currentTimeMillis()
 
     fun updateFlags(): Promise<Unit> =
-        SpicyAzisaBan.instance.connection.punishments.update("flags", flags.toDatabase(), FindOptions.Builder().addWhere("id", id).build())
-            .then(SpicyAzisaBan.instance.connection.punishmentHistory.update("flags", flags.toDatabase(), FindOptions.Builder().addWhere("id", id).build()))
+        SpicyAzisaBan.instance.connection.punishments.update("extra", flags.toDatabase(), FindOptions.Builder().addWhere("id", id).build())
+            .then(SpicyAzisaBan.instance.connection.punishmentHistory.update("extra", flags.toDatabase(), FindOptions.Builder().addWhere("id", id).build()))
             .then {}
 
     /**
@@ -212,8 +226,8 @@ data class Punishment(
             .addValue("type", type.name)
             .addValue("start", start)
             .addValue("end", end)
-            .addValue("server", server)
-            .addValue("flags", flags.toDatabase())
+            .addValue("server", server.lowercase())
+            .addValue("extra", flags.toDatabase())
         try {
             val id = Util.insert {
                 SpicyAzisaBan.instance.connection.punishmentHistory.insert(insertOptions.build()).complete()
@@ -222,7 +236,7 @@ data class Punishment(
                 SpicyAzisaBan.instance.connection.punishments.insert(insertOptions.addValue("id", id).build())
                     .complete()
             }
-            return@create context.resolve(Punishment(id, name, target, reason, operator, type, start, end, server, flags))
+            return@create context.resolve(Punishment(id, name, target, reason, operator, type, start, end, server.lowercase(), flags))
         } catch (e: Throwable) {
             return@create context.reject(e)
         }
@@ -235,7 +249,7 @@ data class Punishment(
         fun and(flags: Flags) = listOf(this, flags)
 
         companion object {
-            fun fromDatabase(s: String): List<Flags> = s.split(",").map { valueOf(it) }.distinct()
+            fun fromDatabase(s: String): List<Flags> = if (s.isEmpty()) listOf() else s.split(",").map { valueOf(it) }.distinct()
 
             fun List<Flags>.toDatabase() = this.distinct().joinToString(",") { it.name }
             fun List<Flags>.and(flags: Flags) = this.toMutableList().apply { add(flags) }
