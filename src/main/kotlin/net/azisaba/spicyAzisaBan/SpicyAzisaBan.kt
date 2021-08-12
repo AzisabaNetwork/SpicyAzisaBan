@@ -2,6 +2,7 @@ package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
+import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
@@ -72,6 +73,7 @@ class SpicyAzisaBan: Plugin() {
             }
         }, SABConfig.database.keepAlive * 1000L, SABConfig.database.keepAlive * 1000L)
         proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
+        proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerCommand(this, SABCommand)
         proxy.pluginManager.registerCommand(this, GlobalBanCommand)
         logger.info("Hewwwwwwwwwoooooo!")

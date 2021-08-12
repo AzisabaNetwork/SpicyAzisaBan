@@ -14,7 +14,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 2
+        const val CURRENT_DATABASE_VERSION = 3
     }
 
     lateinit var punishments: Table
@@ -43,6 +43,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             TableDefinition.Builder("start", DataType.BIGINT).setAllowNull(false).build(),
             TableDefinition.Builder("end", DataType.BIGINT).setAllowNull(false).build(), // -1 means permanent, otherwise temporary
             TableDefinition.Builder("server", DataType.STRING).setAllowNull(false).build(), // "global", server or group name
+            TableDefinition.Builder("extra", DataType.STRING).setDefaultValue("").setAllowNull(false).build(), // Punishment.Flags
         )
         // remove punishments associated with group when group disappears after the punishment
         punishments = this.define("punishments", dupe)

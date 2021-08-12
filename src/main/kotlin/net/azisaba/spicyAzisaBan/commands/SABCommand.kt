@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
 import net.azisaba.spicyAzisaBan.util.Util.filtr
+import net.azisaba.spicyAzisaBan.util.Util.insert
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -62,7 +63,13 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                             throw Exception()
                         }
                     }
-                    .then(SpicyAzisaBan.instance.connection.groups.insert(InsertOptions.Builder().addValue("id", groupName).build()))
+                    .thenDo {
+                        insert {
+                            SpicyAzisaBan.instance.connection.groups.insert(
+                                InsertOptions.Builder().addValue("id", groupName).build()
+                            ).complete()
+                        }
+                    }
                     .thenDo { SpicyAzisaBan.instance.connection.cachedGroups.set(null) }
                     .then { sender.send("${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を作成しました。") }
                     .catch {

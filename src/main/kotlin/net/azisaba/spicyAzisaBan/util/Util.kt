@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.util
 
+import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.md_5.bungee.api.ChatColor
@@ -7,9 +8,16 @@ import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
+import util.UUIDUtil
+import util.kt.promise.rewrite.catch
+import util.promise.rewrite.Promise
+import xyz.acrylicstyle.mcutil.common.PlayerProfile
+import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
+import xyz.acrylicstyle.mcutil.mojang.MojangAPI
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.Calendar
+import java.util.UUID
 import kotlin.math.floor
 
 object Util {
@@ -17,7 +25,9 @@ object Util {
      * Sends a message to sender.
      */
     fun CommandSender.send(message: String) {
-        sendMessage(*TextComponent.fromLegacyText(message.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
+        message.split("\\n|\\\\n".toRegex()).forEach { msg ->
+            sendMessage(*TextComponent.fromLegacyText(msg.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
+        }
     }
 
     private var lastPreloadedPermissions = 0L
@@ -31,7 +41,7 @@ object Util {
         sender.hasPermission("sab.punish.global")
         PunishmentType.values().forEach { type ->
             sender.hasPermission(type.perm)
-            sender.hasPermission("sab.notification.${type.id}")
+            sender.hasNotifyPermissionOf(type)
         }
         SpicyAzisaBan.instance.connection.getAllGroups().then {
             it.forEach { group -> sender.hasPermission("sab.punish.group.$group") }
@@ -160,29 +170,32 @@ object Util {
     }
 
     fun unProcessTime(l: Long): String {
-        var s = ""
         var time = l
+        var d = 0
+        var h = 0
+        var m = 0
+        var s = 0
         if (time > day) {
             val t = floor(time / day.toDouble()).toLong()
-            s += "${t}d "
+            d = t.toInt()
             time -= t * day
         }
         if (time > hour) {
             val t = floor(time / hour.toDouble()).toLong()
-            s += "${t}h "
+            h = t.toInt()
             time -= t * hour
         }
         if (time > minute) {
             val t = floor(time / minute.toDouble()).toLong()
-            s += "${t}m "
+            m = t.toInt()
             time -= t * minute
         }
         if (time > second) {
             val t = floor(time / second.toDouble()).toLong()
-            s += "${t}s"
+            s = t.toInt()
             time -= t * second
         }
-        return s
+        return SABMessages.formatDateTime(d, h, m, s)
     }
 
     fun Boolean.toMinecraft() = if (this) "${ChatColor.GREEN}true" else "${ChatColor.RED}false"
@@ -195,4 +208,34 @@ object Util {
     }
 
     fun List<String>.filtr(s: String): List<String> = distinct().filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
+
+    private val insertLock = Object()
+
+    fun insert(fn: () -> Unit): Long = synchronized(insertLock) {
+        fn()
+        val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
+        val result = statement.executeQuery("SELECT LAST_INSERT_ID()")
+        if (!result.next()) return -1L
+        val r = result.getObject(1) as Number
+        statement.close()
+        r.toLong()
+    }
+
+    fun CommandSender.getUniqueId(): UUID = when (this) {
+        is ProxiedPlayer -> this.uniqueId
+        else -> UUIDUtil.NIL
+    }
+
+    fun CommandSender.hasNotifyPermissionOf(type: PunishmentType) = hasPermission("sab.notify.${type.id}")
+
+    fun UUID.getProfile(): Promise<PlayerProfile> = Promise.create { context ->
+        if (this == UUIDUtil.NIL) return@create context.resolve(SimplePlayerProfile("CONSOLE", this))
+        MojangAPI.getName(this, true)
+            .thenDo { context.resolve(SimplePlayerProfile(it, this)) }
+            .catch { context.reject(it) }
+    }
+
+    fun ProxiedPlayer.kick(reason: String) {
+        this.disconnect(*TextComponent.fromLegacyText(reason.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
+    }
 }

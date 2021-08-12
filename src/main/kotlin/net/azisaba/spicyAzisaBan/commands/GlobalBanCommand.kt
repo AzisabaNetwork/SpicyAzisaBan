@@ -3,21 +3,24 @@ package net.azisaba.spicyAzisaBan.commands
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
-import net.azisaba.spicyAzisaBan.util.Util.concat
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
+import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
+import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
-import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
+import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
+import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
+import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
 object GlobalBanCommand: Command("gban"), TabExecutor {
@@ -27,16 +30,41 @@ object GlobalBanCommand: Command("gban"), TabExecutor {
         if (!sender.hasPermission(PunishmentType.BAN.perm)) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
-        if (args.isEmpty()) return sender.send(SABMessages.Commands.Gban.usage.replaceVariables().translate())
+        if (args.isEmpty()) return sender.send(SABMessages.Commands.GBan.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         Promise.create<Unit> { context ->
             val player = arguments.get(Contexts.PLAYER, sender).complete().apply { if (!isSuccess) return@create }
             val server = arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return@create }
             val reason = arguments.get(Contexts.REASON, sender).complete()
+            /*
             sender.send("Player: ${player.profile.name} (UUID: ${player.profile.uniqueId})")
             sender.send("Reason: ${reason.text}")
             sender.send("Server: ${server.name} (isGroup: ${server.isGroup.toMinecraft()}${ChatColor.RESET})")
             sender.send("Silent: ${arguments.contains("-s").toMinecraft()}")
+            */
+            val p = Punishment(
+                -1,
+                player.profile.name,
+                player.profile.uniqueId.toString(),
+                reason.text,
+                sender.getUniqueId(),
+                PunishmentType.BAN,
+                System.currentTimeMillis(),
+                -1,
+                server.name,
+            )
+                .insert()
+                .thenDo {
+                    ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.kick(SABMessages.Commands.GBan.layout.replaceVariables(it.getVariables().complete()).translate())
+                }
+                .catch {
+                    sender.send(SABMessages.General.error.replaceVariables().translate())
+                    SpicyAzisaBan.instance.logger.warning("Something went wrong while handling /gban from ${sender.name}!")
+                    it.printStackTrace()
+                }
+                .complete() ?: return@create
+            if (!arguments.contains("-s")) p.notifyToAll().complete()
+            sender.send(SABMessages.Commands.GBan.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
         }
     }
@@ -45,17 +73,8 @@ object GlobalBanCommand: Command("gban"), TabExecutor {
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
-        if (s.startsWith("player=")) {
-            if (ProxyServer.getInstance().players.size > 500) return emptyList()
-            return ProxyServer.getInstance().players.map { "player=${it.name}" }.filtr(s)
-        } else if (s.startsWith("server=")) {
-            return ProxyServer.getInstance()
-                .servers
-                .keys
-                .concat(SpicyAzisaBan.instance.connection.getCachedGroups())
-                .map { "server=${it}" }
-                .filtr(s)
-        }
+        if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
+        if (s.startsWith("server=")) return ServerContext.tabComplete(s)
         return emptyList()
     }
 }
