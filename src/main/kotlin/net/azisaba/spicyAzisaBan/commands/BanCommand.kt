@@ -7,11 +7,13 @@ import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
+import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
+import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.ChatColor
@@ -43,20 +45,11 @@ object BanCommand: Command("ban"), TabExecutor {
             val player = arguments.get(Contexts.PLAYER, sender).complete().apply { if (!isSuccess) return@create context.resolve() }
             val server = arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return@create context.resolve() }
             val reason = arguments.get(Contexts.REASON, sender).complete()
-            val p = Punishment(
-                -1,
-                player.profile.name,
-                player.profile.uniqueId.toString(),
-                reason.text,
-                sender.uniqueId,
-                PunishmentType.BAN,
-                System.currentTimeMillis(),
-                -1,
-                server.name,
-            )
+            val p = Punishment
+                .createByPlayer(player.profile, reason.text, sender.uniqueId, PunishmentType.BAN, -1, server.name)
                 .insert()
                 .thenDo {
-                    ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.kick(SABMessages.Commands.Ban.layout.replaceVariables(it.getVariables().complete()).translate())
+                    ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.kick(it.getBannedMessage().complete())
                 }
                 .catch {
                     sender.send(SABMessages.General.error.replaceVariables().translate())
@@ -76,6 +69,7 @@ object BanCommand: Command("ban"), TabExecutor {
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
         if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
         if (s.startsWith("server=")) return ServerContext.tabComplete(s)
+        if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.BAN, args, sender.getServerName())
         return emptyList()
     }
 }

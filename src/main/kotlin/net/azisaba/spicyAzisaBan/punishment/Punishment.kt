@@ -14,6 +14,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
+import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import xyz.acrylicstyle.sql.TableData
 import xyz.acrylicstyle.sql.options.FindOptions
@@ -35,6 +36,33 @@ data class Punishment(
 ) {
     companion object {
         val recentPunishedPlayers = mutableSetOf<SimplePlayerProfile>()
+
+        fun createByPlayer(
+            playerProfile: PlayerProfile,
+            reason: String,
+            operator: UUID,
+            type: PunishmentType,
+            end: Long,
+            server: String,
+        ): Punishment {
+            if (type.isIPBased()) error("Wrong type for #createByPlayer: ${type.name}")
+            return Punishment(
+                -1,
+                playerProfile.name,
+                playerProfile.uniqueId.toString(),
+                reason,
+                operator,
+                type,
+                System.currentTimeMillis(),
+                end,
+                server,
+            )
+        }
+
+        fun createByIPAddress(ip: String, reason: String, operator: UUID, type: PunishmentType, end: Long, server: String): Punishment {
+            if (!type.isIPBased()) error("Wrong type for #createByIPAddress: ${type.name}")
+            return Punishment(-1, ip, ip, reason, operator, type, System.currentTimeMillis(), end, server)
+        }
 
         fun fromTableData(td: TableData): Punishment {
             val id = td.getLong("id")!!
@@ -146,7 +174,7 @@ data class Punishment(
     }
 
     init {
-        if (type.isIPBased() && !target.isPunishableIP()) error("This IP address ($target) is banned from being banned")
+        if (type.isIPBased() && !target.isPunishableIP()) error("This IP address ($target) cannot be banned")
         if (!type.isIPBased()) {
             try {
                 val uuid = getTargetUUID()
@@ -211,10 +239,9 @@ data class Punishment(
                 it.printStackTrace()
             }
 
-    fun notifyConsole() = getMessage().thenDo { message -> ProxyServer.getInstance().console.send(message) }.then {}
-
     fun notifyToAll() =
         getMessage().thenDo { message ->
+            ProxyServer.getInstance().console.send(message)
             ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
                 player.send(message)
             }
@@ -243,18 +270,33 @@ data class Punishment(
             .addValue("end", end)
             .addValue("server", server.lowercase())
             .addValue("extra", flags.toDatabase())
-        try {
-            val id = Util.insert {
-                SpicyAzisaBan.instance.connection.punishmentHistory.insert(insertOptions.build()).complete()
-            }
-            Util.insert {
-                SpicyAzisaBan.instance.connection.punishments.insert(insertOptions.addValue("id", id).build())
-                    .complete()
-            }
-            return@create context.resolve(Punishment(id, name, target, reason, operator, type, start, end, server.lowercase(), flags))
-        } catch (e: Throwable) {
-            return@create context.reject(e)
+        var cancel = false
+        val id = Util.insert {
+            cancel = SpicyAzisaBan.instance.connection.punishmentHistory.insert(insertOptions.build())
+                .catch { it.printStackTrace();context.reject(it) }
+                .complete() == null
         }
+        if (cancel) return@create
+        Util.insert u@{
+            cancel = SpicyAzisaBan.instance.connection.punishments.insert(insertOptions.addValue("id", id).build())
+                .catch { it.printStackTrace();context.reject(it) }
+                .complete() == null
+        }
+        if (cancel) return@create
+        return@create context.resolve(
+            Punishment(
+                id,
+                name,
+                target,
+                reason,
+                operator,
+                type,
+                start,
+                end,
+                server.lowercase(),
+                flags,
+            )
+        )
     }
 
     enum class Flags {

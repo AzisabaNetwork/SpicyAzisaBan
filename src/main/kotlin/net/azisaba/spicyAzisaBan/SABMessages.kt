@@ -76,6 +76,7 @@ object SABMessages {
             val invalidServer = obj.getMessage("invalidServer", "%PREFIX%&c無効なサーバー名です。")
             val invalidPlayer = obj.getMessage("invalidPlayer", "%PREFIX%&cプレイヤーが見つかりません。")
             val invalidTime = obj.getMessage("invalidTime", "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。")
+            val invalidIPAddress = obj.getMessage("invalidIPAddress", "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。")
             val timeNotSpecified = obj.getMessage("timeNotSpecified", "%PREFIX%&c時間が指定されていません。")
         }
 
@@ -105,7 +106,8 @@ object SABMessages {
         object IPBan {
             private val obj = Commands.obj.getObj("ipban")
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ipban [-s] <target=Player/IP> <reason=\\\"...\\\"> [server=...]")
-            val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にIP Banされました!")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipban [-s] <target=Player/IP> <reason=\\\"...\\\"> [server=...]")
+            val done = obj.getMessage("done", "%PREFIX%&c&o%TARGET%&r&7は、正常にIP Banされました!")
             val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7#&o%ID%")
             val layout = obj.getMessage("layout", "%PREFIX%&7永久BANされました!\n\n&c対象サーバー &8&l» &7全サーバー\n&c理由 &8&l» &7%REASON%")
         }

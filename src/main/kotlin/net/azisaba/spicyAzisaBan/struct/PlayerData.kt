@@ -4,8 +4,10 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.insertNoId
 import net.md_5.bungee.api.connection.ProxiedPlayer
+import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
+import xyz.acrylicstyle.mcutil.mojang.MojangAPI
 import xyz.acrylicstyle.sql.TableData
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.Sort
@@ -41,15 +43,22 @@ data class PlayerData(
             insertNoId {
                 SpicyAzisaBan.instance.connection.players.upsert(
                     UpsertOptions.Builder()
-                        .addWhere("uuid", player.uniqueId)
-                        .addValue("uuid", player.uniqueId)
+                        .addWhere("uuid", player.uniqueId.toString())
+                        .addValue("uuid", player.uniqueId.toString())
                         .addValue("name", player.name)
                         .addValue("ip", player.socketAddress.getIPAddress())
                         .addValue("last_seen", time)
                         .build()
-                ).complete()
+                ).catch { it.printStackTrace() }.complete()
+                context.resolve(PlayerData(player.uniqueId, player.name, player.socketAddress.getIPAddress(), time))
             }
-            context.resolve(PlayerData(player.uniqueId, player.name, player.socketAddress.getIPAddress(), time))
+        }
+
+        fun updateFromMojangAPI(uuid: UUID) {
+            if (uuid.version() != 4) error("UUID must be Mojang-assigned (version 4)")
+            MojangAPI.getName(uuid).thenDo { name ->
+                //
+            }
         }
     }
 

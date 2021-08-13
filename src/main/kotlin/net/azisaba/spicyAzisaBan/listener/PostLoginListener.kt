@@ -9,8 +9,9 @@ import net.md_5.bungee.event.EventHandler
 object PostLoginListener: Listener {
     @EventHandler
     fun onPostLogin(e: PostLoginEvent) {
+        SpicyAzisaBan.debug("Updating player data of ${e.player.uniqueId} (${e.player.name})")
         PlayerData.createOrUpdate(e.player).thenDo {
-            SpicyAzisaBan.debug("Updated player data of ${e.player.uniqueId}!")
+            SpicyAzisaBan.debug("Updated player data of ${e.player.uniqueId} (${e.player.name})")
             SpicyAzisaBan.debug(it.toString(), 2)
         }
     }

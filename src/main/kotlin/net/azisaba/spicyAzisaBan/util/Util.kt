@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.util
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
@@ -216,17 +217,23 @@ object Util {
 
     private val insertLock = Object()
 
-    fun insert(fn: () -> Unit): Long = synchronized(insertLock) {
-        fn()
-        val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
-        val result = statement.executeQuery("SELECT LAST_INSERT_ID()")
-        if (!result.next()) return -1L
-        val r = result.getObject(1) as Number
-        statement.close()
-        r.toLong()
+    fun insert(fn: () -> Unit): Long {
+        synchronized(insertLock) {
+            fn()
+            val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
+            val result = statement.executeQuery("SELECT LAST_INSERT_ID()")
+            if (!result.next()) return -1L
+            val r = result.getObject(1) as Number
+            statement.close()
+            return r.toLong()
+        }
     }
 
-    fun insertNoId(fn: () -> Unit) = synchronized(insertLock) { fn() }
+    fun insertNoId(fn: () -> Unit) {
+        synchronized(insertLock) {
+            fn()
+        }
+    }
 
     fun CommandSender.getUniqueId(): UUID = when (this) {
         is ProxiedPlayer -> this.uniqueId
@@ -246,6 +253,12 @@ object Util {
         this.disconnect(*TextComponent.fromLegacyText(reason.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
     }
 
+    fun String.reconstructIPAddress(): String {
+        if (!isPunishableIP()) error("not a valid ip address")
+        val numbers = this.split(".").map { Integer.parseInt(it, 10) }
+        return "${numbers[0]}.${numbers[1]}.${numbers[2]}.${numbers[3]}"
+    }
+
     fun String.isPunishableIP(): Boolean {
         val numbers = this.split(".").mapNotNull {
             try {
@@ -253,6 +266,8 @@ object Util {
             } catch (e: NumberFormatException) { null }
         }
         if (numbers.size != 4) return false
+        if (numbers.any { it !in 0..255 }) return false
+        if (SABConfig.enableDebugFeatures && (this == "127.0.0.1" || (numbers[0] == 192 && numbers[1] == 168))) return true
         // Reserved IP addresses
         // 0.0.0.0/8 (0.0.0.0 - 0.255.255.255)
         if (numbers[0] == 0) return false
@@ -285,4 +300,6 @@ object Util {
         if (numbers[0] >= 240) return false
         return true
     }
+
+    fun CommandSender.getServerName() = if (this is ProxiedPlayer) this.server?.info?.name ?: "" else ""
 }

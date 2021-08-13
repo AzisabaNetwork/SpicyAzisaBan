@@ -2,7 +2,9 @@ package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempBanCommand
+import net.azisaba.spicyAzisaBan.commands.IPBanCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
@@ -101,6 +103,8 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, BanCommand)
         proxy.pluginManager.registerCommand(this, GlobalTempBanCommand)
         proxy.pluginManager.registerCommand(this, TempBanCommand)
+        proxy.pluginManager.registerCommand(this, GlobalIPBanCommand)
+        proxy.pluginManager.registerCommand(this, IPBanCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

@@ -12,3 +12,14 @@ database:
 serverNames:
   # "server" (key) must not contain UPPERCASE character.
   server: FriendlyServerName
+defaultReasons:
+  # valid types: ban, temp_ban, ip_ban, temp_ip_ban, mute, temp_mute, ip_mute, temp_ip_mute, warning, caution, kick, note
+  # invalid types are ignored
+  ban:
+    # <server/group/global>: reasons list
+    global:
+      - "ban reason (global) 1"
+      - "ban reason (global) 2"
+    lobby:
+      - "ban reason (lobby) 1"
+      - "ban reason (lobby) 2"

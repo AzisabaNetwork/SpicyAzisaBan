@@ -1,10 +1,13 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.SABMessages.getObj
+import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import util.ResourceLocator
 import util.base.Bytes
 import util.yaml.YamlConfiguration
 import util.yaml.YamlObject
 import java.io.File
+import java.util.Objects
 
 object SABConfig {
     private val cfg: YamlObject
@@ -39,4 +42,25 @@ object SABConfig {
     }
 
     val serverNames = cfg.getObject("serverNames")?.rawData?.mapKeys { it.key!! }?.mapValues { (_, value) -> value.toString() } ?: mapOf()
+
+    val defaultReasons = PunishmentType.values().let { list ->
+        val map = mutableMapOf<PunishmentType, Map<String, List<String>>>()
+        val obj = cfg.getObj("defaultReasons")
+        list.forEach { type ->
+            val m2 = mutableMapOf<String, List<String>>()
+            obj.getObj(type.name.lowercase()).rawData.forEach e@ { (server, any) ->
+                if (any == null) return@e
+                if (any is List<*>) {
+                    m2[server] = any.map { a -> a.toString() }
+                } else {
+                    m2[server] = listOf(any.toString())
+                }
+            }
+            map[type] = m2
+        }
+        SpicyAzisaBan.instance.logger.info("Loaded defaultReasons: $map")
+        map.toMap()
+    }
+
+    val enableDebugFeatures = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!).asObject().getBoolean("enableDebugFeatures", false)
 }

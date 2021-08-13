@@ -5,6 +5,8 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
+import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.CommandSender
@@ -14,6 +16,7 @@ import util.UUIDUtil
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
+import java.sql.SQLException
 
 @Suppress("UNCHECKED_CAST")
 fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender): Promise<T> {
@@ -21,6 +24,7 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender
     if (context == Contexts.SERVER) return getServer(sender) as Promise<T>
     if (context == Contexts.REASON) return getReason() as Promise<T>
     if (context == Contexts.TIME) return getTime(sender) as Promise<T>
+    if (context == Contexts.IP_ADDRESS) return getIPAddress(sender) as Promise<T>
     return Promise.reject(IllegalArgumentException("Unknown context: " + context.key))
 }
 
@@ -31,7 +35,10 @@ private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerConte
         return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
     }
     val profile = PlayerData.getByName(rawName)
-        .catch { sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate()) }
+        .catch {
+            if (it is SQLException) it.printStackTrace()
+            sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
+        }
         .complete()
         ?: return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
     context.resolve(PlayerContext(true, profile))
@@ -80,4 +87,21 @@ private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> 
         sender.send(SABMessages.Commands.General.invalidTime.replaceVariables().translate())
         return@create context.resolve(TimeContext(false, -1L))
     }
+}
+
+private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddressContext> = Promise.create { context ->
+    val target = getString("target")
+    if (target == null) {
+        sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
+        return@create context.resolve(IPAddressContext(false, ""))
+    }
+    if (target.isPunishableIP()) return@create context.resolve(IPAddressContext(true, target.reconstructIPAddress()))
+    val data = PlayerData.getByName(target)
+        .catch { if (it is SQLException) it.printStackTrace() }
+        .complete()
+    if (data?.ip != null) {
+        return@create context.resolve(IPAddressContext(true, data.ip))
+    }
+    sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
+    context.resolve(IPAddressContext(false, ""))
 }

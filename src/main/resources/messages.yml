@@ -24,14 +24,14 @@ commands:
     invalidServer: "%PREFIX%&c無効なサーバー名です。"
     invalidPlayer: "%PREFIX%&cプレイヤーが見つかりません。"
     invalidTime: "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。"
-    invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくありません。"
+    invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
 
   # Available variables:
   # %ID% - Punishment ID
-  # %PLAYER% - Player name
+  # %PLAYER% - Player name or IP if IP-based bans
   # %TARGET% - UUID of player or IP if IP-based bans
   # %OPERATOR% - Player name of operator (or CONSOLE if the punishment was done from console)
   # %TYPE% - Punishment type
@@ -79,11 +79,12 @@ commands:
   ipban:
     # IP ban that's specific to some groups/servers
     usage: "%PREFIX%&a使用法: /ipban [-s] <target=Player/IP> <reason=\"...\"> [server=...]"
-    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIP Banされました!"
+    globalUsage: "%PREFIX%&a使用法: /gipban [-s] <target=Player/IP> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%TARGET%&r&7は、正常にIP Banされました!"
     notify:
       - "&c&o%TARGET%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIP Banされました。"
-      - "&7理由 &8> &7%REASON%"
-      - "&7ID &8> &7#%ID%"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
     layout:
       - "%PREFIX%&7永久IP BANされました!"
       - ""

@@ -204,7 +204,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                         0
                     }
                 }
-                sender.send(SABMessages.Commands.Sab.setDebugLevel.format(SpicyAzisaBan.debugLevel).replaceVariables().translate())
+                sender.send(SABMessages.Commands.Sab.setDebugLevel.replaceVariables().format(SpicyAzisaBan.debugLevel).translate())
             }
             else -> sender.sendHelp()
         }

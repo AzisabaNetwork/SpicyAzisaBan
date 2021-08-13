@@ -4,7 +4,7 @@ class Contexts<T : Context> private constructor(val key: String) {
     companion object {
         /**
          * "player" context. You may want to execute Promise asynchronously because we have to get player profile
-         * asynchronously using Mojang's API.
+         * asynchronously using database.
          */
         val PLAYER = Contexts<PlayerContext>("player")
 
@@ -20,5 +20,7 @@ class Contexts<T : Context> private constructor(val key: String) {
         val REASON = Contexts<ReasonContext>("reason")
 
         val TIME = Contexts<TimeContext>("time")
+
+        val IP_ADDRESS = Contexts<IPAddressContext>("target")
     }
 }

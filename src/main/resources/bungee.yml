@@ -1,4 +1,8 @@
 name: SpicyAzisaBan
 main: net.azisaba.spicyAzisaBan.SpicyAzisaBan
-version: 0.0.6
+version: 0.0.7
 author: acrylic-style
+
+# enables debug features:
+# - allow ip banning for some local addresses (127.0.0.1 and 192.168.0.0/16)
+enableDebugFeatures: true

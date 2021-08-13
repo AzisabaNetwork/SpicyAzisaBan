@@ -15,7 +15,9 @@ data class ServerContext(
             .servers
             .keys
             .concat(SpicyAzisaBan.instance.connection.getCachedGroups())
+            .apply { add("global") }
             .map { "server=${it}" }
+            .distinct()
             .filtr(s)
     }
 }

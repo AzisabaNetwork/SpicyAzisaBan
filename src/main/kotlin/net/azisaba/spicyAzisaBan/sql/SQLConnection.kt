@@ -128,6 +128,25 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         return groups
     }
 
+    val cachedGroupByServer = mutableMapOf<String, DataCache<String>>()
+    var updatingCacheGroupByServer = false
+    fun getCachedGroupByServer(server: String): String? {
+        if (server == "global") return null
+        val group = cachedGroupByServer[server]
+        if (group == null || group.ttl - System.currentTimeMillis() < 10000) {
+            if (!updatingCacheGroupByServer) {
+                updatingCacheGroupByServer = true
+                serverGroup.findOne(FindOptions.Builder().addWhere("server", server).setLimit(1).build())
+                    .then {
+                        val g = it?.getString("group")
+                        cachedGroupByServer[server] = DataCache(g, System.currentTimeMillis() + 1000 * 60)
+                        updatingCacheGroupByServer = false
+                    }
+            }
+        }
+        return group?.get()
+    }
+
     fun getGroupByServer(server: String): Promise<String?> {
         if (server == "global") return Promise.resolve(null)
         return serverGroup.findOne(FindOptions.Builder().addWhere("server", server).setLimit(1).build())
