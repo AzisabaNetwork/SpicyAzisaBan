@@ -272,6 +272,8 @@ data class Punishment(
                     PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.layout2.replaceVariables(variables).translate()
                     PunishmentType.IP_MUTE -> SABMessages.Commands.IPMute.layout2.replaceVariables(variables).translate()
                     PunishmentType.TEMP_IP_MUTE -> SABMessages.Commands.TempIPMute.layout2.replaceVariables(variables).translate()
+                    PunishmentType.WARNING -> SABMessages.Commands.Warning.layout.replaceVariables().translate()
+                    PunishmentType.CAUTION -> SABMessages.Commands.Caution.layout.replaceVariables().translate()
                     else -> "undefined"
                 }
             }
@@ -292,6 +294,8 @@ data class Punishment(
                     PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.notify.replaceVariables(variables).translate()
                     PunishmentType.IP_MUTE -> SABMessages.Commands.IPMute.notify.replaceVariables(variables).translate()
                     PunishmentType.TEMP_IP_MUTE -> SABMessages.Commands.TempIPMute.notify.replaceVariables(variables).translate()
+                    PunishmentType.WARNING -> SABMessages.Commands.Warning.notify.replaceVariables().translate()
+                    PunishmentType.CAUTION -> SABMessages.Commands.Caution.notify.replaceVariables().translate()
                     else -> "undefined"
                 }
             }

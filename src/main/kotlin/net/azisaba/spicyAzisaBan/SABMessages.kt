@@ -113,8 +113,8 @@ object SABMessages {
 
         object IPBan {
             private val obj = Commands.obj.getObj("ipban")
-            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ipban <target=Player/IP> <reason=\\\"...\\\"> [server=...]")
-            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipban <target=Player/IP> <reason=\\\"...\\\"> [server=...]")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ipban <target=Player/IP> <reason=\"...\"> [server=...]")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipban <target=Player/IP> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%TARGET%&r&7は、正常にIPBanされました!")
             val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からIPBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7#&o%ID%")
             val layout = obj.getMessage("layout", "%PREFIX%&7永久IP BANされました!\n\n&c対象サーバー &8&l» &7全サーバー\n&c理由 &8&l» &7%REASON%")
@@ -122,8 +122,8 @@ object SABMessages {
 
         object TempIPBan {
             private val obj = Commands.obj.getObj("tempipban")
-            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /tempipban <target=Player/IP> <reason=\\\"...\\\"> <time=...> [server=...]")
-            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempipban <target=Player/IP> <reason=\\\"...\\\"> <time=...> [server=...]")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /tempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%TARGET%&r&7は、正常にTempIPBanされました!")
             val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempIPBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7#&o%ID%&r\n&7期間 &8> &7&o%TIME%")
             val layout = obj.getMessage("layout", "%PREFIX%&7一時的にIP BANされました!\n\n&c対象サーバー &8&l» &7全サーバー&r\n&c理由 &8&l» &7%REASON%&r\n&c期間 &8&l» &7&o%DURATION%")
@@ -167,6 +167,24 @@ object SABMessages {
             val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
             val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にIPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
             val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にIPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
+        }
+
+        object Warning {
+            private val obj = Commands.obj.getObj("warning")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /warning <player=...> <reason=\"...\"> [server=...]")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gwarning <player=...> <reason=\"...\"> [server=...]")
+            val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にWarnされました!")
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val layout = obj.getMessage("layout", listOf("%PREFIX%&c警告を受けました", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
+        }
+
+        object Caution {
+            private val obj = Commands.obj.getObj("caution")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /caution <player=...> <reason=\"...\"> [server=...]")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]")
+            val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にCautionされました!")
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val layout = obj.getMessage("layout", listOf("%PREFIX%&c注意を受けました", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
         }
     }
 }

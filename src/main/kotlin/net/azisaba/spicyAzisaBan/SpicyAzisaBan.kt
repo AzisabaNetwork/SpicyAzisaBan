@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.commands.GlobalTempBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempMuteCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalWarningCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
 import net.azisaba.spicyAzisaBan.commands.IPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.MuteCommand
@@ -127,6 +128,8 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, IPMuteCommand)
         proxy.pluginManager.registerCommand(this, GlobalTempIPMuteCommand)
         proxy.pluginManager.registerCommand(this, TempIPMuteCommand)
+        proxy.pluginManager.registerCommand(this, GlobalWarningCommand)
+        // 19 commands left...
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

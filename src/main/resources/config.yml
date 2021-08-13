@@ -33,3 +33,6 @@ banOnWarning:
   threshold: 3
   time: "1mo"
   reason: ":boom:"
+warning:
+  sendTitleEvery: 10s
+  titleStayTime: 5s

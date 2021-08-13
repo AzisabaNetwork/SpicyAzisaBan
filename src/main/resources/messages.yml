@@ -182,3 +182,29 @@ commands:
       - "&7対象サーバー &8> &7&o%SERVER%"
       - "&7理由 &8> &7&o%REASON%"
       - "&7期間 &8> &7&o%DURATION%"
+  warning:
+    usage: "%PREFIX%&a使用法: /warning <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gwarning <player=...> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にWarnされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+      - "&7期間 &8> &7&o%TIME%"
+    layout:
+      - "%PREFIX%&c警告を受けました"
+      - "&c対象サーバー &8> &7%SERVER%"
+      - "&c理由 &8> &7%REASON%"
+  caution:
+    usage: "%PREFIX%&a使用法: /caution <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にCautionされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+      - "&7期間 &8> &7&o%TIME%"
+    layout:
+      - "%PREFIX%&c注意を受けました"
+      - "&c対象サーバー &8> &7%SERVER%"
+      - "&c理由 &8> &7%REASON%"

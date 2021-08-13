@@ -29,7 +29,7 @@ object SABConfig {
         cfg = YamlConfiguration(file).asObject()
     }
 
-    val database = DatabaseSettings(cfg.getObject("database"))
+    val database = DatabaseSettings(cfg.getObj("database"))
 
     class DatabaseSettings internal constructor(obj: YamlObject) {
         val host = obj.getString("host", "localhost")!!
@@ -65,6 +65,7 @@ object SABConfig {
 
     val enableDebugFeatures = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!).asObject().getBoolean("enableDebugFeatures", false)
     val blockedCommandsWhenMuted = cfg.getArray("blockedCommandsWhenMuted")?.mapNotNull { if (Objects.isNull(it)) null else it.toString() } ?: emptyList()
+    val banOnWarning = BanOnWarning(cfg.getObj("banOnWarning"))
 
     class BanOnWarning internal constructor(obj: YamlObject) {
         val threshold = obj.getInt("threshold", 3)
