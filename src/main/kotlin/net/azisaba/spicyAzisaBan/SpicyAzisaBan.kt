@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
+import net.azisaba.spicyAzisaBan.listener.PostLoginListener
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
@@ -33,6 +34,21 @@ class SpicyAzisaBan: Plugin() {
 
         @JvmStatic
         fun getUptime(): String = Util.unProcessTime(System.currentTimeMillis() - startTime)
+
+        // Range: 0 - 99999
+        //     0: off
+        //     1: on
+        //     2: + additional data/info
+        // 99999: + dump stacktrace with debug message
+        @JvmStatic
+        var debugLevel: Int = 0
+
+        @JvmStatic
+        fun debug(s: String, minLevel: Int = 1) {
+            if (debugLevel < minLevel) return
+            instance.logger.info(s)
+            if (debugLevel >= 99999) Throwable("Debug").printStackTrace()
+        }
     }
 
     private val timer = Timer()
@@ -79,6 +95,7 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)
+        proxy.pluginManager.registerListener(this, PostLoginListener)
         proxy.pluginManager.registerCommand(this, SABCommand)
         proxy.pluginManager.registerCommand(this, GlobalBanCommand)
         proxy.pluginManager.registerCommand(this, BanCommand)

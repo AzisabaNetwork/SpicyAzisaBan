@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.util.contexts
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -13,7 +14,6 @@ import util.UUIDUtil
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
-import xyz.acrylicstyle.mcutil.mojang.MojangAPI
 
 @Suppress("UNCHECKED_CAST")
 fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender): Promise<T> {
@@ -30,7 +30,7 @@ private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerConte
         sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
     }
-    val profile = MojangAPI.getPlayerProfile(rawName, true)
+    val profile = PlayerData.getByName(rawName)
         .catch { sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate()) }
         .complete()
         ?: return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))

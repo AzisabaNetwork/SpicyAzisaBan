@@ -79,6 +79,11 @@ object SABMessages {
             val timeNotSpecified = obj.getMessage("timeNotSpecified", "%PREFIX%&c時間が指定されていません。")
         }
 
+        object Sab {
+            private val obj = Commands.obj.getObj("sab")
+            val setDebugLevel = obj.getMessage("setDebugLevel", "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。")
+        }
+
         object Ban {
             private val obj = Commands.obj.getObj("ban")
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ban [-s] <player=...> <reason=\"...\"> [server=...]")
@@ -93,7 +98,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /tempban [-s] <player=...> <reason=\"...\"> <time=...> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempban [-s] <player=...> <reason=\"...\"> <time=...> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempBanされました!")
-            val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7&o#%ID%&r\n&7期間 &8> &7&o%DURATION%")
+            val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7&o#%ID%&r\n&7期間 &8> &7&o%TIME%")
             val layout = obj.getMessage("layout", "%PREFIX%&7永久BANされました!\n\n&c対象サーバー &8&l» &7全サーバー\n&c理由 &8&l» &7%REASON%\n&c期間 &8&l» &7&o%DURATION%")
         }
 

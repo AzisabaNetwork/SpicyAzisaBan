@@ -87,7 +87,7 @@ data class Punishment(
         }
 
         fun canJoinServer(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
-            //SpicyAzisaBan.instance.logger.info("Checking for $uuid (trigger: joining server $server)")
+            SpicyAzisaBan.debug("Checking for $uuid (trigger: joining server $server)")
             val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
             val s = SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)")
             s.setString(1, uuid.toString())
@@ -102,9 +102,10 @@ data class Punishment(
             var punishment: Punishment? = null
             ps.filter { p -> p.type.isBan() }.forEach { p ->
                 if (p.isExpired()) {
-                    //SpicyAzisaBan.instance.logger.info("Removing ${p.id} from punishments")
+                    SpicyAzisaBan.debug("Removing punishment #${p.id} (reason: expired)")
+                    SpicyAzisaBan.debug(p.toString(), 2)
                     SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", p.id).build()).thenDo {
-                        SpicyAzisaBan.instance.logger.info("Removed punishment #${p.id} because it is expired")
+                        SpicyAzisaBan.debug("Removed punishment #${p.id} (reason: expired)")
                     }
                 } else {
                     punishment = p
@@ -153,6 +154,10 @@ data class Punishment(
             } catch (e: IllegalArgumentException) {}
         }
     }
+
+    fun getProofs(): Promise<List<Proof>> =
+        SpicyAzisaBan.instance.connection.proofs.findAll(FindOptions.Builder().addWhere("punish_id", id).build())
+            .then { list -> list.map { td -> Proof.fromTableData(this, td) } }
 
     fun getTargetUUID(): UUID {
         if (type.isIPBased()) {

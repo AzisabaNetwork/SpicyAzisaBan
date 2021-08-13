@@ -26,6 +26,8 @@ commands:
     invalidTime: "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。"
     invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくありません。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
+  sab:
+    setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
 
   # Available variables:
   # %ID% - Punishment ID
@@ -63,7 +65,7 @@ commands:
       - "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
-      - "&7期間 &8> &7&o%DURATION%"
+      - "&7期間 &8> &7&o%TIME%"
     layout:
       - "%PREFIX%&7一時的にBANされました!"
       - ""

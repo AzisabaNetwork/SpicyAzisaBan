@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.util
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -13,7 +14,6 @@ import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
-import xyz.acrylicstyle.mcutil.mojang.MojangAPI
 import java.lang.NumberFormatException
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -226,6 +226,8 @@ object Util {
         r.toLong()
     }
 
+    fun insertNoId(fn: () -> Unit) = synchronized(insertLock) { fn() }
+
     fun CommandSender.getUniqueId(): UUID = when (this) {
         is ProxiedPlayer -> this.uniqueId
         else -> UUIDUtil.NIL
@@ -235,8 +237,8 @@ object Util {
 
     fun UUID.getProfile(): Promise<PlayerProfile> = Promise.create { context ->
         if (this == UUIDUtil.NIL) return@create context.resolve(SimplePlayerProfile("CONSOLE", this))
-        MojangAPI.getName(this, true)
-            .thenDo { context.resolve(SimplePlayerProfile(it, this)) }
+        PlayerData.getByUUID(this)
+            .thenDo { context.resolve(it) }
             .catch { context.reject(it) }
     }
 

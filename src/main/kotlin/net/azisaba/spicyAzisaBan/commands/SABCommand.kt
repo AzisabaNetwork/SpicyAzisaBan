@@ -23,9 +23,11 @@ import xyz.acrylicstyle.sql.options.InsertOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
 
 object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
-    private val commands = listOf("creategroup", "deletegroup", "group", "info")
+    private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug")
     private val groupCommands = listOf("add", "remove", "info")
 
     private val groupRemoveConfirmation = mutableMapOf<UUID, String>()
@@ -36,6 +38,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab info")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab creategroup <group>")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletegroup <group>")
+        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab debug [debugLevel = 0-99999]")
     }
 
     private fun CommandSender.sendGroupHelp() {
@@ -190,6 +193,18 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
                     sender.send("$PREFIX- ${ChatColor.AQUA}Uptime: ${ChatColor.GREEN}${SpicyAzisaBan.getUptime()}")
                     context.resolve()
                 }
+            }
+            "debug" -> {
+                if (args.size <= 1) {
+                    SpicyAzisaBan.debugLevel = 0
+                } else {
+                    SpicyAzisaBan.debugLevel = try {
+                        min(max(Integer.parseInt(args[1]), 0), 99999)
+                    } catch (e: NumberFormatException) {
+                        0
+                    }
+                }
+                sender.send(SABMessages.Commands.Sab.setDebugLevel.format(SpicyAzisaBan.debugLevel).replaceVariables().translate())
             }
             else -> sender.sendHelp()
         }

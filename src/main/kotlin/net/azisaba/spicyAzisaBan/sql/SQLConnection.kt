@@ -14,7 +14,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 3
+        const val CURRENT_DATABASE_VERSION = 4
     }
 
     lateinit var punishments: Table
@@ -22,6 +22,10 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     lateinit var groups: Table
     lateinit var serverGroup: Table
     lateinit var settings: Table
+    lateinit var unpunish: Table
+    lateinit var proofs: Table
+    lateinit var players: Table
+    lateinit var usernameHistory: Table
 
     fun isConnected() =
         try {
@@ -67,6 +71,41 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("key", DataType.STRING).setPrimaryKey(true).build(),
                 TableDefinition.Builder("valueString", DataType.STRING).build(),
                 TableDefinition.Builder("valueInt", DataType.INT).build(),
+            ),
+        )
+        unpunish = this.define(
+            "unpunish",
+            arrayOf(
+                TableDefinition.Builder("id", DataType.BIGINT).setAutoIncrement(true).setPrimaryKey(true).build(), // unpunish id
+                TableDefinition.Builder("punish_id", DataType.BIGINT).setAllowNull(false).build(),
+                TableDefinition.Builder("reason", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("timestamp", DataType.BIGINT).setAllowNull(false).build(),
+                TableDefinition.Builder("operator", DataType.STRING).setAllowNull(false).build(),
+            ),
+        )
+        proofs = this.define(
+            "proofs",
+            arrayOf(
+                TableDefinition.Builder("id", DataType.BIGINT).setAutoIncrement(true).setPrimaryKey(true).build(),
+                TableDefinition.Builder("punish_id", DataType.BIGINT).setAllowNull(false).build(),
+                TableDefinition.Builder("text", DataType.STRING).setAllowNull(false).build(),
+            ),
+        )
+        players = this.define(
+            "players",
+            arrayOf(
+                TableDefinition.Builder("uuid", DataType.STRING).setPrimaryKey(true).build(),
+                TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("ip", DataType.STRING).setAllowNull(true).build(), // could be unix socket
+                TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
+            ),
+        )
+        usernameHistory = this.define(
+            "usernameHistory",
+            arrayOf(
+                TableDefinition.Builder("uuid", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).build(),
             ),
         )
         this.sync()
