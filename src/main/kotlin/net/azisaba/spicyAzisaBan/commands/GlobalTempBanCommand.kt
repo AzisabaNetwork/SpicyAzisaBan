@@ -25,7 +25,7 @@ import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
 object GlobalTempBanCommand: Command("gtempban"), TabExecutor {
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=", "-s")
+    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission(PunishmentType.TEMP_BAN.perm)) {
@@ -63,11 +63,7 @@ object GlobalTempBanCommand: Command("gtempban"), TabExecutor {
                     it.printStackTrace()
                 }
                 .complete() ?: return@create context.resolve()
-            if (!arguments.contains("-s")) {
-                p.notifyToAll().complete()
-            } else {
-                p.notifyConsole()
-            }
+            p.notifyToAll().complete()
             sender.send(SABMessages.Commands.TempBan.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
         }
