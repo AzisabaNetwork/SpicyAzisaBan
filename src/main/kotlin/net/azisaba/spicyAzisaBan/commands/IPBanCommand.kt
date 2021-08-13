@@ -64,6 +64,9 @@ object IPBanCommand: Command("ipban"), TabExecutor {
             p.notifyToAll().complete()
             sender.send(SABMessages.Commands.IPBan.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
+        }.catch {
+            it.printStackTrace()
+            sender.send(SABMessages.General.error.replaceVariables().translate())
         }
     }
 

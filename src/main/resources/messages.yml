@@ -40,14 +40,13 @@ commands:
   # %DURATION% - Times left until the punishment expires
   # %TIME% - Duration of punishment
   ban:
-    # ban that's specific to some groups/servers
     usage: "%PREFIX%&a使用法: /ban [-s] <player=...> <reason=\"...\"> [server=...]"
     globalUsage: "%PREFIX%&a使用法: /gban [-s] <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にBanされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。"
-      - "&7理由 &8> &7%REASON%"
-      - "&7ID &8> &7#%ID%"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
     layout:
       - "%PREFIX%&7永久BANされました!"
       - ""
@@ -77,20 +76,38 @@ commands:
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"
   ipban:
-    # IP ban that's specific to some groups/servers
     usage: "%PREFIX%&a使用法: /ipban [-s] <target=Player/IP> <reason=\"...\"> [server=...]"
     globalUsage: "%PREFIX%&a使用法: /gipban [-s] <target=Player/IP> <reason=\"...\"> [server=...]"
-    done: "%PREFIX%&c&o%TARGET%&r&7は、正常にIP Banされました!"
+    done: "%PREFIX%&c&o%TARGET%&r&7は、正常にIPBanされました!"
     notify:
-      - "&c&o%TARGET%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIP Banされました。"
+      - "&c&o%TARGET%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPBanされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
     layout:
       - "%PREFIX%&7永久IP BANされました!"
       - ""
       - ""
-      - "&c対象サーバー &8&l» &7%SERVER%"
-      - "&c理由 &8&l» &7%REASON%"
+      - "&c対象サーバー &8&l» &7&o%SERVER%"
+      - "&c理由 &8&l» &7&o%REASON%"
+      - ""
+      - "&7お問い合わせ:"
+      - "&eDiscord &8» &c&ncoming soon"
+  tempipban:
+    usage: "%PREFIX%&a使用法: /tempipban [-s] <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gtempipban [-s] <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
+    done: "%PREFIX%&c&o%TARGET%&r&7は、正常にTempIPBanされました!"
+    notify:
+      - "&c&o%TARGET%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPBanされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+      - "&7期間 &8> &7&o%TIME%"
+    layout:
+      - "%PREFIX%&7一時的にIP BANされました!"
+      - ""
+      - ""
+      - "&c対象サーバー &8&l» &7&o%SERVER%"
+      - "&c理由 &8&l» &7&o%REASON%"
+      - "&c期間 &8&l» &7&o%DURATION%"
       - ""
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"

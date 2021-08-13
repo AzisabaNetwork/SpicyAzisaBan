@@ -216,6 +216,7 @@ data class Punishment(
                     PunishmentType.BAN -> SABMessages.Commands.Ban.layout.replaceVariables(variables).translate()
                     PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.layout.replaceVariables(variables).translate()
                     PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.layout.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_IP_BAN -> SABMessages.Commands.TempIPBan.layout.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -231,6 +232,7 @@ data class Punishment(
                     PunishmentType.BAN -> SABMessages.Commands.Ban.notify.replaceVariables(variables).translate()
                     PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.notify.replaceVariables(variables).translate()
                     PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.notify.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_IP_BAN -> SABMessages.Commands.TempIPBan.notify.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }

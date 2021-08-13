@@ -4,9 +4,11 @@ import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalTempIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
+import net.azisaba.spicyAzisaBan.commands.TempIPBanCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
@@ -105,6 +107,8 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, TempBanCommand)
         proxy.pluginManager.registerCommand(this, GlobalIPBanCommand)
         proxy.pluginManager.registerCommand(this, IPBanCommand)
+        proxy.pluginManager.registerCommand(this, GlobalTempIPBanCommand)
+        proxy.pluginManager.registerCommand(this, TempIPBanCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

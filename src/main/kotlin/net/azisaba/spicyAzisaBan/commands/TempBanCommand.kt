@@ -66,6 +66,9 @@ object TempBanCommand: Command("tempban"), TabExecutor {
             p.notifyToAll().complete()
             sender.send(SABMessages.Commands.TempBan.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
+        }.catch {
+            it.printStackTrace()
+            sender.send(SABMessages.General.error.replaceVariables().translate())
         }
     }
 

@@ -52,6 +52,9 @@ object GlobalBanCommand: Command("gban"), TabExecutor {
             p.notifyToAll().complete()
             sender.send(SABMessages.Commands.Ban.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
+        }.catch {
+            it.printStackTrace()
+            sender.send(SABMessages.General.error.replaceVariables().translate())
         }
     }
 
