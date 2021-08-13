@@ -30,8 +30,12 @@ data class PlayerData(
             return PlayerData(uuid, name, ip, lastSeen)
         }
 
+        fun getByIP(ip: String): Promise<List<PlayerData>> =
+            SpicyAzisaBan.instance.connection.players.findAll(FindOptions.Builder().addWhere("ip", ip).build())
+                .then { list -> list.map { td -> fromTableData(td) } }
+
         fun getByUUID(uuid: UUID): Promise<PlayerData> =
-            SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid.toString()).build())
+            SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid.toString()).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $uuid") }
 
         fun getByName(name: String): Promise<PlayerData> =
@@ -54,11 +58,13 @@ data class PlayerData(
             }
         }
 
-        fun updateFromMojangAPI(uuid: UUID) {
+        fun updateFromMojangAPI(uuid: UUID): Promise<Unit> {
             if (uuid.version() != 4) error("UUID must be Mojang-assigned (version 4)")
-            MojangAPI.getName(uuid).thenDo { name ->
-                //
-            }
+            return MojangAPI.getName(uuid).thenDo { name ->
+                SpicyAzisaBan.instance.connection.players
+                    .update("name", name, FindOptions.Builder().addWhere("uuid", uuid.toString()).build())
+                    .complete()
+            }.then {}
         }
     }
 

@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
@@ -26,7 +27,7 @@ import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
 object MuteCommand: Command("mute"), TabExecutor {
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=")
+    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "--all")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (sender !is ProxiedPlayer) return sender.send("${ChatColor.RED}This command cannot be used from console!")
@@ -48,18 +49,19 @@ object MuteCommand: Command("mute"), TabExecutor {
                 .createByPlayer(player.profile, reason.text, sender.uniqueId, PunishmentType.MUTE, -1, server.name)
                 .insert()
                 .catch {
-                    sender.send(SABMessages.General.error.replaceVariables().translate())
                     SpicyAzisaBan.instance.logger.warning("Something went wrong while handling /mute from ${sender.name}!")
-                    it.printStackTrace()
+                    sender.sendErrorMessage(it)
                 }
                 .complete() ?: return@create context.resolve()
             p.notifyToAll().complete()
+            if (arguments.contains("all")) {
+                p.applyToSameIPs(player.profile.uniqueId).catch { sender.sendErrorMessage(it) }.complete()
+            }
             ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.send(SABMessages.Commands.Mute.layout1.replaceVariables(p.getVariables().complete()).translate())
             sender.send(SABMessages.Commands.Mute.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
         }.catch {
-            it.printStackTrace()
-            sender.send(SABMessages.General.error.replaceVariables().translate())
+            sender.sendErrorMessage(it)
         }
     }
 

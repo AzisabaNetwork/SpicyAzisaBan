@@ -11,6 +11,7 @@ import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.IPAddressContext
@@ -48,17 +49,15 @@ object GlobalIPBanCommand: Command("gipban"), TabExecutor {
                         .forEach { p -> p.kick(message) }
                 }
                 .catch {
-                    sender.send(SABMessages.General.error.replaceVariables().translate())
                     SpicyAzisaBan.instance.logger.warning("Something went wrong while handling /gipban from ${sender.name}!")
-                    it.printStackTrace()
+                    sender.sendErrorMessage(it)
                 }
                 .complete() ?: return@create context.resolve()
             p.notifyToAll().complete()
             sender.send(SABMessages.Commands.IPBan.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
         }.catch {
-            it.printStackTrace()
-            sender.send(SABMessages.General.error.replaceVariables().translate())
+            sender.sendErrorMessage(it)
         }
     }
 

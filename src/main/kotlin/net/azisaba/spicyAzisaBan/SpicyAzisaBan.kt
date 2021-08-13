@@ -3,15 +3,19 @@ package net.azisaba.spicyAzisaBan
 import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalIPBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalIPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalTempIPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempMuteCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
+import net.azisaba.spicyAzisaBan.commands.IPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.MuteCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.commands.TempIPBanCommand
+import net.azisaba.spicyAzisaBan.commands.TempIPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.TempMuteCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
@@ -119,6 +123,10 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, MuteCommand)
         proxy.pluginManager.registerCommand(this, GlobalTempMuteCommand)
         proxy.pluginManager.registerCommand(this, TempMuteCommand)
+        proxy.pluginManager.registerCommand(this, GlobalIPMuteCommand)
+        proxy.pluginManager.registerCommand(this, IPMuteCommand)
+        proxy.pluginManager.registerCommand(this, GlobalTempIPMuteCommand)
+        proxy.pluginManager.registerCommand(this, TempIPMuteCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

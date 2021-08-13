@@ -26,6 +26,7 @@ commands:
     invalidTime: "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。"
     invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
+    samePunishmentAppliedToSameIPAddress: "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。"
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
 
@@ -44,7 +45,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gban <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にBanされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
     layout:
@@ -61,7 +62,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gtempban <player=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempBanされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
       - "&7期間 &8> &7&o%TIME%"
@@ -143,6 +144,41 @@ commands:
       - "&7期間 &8> &7&o%DURATION%"
     layout2: # layout that shows to a player when a player tries to speak after they got muted
       - "%PREFIX%&cあなたは一時的にミュートされています!"
+      - "&7対象サーバー &8> &7&o%SERVER%"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7期間 &8> &7&o%DURATION%"
+  ipmute:
+    usage: "%PREFIX%&a使用法: /ipmute <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gipmute <player=...> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+    layout1: # layout that shows to a player when a player got muted
+      - "%PREFIX%&cあなたは永久IPミュートされました!"
+      - "&7対象サーバー &8> &7&o%SERVER%"
+      - "&7理由 &8> &7&o%REASON%"
+    layout2: # layout that shows to a player when a player tries to speak after they got muted
+      - "%PREFIX%&cあなたは永久IPミュートされています!"
+      - "&7対象サーバー &8> &7&o%SERVER%"
+      - "&7理由 &8> &7&o%REASON%"
+  tempipmute:
+    usage: "%PREFIX%&a使用法: /tempipmute <player=...> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gtempipmute <player=...> <reason=\"...\"> <time=...> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+      - "&7期間 &8> &7&o%TIME%"
+    layout1: # layout that shows to a player when a player got muted
+      - "%PREFIX%&cあなたは一時的にIPミュートされました!"
+      - "&7対象サーバー &8> &7&o%SERVER%"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7期間 &8> &7&o%DURATION%"
+    layout2: # layout that shows to a player when a player tries to speak after they got muted
+      - "%PREFIX%&cあなたは一時的にIPミュートされています!"
       - "&7対象サーバー &8> &7&o%SERVER%"
       - "&7理由 &8> &7&o%REASON%"
       - "&7期間 &8> &7&o%DURATION%"

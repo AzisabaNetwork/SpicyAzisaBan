@@ -10,6 +10,7 @@ import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
@@ -28,7 +29,7 @@ import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
 object TempBanCommand: Command("tempban"), TabExecutor {
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=")
+    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=", "--all")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (sender !is ProxiedPlayer) return sender.send("${ChatColor.RED}This command cannot be used from console!")
@@ -58,17 +59,18 @@ object TempBanCommand: Command("tempban"), TabExecutor {
                     ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.kick(it.getBannedMessage().complete())
                 }
                 .catch {
-                    sender.send(SABMessages.General.error.replaceVariables().translate())
                     SpicyAzisaBan.instance.logger.warning("Something went wrong while handling /tempban from ${sender.name}!")
-                    it.printStackTrace()
+                    sender.sendErrorMessage(it)
                 }
                 .complete() ?: return@create context.resolve()
             p.notifyToAll().complete()
+            if (arguments.contains("all")) {
+                p.applyToSameIPs(player.profile.uniqueId).catch { sender.sendErrorMessage(it) }.complete()
+            }
             sender.send(SABMessages.Commands.TempBan.done.replaceVariables(p.getVariables().complete()).translate())
             context.resolve()
         }.catch {
-            it.printStackTrace()
-            sender.send(SABMessages.General.error.replaceVariables().translate())
+            sender.sendErrorMessage(it)
         }
     }
 

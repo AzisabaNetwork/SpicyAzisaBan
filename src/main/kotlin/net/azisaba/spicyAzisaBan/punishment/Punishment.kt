@@ -5,10 +5,12 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment.Flags.Companion.toDatabase
+import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.getProfile
 import net.azisaba.spicyAzisaBan.util.Util.hasNotifyPermissionOf
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
+import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
@@ -117,7 +119,6 @@ data class Punishment(
         }
 
         fun canJoinServer(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
-            SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: joining server $server)")
             val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
             val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
             if (ps.isEmpty()) return@create context.resolve(null)
@@ -269,6 +270,8 @@ data class Punishment(
                     PunishmentType.TEMP_IP_BAN -> SABMessages.Commands.TempIPBan.layout.replaceVariables(variables).translate()
                     PunishmentType.MUTE -> SABMessages.Commands.Mute.layout2.replaceVariables(variables).translate()
                     PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.layout2.replaceVariables(variables).translate()
+                    PunishmentType.IP_MUTE -> SABMessages.Commands.IPMute.layout2.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_IP_MUTE -> SABMessages.Commands.TempIPMute.layout2.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -287,6 +290,8 @@ data class Punishment(
                     PunishmentType.TEMP_IP_BAN -> SABMessages.Commands.TempIPBan.notify.replaceVariables(variables).translate()
                     PunishmentType.MUTE -> SABMessages.Commands.Mute.notify.replaceVariables(variables).translate()
                     PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.notify.replaceVariables(variables).translate()
+                    PunishmentType.IP_MUTE -> SABMessages.Commands.IPMute.notify.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_IP_MUTE -> SABMessages.Commands.TempIPMute.notify.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -358,6 +363,36 @@ data class Punishment(
                 flags,
             )
         )
+    }
+
+    private fun alsoApplyToPlayer(profile: PlayerProfile): Promise<Punishment> =
+        createByPlayer(profile, reason, operator, type, end, server).insert()
+
+    fun applyToSameIPs(uuid: UUID): Promise<List<Punishment>> = Promise.create<List<Punishment>?> { context ->
+        val data = PlayerData.getByUUID(uuid).catch { context.reject(it) }.complete() ?: return@create
+        if (data.ip == null) return@create context.resolve(emptyList())
+        val punishments = mutableListOf<Punishment>()
+        PlayerData.getByIP(data.ip)
+            .catch { context.reject(it) }
+            .complete()
+            ?.forEach { pd ->
+                if (pd.uuid == uuid) return@forEach
+                val p = alsoApplyToPlayer(pd).catch { context.reject(it) }.complete() ?: return@create
+                punishments.add(p)
+                if (p.type.isBan()) {
+                    p.getBannedMessage().thenDo { ProxyServer.getInstance().getPlayer(pd.uuid)?.kick(it) }
+                } else {
+                    p.getBannedMessage().thenDo { ProxyServer.getInstance().getPlayer(pd.uuid)?.send(it) }
+                }
+            }
+            ?: return@create
+        context.resolve(punishments)
+    }.thenDo { list ->
+        val message = SABMessages.Commands.General.samePunishmentAppliedToSameIPAddress.replaceVariables().format(list.size).translate()
+        ProxyServer.getInstance().console.send(message)
+        ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
+            player.send(message)
+        }
     }
 
     enum class Flags {

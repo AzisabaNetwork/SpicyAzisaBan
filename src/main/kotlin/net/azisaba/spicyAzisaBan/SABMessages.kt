@@ -85,6 +85,7 @@ object SABMessages {
             val invalidTime = obj.getMessage("invalidTime", "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。")
             val invalidIPAddress = obj.getMessage("invalidIPAddress", "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。")
             val timeNotSpecified = obj.getMessage("timeNotSpecified", "%PREFIX%&c時間が指定されていません。")
+            val samePunishmentAppliedToSameIPAddress = obj.getMessage("samePunishmentAppliedToSameIPAddress", "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。")
         }
 
         object Sab {
@@ -146,6 +147,26 @@ object SABMessages {
             val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
             val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
             val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
+        }
+
+        object IPMute {
+            private val obj = Commands.obj.getObj("ipmute")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ipmute <player=...> <reason=\"...\"> [server=...]")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipmute <player=...> <reason=\"...\"> [server=...]")
+            val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!")
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは永久IPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
+            val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは永久IPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
+        }
+
+        object TempIPMute {
+            private val obj = Commands.obj.getObj("tempipmute")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /tempipmute <player=...> <reason=\"...\\\"> <time=...> [server=...]")
+            val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempipmute <player=...> <reason=\"...\"> <time=...> [server=...]")
+            val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!")
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
+            val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にIPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
+            val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にIPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
         }
     }
 }

@@ -2,9 +2,11 @@ package net.azisaba.spicyAzisaBan.util
 
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
+import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
+import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -31,6 +33,11 @@ object Util {
         message.split("\\n|\\\\n".toRegex()).forEach { msg ->
             sendMessage(*TextComponent.fromLegacyText(msg.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
         }
+    }
+
+    fun CommandSender.sendErrorMessage(throwable: Throwable) {
+        throwable.printStackTrace()
+        send(SABMessages.General.error.replaceVariables().translate())
     }
 
     private var lastPreloadedPermissions = 0L
