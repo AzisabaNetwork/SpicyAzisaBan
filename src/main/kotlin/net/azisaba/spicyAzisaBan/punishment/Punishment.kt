@@ -14,6 +14,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
+import util.ref.DataCache
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import xyz.acrylicstyle.sql.TableData
@@ -35,6 +36,7 @@ data class Punishment(
     val flags: MutableList<Flags> = mutableListOf(),
 ) {
     companion object {
+        private val pendingRemoval = mutableListOf<Long>()
         val recentPunishedPlayers = mutableSetOf<SimplePlayerProfile>()
 
         fun createByPlayer(
@@ -115,31 +117,61 @@ data class Punishment(
         }
 
         fun canJoinServer(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
-            SpicyAzisaBan.debug("Checking for $uuid (trigger: joining server $server)")
+            SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: joining server $server)")
             val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
+            val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
+            if (ps.isEmpty()) return@create context.resolve(null)
+            var punishment: Punishment? = null
+            ps.filter { p -> p.type.isBan() }.forEach { p ->
+                if (p.isExpired()) {
+                    p.removeIfExpired()
+                } else {
+                    punishment = p
+                }
+            }
+            context.resolve(punishment)
+        }
+
+        val muteCache = mutableMapOf<String, DataCache<Punishment>>()
+
+        fun canSpeak(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+            val punish = muteCache["$uuid,$address"]
+            val punishValue = punish?.get()
+            if (punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
+                SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: ChatEvent on $server)")
+                muteCache["$uuid,$address"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
+                val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
+                val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
+                if (ps.isEmpty()) return@create context.resolve(null)
+                var punishment: Punishment? = null
+                ps.filter { p -> p.type.isMute() }.forEach { p ->
+                    if (p.isExpired()) {
+                        p.removeIfExpired()
+                    } else {
+                        punishment = p
+                    }
+                }
+                muteCache["$uuid,$address"] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 30L)
+                return@create context.resolve(punishment)
+            }
+            if (punishValue?.isExpired() == true) {
+                punishValue.removeIfExpired()
+                return@create context.resolve(null)
+            }
+            context.resolve(punishValue)
+        }
+
+        fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID, ip: String?, server: String, group: String?): List<Punishment> {
             val s = SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)")
             s.setString(1, uuid.toString())
-            s.setString(2, address ?: uuid.toString())
+            s.setString(2, ip ?: uuid.toString())
             s.setString(3, server)
             s.setString(4, group ?: server)
             val ps = mutableListOf<Punishment>()
             val rs = s.executeQuery()
             while (rs.next()) ps.add(fromResultSet(rs))
             s.close()
-            if (ps.isEmpty()) return@create context.resolve(null)
-            var punishment: Punishment? = null
-            ps.filter { p -> p.type.isBan() }.forEach { p ->
-                if (p.isExpired()) {
-                    SpicyAzisaBan.debug("Removing punishment #${p.id} (reason: expired)")
-                    SpicyAzisaBan.debug(p.toString(), 2)
-                    SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", p.id).build()).thenDo {
-                        SpicyAzisaBan.debug("Removed punishment #${p.id} (reason: expired)")
-                    }
-                } else {
-                    punishment = p
-                }
-            }
-            context.resolve(punishment)
+            return ps
         }
 
         fun fetchActivePunishmentById(id: Long): Promise<Punishment?> =
@@ -183,6 +215,24 @@ data class Punishment(
         }
     }
 
+    fun removeIfExpired(): Promise<Unit> = Promise.create { context ->
+        if (isExpired() && !pendingRemoval.contains(id)) {
+            pendingRemoval.add(id)
+            SpicyAzisaBan.debug("Removing punishment #${id} (reason: expired)")
+            SpicyAzisaBan.debug(toString(), 2)
+            SpicyAzisaBan.instance.connection.punishments.delete(
+                FindOptions.Builder().addWhere("id", id).build()
+            ).thenDo {
+                SpicyAzisaBan.debug("Removed punishment #${id} (reason: expired)")
+            }.complete()
+            muteCache.toList().forEach { (s) ->
+                if (s.contains(target)) muteCache.remove(s)
+            }
+            pendingRemoval.remove(id)
+        }
+        context.resolve()
+    }
+
     fun getProofs(): Promise<List<Proof>> =
         SpicyAzisaBan.instance.connection.proofs.findAll(FindOptions.Builder().addWhere("punish_id", id).build())
             .then { list -> list.map { td -> Proof.fromTableData(this, td) } }
@@ -217,6 +267,8 @@ data class Punishment(
                     PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.layout.replaceVariables(variables).translate()
                     PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.layout.replaceVariables(variables).translate()
                     PunishmentType.TEMP_IP_BAN -> SABMessages.Commands.TempIPBan.layout.replaceVariables(variables).translate()
+                    PunishmentType.MUTE -> SABMessages.Commands.Mute.layout2.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.layout2.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -233,6 +285,8 @@ data class Punishment(
                     PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.notify.replaceVariables(variables).translate()
                     PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.notify.replaceVariables(variables).translate()
                     PunishmentType.TEMP_IP_BAN -> SABMessages.Commands.TempIPBan.notify.replaceVariables(variables).translate()
+                    PunishmentType.MUTE -> SABMessages.Commands.Mute.notify.replaceVariables(variables).translate()
+                    PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.notify.replaceVariables(variables).translate()
                     else -> "undefined"
                 }
             }
@@ -249,7 +303,7 @@ data class Punishment(
             }
         }.then {}
 
-    fun isExpired() = end != -1L && end < System.currentTimeMillis()
+    fun isExpired() = (end != -1L && end < System.currentTimeMillis()) || pendingRemoval.contains(id)
 
     fun updateFlags(): Promise<Unit> =
         SpicyAzisaBan.instance.connection.punishments.update("extra", flags.toDatabase(), FindOptions.Builder().addWhere("id", id).build())
@@ -285,6 +339,11 @@ data class Punishment(
                 .complete() == null
         }
         if (cancel) return@create
+        if (type.isMute()) {
+            muteCache.toList().forEach { (s) ->
+                if (s.contains(target)) muteCache.remove(s)
+            }
+        }
         return@create context.resolve(
             Punishment(
                 id,

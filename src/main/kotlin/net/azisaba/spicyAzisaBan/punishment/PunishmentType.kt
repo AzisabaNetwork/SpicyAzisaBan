@@ -16,6 +16,6 @@ enum class PunishmentType(val id: String, val base: PunishmentType?, val temp: B
     ;
 
     fun isBan() = this == BAN || this == TEMP_BAN || this == IP_BAN || this == TEMP_IP_BAN
-
+    fun isMute() = this == MUTE || this == TEMP_MUTE || this == IP_MUTE || this == TEMP_IP_MUTE
     fun isIPBased() = this == IP_BAN || this.base == IP_BAN
 }

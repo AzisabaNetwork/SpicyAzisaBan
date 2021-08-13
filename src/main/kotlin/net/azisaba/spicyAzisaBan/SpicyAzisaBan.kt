@@ -3,14 +3,19 @@ package net.azisaba.spicyAzisaBan
 import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalIPBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalTempMuteCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
+import net.azisaba.spicyAzisaBan.commands.MuteCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.commands.TempIPBanCommand
+import net.azisaba.spicyAzisaBan.commands.TempMuteCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
+import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
@@ -100,6 +105,7 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)
+        proxy.pluginManager.registerListener(this, CheckMuteListener)
         proxy.pluginManager.registerCommand(this, SABCommand)
         proxy.pluginManager.registerCommand(this, GlobalBanCommand)
         proxy.pluginManager.registerCommand(this, BanCommand)
@@ -109,6 +115,10 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, IPBanCommand)
         proxy.pluginManager.registerCommand(this, GlobalTempIPBanCommand)
         proxy.pluginManager.registerCommand(this, TempIPBanCommand)
+        proxy.pluginManager.registerCommand(this, GlobalMuteCommand)
+        proxy.pluginManager.registerCommand(this, MuteCommand)
+        proxy.pluginManager.registerCommand(this, GlobalTempMuteCommand)
+        proxy.pluginManager.registerCommand(this, TempMuteCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

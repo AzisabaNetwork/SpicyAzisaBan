@@ -23,3 +23,13 @@ defaultReasons:
     lobby:
       - "ban reason (lobby) 1"
       - "ban reason (lobby) 2"
+blockedCommandsWhenMuted:
+  - tell
+  - r
+  - me
+banOnWarning:
+  # if warning count hits 3, the player would be banned with specified reason
+  # this feature will be disabled if you set this value to <= 0
+  threshold: 3
+  time: "1mo"
+  reason: ":boom:"
