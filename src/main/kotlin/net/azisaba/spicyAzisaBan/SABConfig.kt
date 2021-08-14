@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.SABMessages.getMessage
 import net.azisaba.spicyAzisaBan.SABMessages.getObj
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util
@@ -65,11 +66,25 @@ object SABConfig {
 
     val enableDebugFeatures = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!).asObject().getBoolean("enableDebugFeatures", false)
     val blockedCommandsWhenMuted = cfg.getArray("blockedCommandsWhenMuted")?.mapNotNull { if (Objects.isNull(it)) null else it.toString() } ?: emptyList()
-    val banOnWarning = BanOnWarning(cfg.getObj("banOnWarning"))
 
-    class BanOnWarning internal constructor(obj: YamlObject) {
+    object BanOnWarning {
+        private val obj = cfg.getObj("banOnWarning")
         val threshold = obj.getInt("threshold", 3)
-        val time = Util.processTime(obj.getString("time", "1mo"))
+        val time = obj.getString("time", "1mo")!!
         val reason = obj.getString("reason", "You've got $threshold warnings")!!
+    }
+
+    object Warning {
+        private val obj = cfg.getObj("warning")
+        val sendTitleEvery = Util.processTime(obj.getString("sendTitleEvery", "10s"))
+        val titleStayTime = Util.processTime(obj.getString("titleStayTime", "5s"))
+    }
+
+    val customBannedMessage = cfg.getObj("customBannedMessage").let {
+        val map = mutableMapOf<String, String>()
+        it.rawData.keys.forEach { key ->
+            map[key] = it.getMessage(key)
+        }
+        map.toMap()
     }
 }

@@ -1,10 +1,15 @@
 package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.commands.BanCommand
+import net.azisaba.spicyAzisaBan.commands.CautionCommand
+import net.azisaba.spicyAzisaBan.commands.ChangeReasonCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalCautionCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalIPMuteCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalKickCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalMuteCommand
+import net.azisaba.spicyAzisaBan.commands.GlobalNoteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPMuteCommand
@@ -12,21 +17,31 @@ import net.azisaba.spicyAzisaBan.commands.GlobalTempMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalWarningCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
 import net.azisaba.spicyAzisaBan.commands.IPMuteCommand
+import net.azisaba.spicyAzisaBan.commands.KickCommand
 import net.azisaba.spicyAzisaBan.commands.MuteCommand
+import net.azisaba.spicyAzisaBan.commands.NoteCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.commands.TempIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.TempIPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.TempMuteCommand
+import net.azisaba.spicyAzisaBan.commands.UnBanCommand
+import net.azisaba.spicyAzisaBan.commands.UnMuteCommand
+import net.azisaba.spicyAzisaBan.commands.UnPunishCommand
+import net.azisaba.spicyAzisaBan.commands.WarningCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
 import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
+import net.azisaba.spicyAzisaBan.punishment.Punishment
+import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.plugin.Plugin
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
@@ -106,6 +121,30 @@ class SpicyAzisaBan: Plugin() {
                 }
             }
         }, SABConfig.database.keepAlive * 1000L, SABConfig.database.keepAlive * 1000L)
+        timer.scheduleAtFixedRate(object: TimerTask() {
+            override fun run() {
+                try {
+                    connection.punishments
+                        .findAll(FindOptions.Builder().addWhere("type", PunishmentType.WARNING.name).build())
+                        .then { list -> list.map { td -> Punishment.fromTableData(td) } }
+                        .thenDo { punishments ->
+                            punishments.forEach { p ->
+                                if (p.flags.contains(Punishment.Flags.SEEN)) return@forEach
+                                val title = ProxyServer.getInstance().createTitle()
+                                title.fadeIn(0)
+                                title.fadeOut(0)
+                                title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
+                                title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title))
+                                title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle))
+                                ProxyServer.getInstance().getPlayer(p.getTargetUUID()).sendTitle(title)
+                            }
+                        }
+                } catch (e: SQLException) {
+                    logger.severe("Could not fetch punishments")
+                    e.printStackTrace()
+                }
+            }
+        }, SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery)
         proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)
@@ -129,7 +168,18 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, GlobalTempIPMuteCommand)
         proxy.pluginManager.registerCommand(this, TempIPMuteCommand)
         proxy.pluginManager.registerCommand(this, GlobalWarningCommand)
-        // 19 commands left...
+        proxy.pluginManager.registerCommand(this, WarningCommand)
+        proxy.pluginManager.registerCommand(this, GlobalCautionCommand)
+        proxy.pluginManager.registerCommand(this, CautionCommand)
+        proxy.pluginManager.registerCommand(this, GlobalKickCommand)
+        proxy.pluginManager.registerCommand(this, KickCommand)
+        proxy.pluginManager.registerCommand(this, GlobalNoteCommand)
+        proxy.pluginManager.registerCommand(this, NoteCommand)
+        proxy.pluginManager.registerCommand(this, UnBanCommand)
+        proxy.pluginManager.registerCommand(this, UnMuteCommand)
+        proxy.pluginManager.registerCommand(this, UnPunishCommand)
+        proxy.pluginManager.registerCommand(this, ChangeReasonCommand)
+        // 8 commands left...
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

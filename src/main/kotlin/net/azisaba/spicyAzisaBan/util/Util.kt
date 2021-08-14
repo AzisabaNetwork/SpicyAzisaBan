@@ -6,11 +6,11 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
-import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.config.ServerInfo
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import util.UUIDUtil
 import util.kt.promise.rewrite.catch
@@ -23,6 +23,7 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.Calendar
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
 object Util {
@@ -48,6 +49,10 @@ object Util {
     fun preloadPermissions(sender: CommandSender) {
         if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
         sender.hasPermission("sab.command.spicyazisaban")
+        sender.hasPermission("sab.changereason")
+        sender.hasPermission("sab.unban")
+        sender.hasPermission("sab.unmute")
+        sender.hasPermission("sab.unpunish")
         sender.hasPermission("sab.punish.global")
         PunishmentType.values().forEach { type ->
             sender.hasPermission(type.perm)
@@ -309,4 +314,16 @@ object Util {
     }
 
     fun CommandSender.getServerName() = if (this is ProxiedPlayer) this.server?.info?.name ?: "" else ""
+
+    fun ServerInfo.broadcastMessageAfterRandomTime(server: String) {
+        val s = SABMessages.getBannedMessage(server).replaceVariables().translate()
+        val random = 100 + (Math.random() * 300).toLong()
+        ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+            ProxyServer.getInstance().players.forEach { p ->
+                if (p.getServerName() == this.name) {
+                    p.send(s)
+                }
+            }
+        }, random, TimeUnit.SECONDS)
+    }
 }

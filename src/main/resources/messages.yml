@@ -27,6 +27,13 @@ commands:
     invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
     samePunishmentAppliedToSameIPAddress: "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。"
+    alreadyPunished: "%PREFIX%&cこのアカウントはすでに(同じサーバー、同じ種類で)処罰されています!"
+    removedFromServer:
+      - "&cとあるプレイヤーがこの世界から抹消された。"
+    offlinePlayer: "%PREFIX%&cこのプレイヤーはオフラインです。"
+    notPunished: "%PREFIX%&cこのアカウントは処罰されていません!"
+    noReason: "%PREFIX%&c理由が指定されていません!"
+    punishmentNotFound: "%PREFIX%&c処罰#%dが見つかりません!"
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
 
@@ -148,8 +155,8 @@ commands:
       - "&7理由 &8> &7&o%REASON%"
       - "&7期間 &8> &7&o%DURATION%"
   ipmute:
-    usage: "%PREFIX%&a使用法: /ipmute <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gipmute <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /ipmute <target=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gipmute <target=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。"
@@ -164,8 +171,8 @@ commands:
       - "&7対象サーバー &8> &7&o%SERVER%"
       - "&7理由 &8> &7&o%REASON%"
   tempipmute:
-    usage: "%PREFIX%&a使用法: /tempipmute <player=...> <reason=\"...\"> <time=...> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gtempipmute <player=...> <reason=\"...\"> <time=...> [server=...]"
+    usage: "%PREFIX%&a使用法: /tempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gtempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。"
@@ -195,6 +202,8 @@ commands:
       - "%PREFIX%&c警告を受けました"
       - "&c対象サーバー &8> &7%SERVER%"
       - "&c理由 &8> &7%REASON%"
+    title: "&cあなたは警告を受けました!"
+    subtitle: "&6/warns&eで表示を解除することができます"
   caution:
     usage: "%PREFIX%&a使用法: /caution <player=...> <reason=\"...\"> [server=...]"
     globalUsage: "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]"
@@ -208,3 +217,38 @@ commands:
       - "%PREFIX%&c注意を受けました"
       - "&c対象サーバー &8> &7%SERVER%"
       - "&c理由 &8> &7%REASON%"
+  kick:
+    usage: "%PREFIX%&a使用法: /kick <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gkick <player=...> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にKickされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+    layout:
+      - "%PREFIX%&cサーバーからキックされました"
+      - "&c理由 &8> &7%REASON%"
+  note:
+    usage: "%PREFIX%&a使用法: /note <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /gnote <player=...> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にNoteされました!"
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+  unpunish:
+    usage: "%PREFIX%&a使用法: /unpunish <id=...> <reason=\"...\">"
+    unbanUsage: "%PREFIX%&a使用法: /unban <player=...> <reason=\"...\"> [server=...]"
+    unmuteUsage: "%PREFIX%&a使用法: /unmute <player=...> <reason=\"...\"> [server=...]"
+    done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にUnpunishされました!"
+    # %TYPE%, %PREASON%, %PID% can be used here
+    notify:
+      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からUnpunishされました。"
+      - "&7処罰タイプ &8> &7&o%TYPE%"
+      - "&7処罰理由 &8> &7&o%PREASON%"
+      - "&7処罰ID &8> &7&o#%PID%"
+      - "&7理由 &8> &7&o%REASON%"
+      - "&7ID &8> &7&o#%ID%"
+  changereason:
+    usage: "%PREFIX%&a使用法: /changereason <id=...> <reason=\"...\">"
+    done: "&7処罰&a#%ID%&7は正常に更新されました。"

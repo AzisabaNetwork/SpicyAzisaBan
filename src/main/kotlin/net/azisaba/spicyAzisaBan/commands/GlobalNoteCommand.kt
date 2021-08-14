@@ -18,17 +18,17 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object GlobalMuteCommand: Command("gmute"), TabExecutor {
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "--all")
+object GlobalNoteCommand: Command("gnote"), TabExecutor {
+    private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
-        if (!sender.hasPermission(PunishmentType.MUTE.perm)) {
+        if (!sender.hasPermission(PunishmentType.NOTE.perm)) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
-        if (args.isEmpty()) return sender.send(SABMessages.Commands.Mute.globalUsage.replaceVariables().translate())
+        if (args.isEmpty()) return sender.send(SABMessages.Commands.Note.globalUsage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         Promise.create<Unit> { context ->
-            MuteCommand.doMute(sender, arguments)
+            NoteCommand.doNote(sender, arguments)
             context.resolve()
         }.catch {
             sender.sendErrorMessage(it)
@@ -41,7 +41,7 @@ object GlobalMuteCommand: Command("gmute"), TabExecutor {
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
         if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
         if (s.startsWith("server=")) return ServerContext.tabComplete(s)
-        if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.MUTE, args, "global")
+        if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.CAUTION, args, "global")
         return emptyList()
     }
 }

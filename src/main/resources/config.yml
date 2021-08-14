@@ -27,6 +27,8 @@ blockedCommandsWhenMuted:
   - tell
   - r
   - me
+  - minecraft:tell
+  - minecraft:me
 banOnWarning:
   # if warning count hits 3, the player would be banned with specified reason
   # this feature will be disabled if you set this value to <= 0
@@ -34,5 +36,12 @@ banOnWarning:
   time: "1mo"
   reason: ":boom:"
 warning:
+  # Don't set to 1s because it's terrible because we fetch the punishments from database every time we check for warnings
   sendTitleEvery: 10s
   titleStayTime: 5s
+customBannedMessage:
+  # usually configured via messages.yml, but you can set the message per server here
+  # key = server
+  # value = message
+  rpg:
+    - "&cA player has been deleted from the server."

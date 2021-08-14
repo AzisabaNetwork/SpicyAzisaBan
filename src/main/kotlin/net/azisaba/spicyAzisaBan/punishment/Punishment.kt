@@ -118,7 +118,8 @@ data class Punishment(
             )
         }
 
-        fun canJoinServer(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+        fun canJoinServer(uuid: UUID?, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+            if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
             val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
             val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
             if (ps.isEmpty()) return@create context.resolve(null)
@@ -135,7 +136,8 @@ data class Punishment(
 
         val muteCache = mutableMapOf<String, DataCache<Punishment>>()
 
-        fun canSpeak(uuid: UUID, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+        fun canSpeak(uuid: UUID?, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+            if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
             val punish = muteCache["$uuid,$address"]
             val punishValue = punish?.get()
             if (punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
@@ -162,9 +164,10 @@ data class Punishment(
             context.resolve(punishValue)
         }
 
-        fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID, ip: String?, server: String, group: String?): List<Punishment> {
+        fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
+            if (uuid == null && ip == null) throw IllegalArgumentException("Either uuid or ip must not be null")
             val s = SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)")
-            s.setString(1, uuid.toString())
+            s.setString(1, uuid?.toString() ?: ip)
             s.setString(2, ip ?: uuid.toString())
             s.setString(3, server)
             s.setString(4, group ?: server)
@@ -272,9 +275,10 @@ data class Punishment(
                     PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.layout2.replaceVariables(variables).translate()
                     PunishmentType.IP_MUTE -> SABMessages.Commands.IPMute.layout2.replaceVariables(variables).translate()
                     PunishmentType.TEMP_IP_MUTE -> SABMessages.Commands.TempIPMute.layout2.replaceVariables(variables).translate()
-                    PunishmentType.WARNING -> SABMessages.Commands.Warning.layout.replaceVariables().translate()
-                    PunishmentType.CAUTION -> SABMessages.Commands.Caution.layout.replaceVariables().translate()
-                    else -> "undefined"
+                    PunishmentType.WARNING -> SABMessages.Commands.Warning.layout.replaceVariables(variables).translate()
+                    PunishmentType.CAUTION -> SABMessages.Commands.Caution.layout.replaceVariables(variables).translate()
+                    PunishmentType.KICK -> SABMessages.Commands.Kick.layout.replaceVariables(variables).translate()
+                    PunishmentType.NOTE -> "RIP Note 2021-2021." // it should not be shown
                 }
             }
             .catch {
@@ -294,9 +298,10 @@ data class Punishment(
                     PunishmentType.TEMP_MUTE -> SABMessages.Commands.TempMute.notify.replaceVariables(variables).translate()
                     PunishmentType.IP_MUTE -> SABMessages.Commands.IPMute.notify.replaceVariables(variables).translate()
                     PunishmentType.TEMP_IP_MUTE -> SABMessages.Commands.TempIPMute.notify.replaceVariables(variables).translate()
-                    PunishmentType.WARNING -> SABMessages.Commands.Warning.notify.replaceVariables().translate()
-                    PunishmentType.CAUTION -> SABMessages.Commands.Caution.notify.replaceVariables().translate()
-                    else -> "undefined"
+                    PunishmentType.WARNING -> SABMessages.Commands.Warning.notify.replaceVariables(variables).translate()
+                    PunishmentType.CAUTION -> SABMessages.Commands.Caution.notify.replaceVariables(variables).translate()
+                    PunishmentType.KICK -> SABMessages.Commands.Kick.notify.replaceVariables(variables).translate()
+                    PunishmentType.NOTE -> SABMessages.Commands.Note.notify.replaceVariables(variables).translate()
                 }
             }
             .catch {
