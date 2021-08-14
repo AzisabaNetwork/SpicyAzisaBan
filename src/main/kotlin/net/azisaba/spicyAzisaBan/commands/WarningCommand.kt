@@ -27,7 +27,7 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object WarningCommand: Command("warning", null, "warn"), TabExecutor {
+object WarningCommand: Command("${SABConfig.prefix}warning", null, "warn"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
@@ -69,7 +69,7 @@ object WarningCommand: Command("warning", null, "warn"), TabExecutor {
             val count = rs.getInt(1)
             st.close()
             if (count % SABConfig.BanOnWarning.threshold == 0) {
-                ProxyServer.getInstance().pluginManager.dispatchCommand(ProxyServer.getInstance().console, "gtempban player=${player.profile.name} reason=\"${SABConfig.BanOnWarning.reason}\" server=${server.name} time=${SABConfig.BanOnWarning.time}")
+                ProxyServer.getInstance().pluginManager.dispatchCommand(ProxyServer.getInstance().console, "${SABConfig.prefix}gtempban player=${player.profile.name} reason=\"${SABConfig.BanOnWarning.reason}\" server=${server.name} time=${SABConfig.BanOnWarning.time}")
             }
         }
         sender.send(SABMessages.Commands.Warning.done.replaceVariables(p.getVariables().complete()).translate())

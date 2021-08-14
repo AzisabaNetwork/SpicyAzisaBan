@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -27,7 +28,7 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object IPMuteCommand: Command("ipmute"), TabExecutor {
+object IPMuteCommand: Command("${SABConfig.prefix}ipmute"), TabExecutor {
     private val availableArguments = listOf("target=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {

@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
-object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
+object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), TabExecutor {
     private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug")
     private val groupCommands = listOf("add", "remove", "info")
 
@@ -55,6 +55,7 @@ object SABCommand: Command("spicyazisaban", null, "sab"), TabExecutor {
         if (args.isEmpty()) {
             sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
             sender.send("$PREFIX${ChatColor.GREEN}Use ${ChatColor.AQUA}/sab help${ChatColor.GREEN} to view commands.")
+            sender.send("$PREFIX${ChatColor.GREEN}For other commands (such as /gban), please see ${ChatColor.AQUA}${ChatColor.UNDERLINE}https://github.com/acrylic-style/SpicyAzisaBan/issues/1${ChatColor.RESET}${ChatColor.GREEN}.")
             return
         }
         when (args[0]) {

@@ -1,3 +1,6 @@
+# you can run command with: /${prefix}command
+# so if you set this to "/", you can run command with //command
+prefix: ""
 database:
   host: localhost
   name: spicyazisaban

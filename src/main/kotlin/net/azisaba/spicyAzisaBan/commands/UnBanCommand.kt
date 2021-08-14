@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -17,6 +18,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
+import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.connection.ProxiedPlayer
@@ -25,10 +27,11 @@ import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
+import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 
-object UnBanCommand: Command("unban"), TabExecutor {
-    private val availableArguments = listOf("player=", "reason=\"\"")
+object UnBanCommand: Command("${SABConfig.prefix}unban"), TabExecutor {
+    private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission("sab.unban")) {
@@ -52,12 +55,13 @@ object UnBanCommand: Command("unban"), TabExecutor {
     private fun doUnPunish(sender: CommandSender, arguments: ArgumentParser) {
         val player = arguments.get(Contexts.PLAYER, sender).complete().apply { if (!isSuccess) return }.profile
         val reason = arguments.get(Contexts.REASON, sender).complete()
-        if (reason.text == "none") return sender.send(SABMessages.Commands.General.noReason.replaceVariables().translate())
+        if (reason.text == "none") return sender.send(SABMessages.Commands.General.noReasonSpecified.replaceVariables().translate())
         val server = arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return }.name
-        val p = Punishment.canJoinServer(player.uniqueId, null, server)
+        val p = Punishment.canJoinServer(player.uniqueId, null, server, noLookupGroup = true)
             .catch { sender.sendErrorMessage(it) }
             .complete()
             ?: return sender.send(SABMessages.Commands.General.notPunished.replaceVariables().translate())
+        SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", p.id).build()).complete()
         val time = System.currentTimeMillis()
         val upid = try {
             insert {
@@ -90,6 +94,7 @@ object UnBanCommand: Command("unban"), TabExecutor {
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
         if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
         if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.BAN, args, sender.getServerName())
+        if (s.startsWith("server=")) return ServerContext.tabComplete(s)
         return emptyList()
     }
 }

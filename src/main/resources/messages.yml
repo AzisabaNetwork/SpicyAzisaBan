@@ -12,11 +12,15 @@ general:
   # these are "words" and you can't use variables here
   global: "全サーバー"
   permanent: "無期限"
+  online: "&aオンライン"
+  offline: "&4オフライン"
   time:
     day: "%d日"
     hour: "%d時間"
     minute: "%d分"
     second: "%d秒"
+  # Available variables: %YEAR%, %MONTH%, %DAY%, %HOUR%, %MINUTE%, %SECOND% and %MILLIS%
+  datetime: "%YEAR%/%MONTH%/%DAY%-%HOUR%:%MINUTE%:%SECOND%"
 
 commands:
   general:
@@ -32,8 +36,10 @@ commands:
       - "&cとあるプレイヤーがこの世界から抹消された。"
     offlinePlayer: "%PREFIX%&cこのプレイヤーはオフラインです。"
     notPunished: "%PREFIX%&cこのアカウントは処罰されていません!"
-    noReason: "%PREFIX%&c理由が指定されていません!"
+    noReasonSpecified: "%PREFIX%&c理由が指定されていません!"
+    noProofSpecified: "%PREFIX%&c証拠が指定されていません!"
     punishmentNotFound: "%PREFIX%&c処罰#%dが見つかりません!"
+    proofNotFound: "%PREFIX%&c証拠#%dが見つかりません!"
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
 
@@ -88,7 +94,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gipban <target=Player/IP> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPBanされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPBanされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からIPBanされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
     layout:
@@ -105,7 +111,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gtempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPBanされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPBanされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPBanされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
       - "&7期間 &8> &7&o%TIME%"
@@ -124,7 +130,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gmute <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にMuteされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からMuteされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からMuteされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
     layout1: # layout that shows to a player when a player got muted
@@ -140,7 +146,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gtempmute <player=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempMuteされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
       - "&7期間 &8> &7&o%TIME%"
@@ -159,7 +165,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gipmute <target=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
     layout1: # layout that shows to a player when a player got muted
@@ -175,7 +181,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gtempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
       - "&7期間 &8> &7&o%TIME%"
@@ -194,14 +200,14 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gwarning <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にWarnされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
       - "&7期間 &8> &7&o%TIME%"
     layout:
       - "%PREFIX%&c警告を受けました"
-      - "&c対象サーバー &8> &7%SERVER%"
-      - "&c理由 &8> &7%REASON%"
+      - "&c対象サーバー &8> &7&o%SERVER%"
+      - "&c理由 &8> &7&o%REASON%"
     title: "&cあなたは警告を受けました!"
     subtitle: "&6/warns&eで表示を解除することができます"
   caution:
@@ -209,20 +215,20 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にCautionされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
       - "&7期間 &8> &7&o%TIME%"
     layout:
       - "%PREFIX%&c注意を受けました"
-      - "&c対象サーバー &8> &7%SERVER%"
-      - "&c理由 &8> &7%REASON%"
+      - "&c対象サーバー &8> &7&o%SERVER%"
+      - "&c理由 &8> &7&o%REASON%"
   kick:
     usage: "%PREFIX%&a使用法: /kick <player=...> <reason=\"...\"> [server=...]"
     globalUsage: "%PREFIX%&a使用法: /gkick <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にKickされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
     layout:
@@ -233,7 +239,7 @@ commands:
     globalUsage: "%PREFIX%&a使用法: /gnote <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にNoteされました!"
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
   unpunish:
@@ -243,12 +249,38 @@ commands:
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にUnpunishされました!"
     # %TYPE%, %PREASON%, %PID% can be used here
     notify:
-      - "&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からUnpunishされました。"
+      - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からUnpunishされました。"
       - "&7処罰タイプ &8> &7&o%TYPE%"
       - "&7処罰理由 &8> &7&o%PREASON%"
       - "&7処罰ID &8> &7&o#%PID%"
-      - "&7理由 &8> &7&o%REASON%"
+      - "&7解除理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
   changereason:
     usage: "%PREFIX%&a使用法: /changereason <id=...> <reason=\"...\">"
-    done: "&7処罰&a#%ID%&7は正常に更新されました。"
+    done: "%PREFIX%&7処罰&a#%ID%&7は正常に更新されました。"
+  addproof:
+    usage: "%PREFIX%&a使用法: /addproof <id=...> <text=\"...\">"
+    # %PID% can be used here (punishment id), and %ID% is proof id
+    # and %TEXT% for proof text
+    done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(ID: &e%ID%&8)"
+  delproof:
+    usage: "%PREFIX%&a使用法: /delproof <id=...>"
+    # %PID% can be used here (punishment id), and %ID% is proof id
+    # and %TEXT% for original proof text
+    done: "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(ID: &e%ID%&8)"
+
+  seen:
+    usage: "%PREFIX%&a使用法: /seen <Player/IP>"
+    searching: "%PREFIX%&eプレイヤーを検索中..."
+    # Available variables: %PLAYER%, %SINCE%, %STATUS%, %NAME_HISTORY%, %IP%, %HOSTNAME%, %IP_HISTORY%
+    layout:
+      - "%PREFIX%&c&o%PLAYER%&eは&c%SINCE%前&eから%STATUS%&eです。"
+      - "&7過去の名前 &8> &e&o%NAME_HISTORY%"
+      - "&7最近のIPアドレス &8> &e&o%IP% &7(&e%HOSTNAME%&7)"
+      - "&7過去のすべてのIPアドレス &8> &e&o%IP_HISTORY%"
+    # Available variables: %PLAYERS_COUNT%, %PLAYERS%
+    layoutIP:
+      - "%PREFIX%&eこのプレイヤーは過去に%PLAYERS_COUNT%個のアカウントで接続しています:"
+      - "&6%PLAYERS%"
+  warns:
+    notWarnedYet: "%PREFIX%&c&oまだ警告を受けていません。"

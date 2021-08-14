@@ -1,11 +1,14 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import util.ResourceLocator
 import util.base.Bytes
 import util.yaml.YamlConfiguration
 import util.yaml.YamlObject
 import java.io.File
+import java.util.Calendar
 
 object SABMessages {
     private val cfg: YamlObject
@@ -60,6 +63,22 @@ object SABMessages {
         return s
     }
 
+    fun formatDate(long: Long): String {
+        val c = Calendar.getInstance()
+        c.timeInMillis = long
+        return General.datetime
+            .replaceVariables(
+                "year" to Util.zero(4, c[Calendar.YEAR]),
+                "month" to Util.zero(2, c[Calendar.MONTH] + 1),
+                "day" to Util.zero(2, c[Calendar.DAY_OF_MONTH]),
+                "hour" to Util.zero(2, c[Calendar.HOUR_OF_DAY]),
+                "minute" to Util.zero(2, c[Calendar.MINUTE]),
+                "second" to Util.zero(2, c[Calendar.SECOND]),
+                "millis" to Util.zero(3, c[Calendar.MILLISECOND]),
+            )
+            .translate()
+    }
+
     object General {
         private val obj = cfg.getObj("general")
         val prefix = obj.getMessage("prefix", "&c&lSpicyAzisaBan &8&l» &r")
@@ -67,6 +86,9 @@ object SABMessages {
         val error = obj.getMessage("error", "%PREFIX%&c処理中に不明なエラーが発生しました。")
         val global = obj.getMessage("global", "全サーバー")
         val permanent = obj.getMessage("permanent", "無期限")
+        val online = obj.getMessage("online", "&aオンライン")
+        val offline = obj.getMessage("offline", "&4オフライン")
+        val datetime = obj.getMessage("datetime", "%YEAR%/%MONTH%/%DAY%-%HOUR%:%MINUTE%:%SECOND%")
 
         object Time {
             private val obj = General.obj.getObj("time")
@@ -93,8 +115,10 @@ object SABMessages {
             val removedFromServer = obj.getMessage("removedFromServer", "&cプレイヤーがこのサーバーから抹消された。")
             val offlinePlayer = obj.getMessage("offlinePlayer", "%PREFIX%&cこのプレイヤーはオフラインです。")
             val notPunished = obj.getMessage("notPunished", "%PREFIX%&cこのアカウントは処罰されていません!")
-            val noReason = obj.getMessage("noReason", "%PREFIX%&c理由が指定されていません!")
+            val noReasonSpecified = obj.getMessage("noReasonSpecified", "%PREFIX%&c理由が指定されていません!")
+            val noProofSpecified = obj.getMessage("noProofSpecified", "%PREFIX%&c証拠が指定されていません!")
             val punishmentNotFound = obj.getMessage("punishmentNotFound", "%PREFIX%&c処罰#%dが見つかりません!")
+            val proofNotFound = obj.getMessage("proofNotFound", "%PREFIX%&c証拠#%dが見つかりません!")
         }
 
         object Sab {
@@ -107,7 +131,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ban <player=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gban <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にBanされました!")
-            val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7&o#%ID%")
+            val notify = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&e&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7&o#%ID%")
             val layout = obj.getMessage("layout", "%PREFIX%&7永久BANされました!\n\n&c対象サーバー &8&l» &7&o%SERVER%\n&c理由 &8&l» &7&o%REASON%")
         }
 
@@ -143,7 +167,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /mute <player=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gmute <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にMuteされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
             val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは永久ミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
             val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは永久ミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
         }
@@ -153,7 +177,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /tempmute <player=...> <reason=\"...\\\"> <time=...> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempmute <player=...> <reason=\"...\"> <time=...> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempMuteされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
             val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
             val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
         }
@@ -163,7 +187,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /ipmute <target=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipmute <target=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
             val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは永久IPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
             val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは永久IPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
         }
@@ -173,7 +197,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /tempipmute <target=...> <reason=\"...\\\"> <time=...> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempipmute <target=...> <reason=\"...\"> <time=...> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
             val layout1 = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にIPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
             val layout2 = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にIPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
         }
@@ -183,7 +207,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /warning <player=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gwarning <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にWarnされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
             val layout = obj.getMessage("layout", listOf("%PREFIX%&c警告を受けました", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
             val title = obj.getMessage("title", "&cあなたは警告を受けました!")
             val subtitle = obj.getMessage("subtitle", "&6/warns&eで表示を解除することができます")
@@ -194,7 +218,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /caution <player=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にCautionされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
             val layout = obj.getMessage("layout", listOf("%PREFIX%&c注意を受けました", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
         }
 
@@ -203,7 +227,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /kick <player=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gkick <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にKickされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
             val layout = obj.getMessage("layout", listOf("%PREFIX%&cサーバーからキックされました", "&7理由 &8> &7&o%REASON%"))
         }
 
@@ -212,7 +236,7 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /note <player=...> <reason=\"...\"> [server=...]")
             val globalUsage = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gnote <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にNoteされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
         }
 
         object Unpunish {
@@ -221,13 +245,33 @@ object SABMessages {
             val unbanUsage = obj.getMessage("unbanUsage", "%PREFIX%&a使用法: /unban <player=...> <reason=\"...\"> [server=...]")
             val unmuteUsage = obj.getMessage("unmuteUsage", "%PREFIX%&a使用法: /unmute <player=...> <reason=\"...\"> [server=...]")
             val done = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にUnpunishされました!")
-            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e%SERVER%&7で&e&o%OPERATOR%&r&7からUnpunishされました。", "&7処罰タイプ &8> &7&o%TYPE%", "&7処罰理由 &8> &7&o%PREASON%", "&7処罰ID &8> &7&o#%PID%", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val notify = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からUnpunishされました。", "&7処罰タイプ &8> &7&o%TYPE%", "&7処罰理由 &8> &7&o%PREASON%", "&7処罰ID &8> &7&o#%PID%", "&7解除理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
         }
 
         object ChangeReason {
             private val obj = Commands.obj.getObj("changereason")
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /changereason <id=...> <reason=\"...\">")
             val done = obj.getMessage("done", "&7処罰&a#%ID%&7は正常に更新されました。")
+        }
+
+        object AddProof {
+            private val obj = Commands.obj.getObj("addproof")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /addproof <id=...> <text=\"...\">")
+            val done = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(ID: &e%ID%&8)")
+        }
+
+        object DelProof {
+            private val obj = Commands.obj.getObj("delproof")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /delproof <id=...>")
+            val done = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(ID: &e%ID%&8)")
+        }
+
+        object Seen {
+            private val obj = Commands.obj.getObj("seen")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /seen <Player/IP>")
+            val searching = obj.getMessage("searching", "%PREFIX%&eプレイヤーを検索中...")
+            val layout = obj.getMessage("layout", listOf("%PREFIX%&c%PLAYER%&eは&c%SINCE%前&eから%STATUS%&eです。", "&7過去の名前 &8> &e&o%NAME_HISTORY%", "&7最近のIPアドレス &8> &e&o%IP% &7(&e%HOSTNAME%&7)", "&7過去のすべてのIPアドレス &8> &e&o%IP_HISTORY%"))
+            val layoutIP = obj.getMessage("layoutIP", listOf("%PREFIX%&eこのプレイヤーは過去に%PLAYERS_COUNT%個のアカウントで接続しています:", "&6%PLAYERS%"))
         }
     }
 }

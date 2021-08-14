@@ -118,9 +118,9 @@ data class Punishment(
             )
         }
 
-        fun canJoinServer(uuid: UUID?, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+        fun canJoinServer(uuid: UUID?, address: String?, server: String, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
             if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
-            val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
+            val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
             val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
             if (ps.isEmpty()) return@create context.resolve(null)
             var punishment: Punishment? = null
@@ -136,14 +136,14 @@ data class Punishment(
 
         val muteCache = mutableMapOf<String, DataCache<Punishment>>()
 
-        fun canSpeak(uuid: UUID?, address: String?, server: String): Promise<Punishment?> = Promise.create { context ->
+        fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
             if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
             val punish = muteCache["$uuid,$address"]
             val punishValue = punish?.get()
-            if (punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
+            if (noCache || punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
                 SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: ChatEvent on $server)")
                 muteCache["$uuid,$address"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
-                val group = if (server == "global") server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
+                val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
                 val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
                 if (ps.isEmpty()) return@create context.resolve(null)
                 var punishment: Punishment? = null
@@ -179,7 +179,7 @@ data class Punishment(
         }
 
         fun fetchActivePunishmentById(id: Long): Promise<Punishment?> =
-            SpicyAzisaBan.instance.connection.punishments.findOne(FindOptions.Builder().addWhere("id", id).build())
+            SpicyAzisaBan.instance.connection.punishments.findOne(FindOptions.Builder().addWhere("id", id).setLimit(1).build())
                 .then { it?.let { fromTableData(it) } }
 
         fun fetchActivePunishmentsByTarget(target: String): Promise<List<Punishment>> =
@@ -201,7 +201,7 @@ data class Punishment(
                 .then { it.map { td -> fromTableData(td) } }
 
         fun fetchPunishmentById(id: Long): Promise<Punishment?> =
-            SpicyAzisaBan.instance.connection.punishmentHistory.findOne(FindOptions.Builder().addWhere("id", id).build())
+            SpicyAzisaBan.instance.connection.punishmentHistory.findOne(FindOptions.Builder().addWhere("id", id).setLimit(1).build())
                 .then { it?.let { fromTableData(it) } }
 
         fun fetchPunishmentsByTarget(target: String): Promise<List<Punishment>> =

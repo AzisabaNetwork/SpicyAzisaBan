@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.12"
+version = "0.0.13"
 
 repositories {
     mavenLocal()
@@ -16,7 +16,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("xyz.acrylicstyle:java-util-kotlin:0.15.4")
-    implementation("xyz.acrylicstyle:sequelize4j:0.4.6")
+    implementation("xyz.acrylicstyle:sequelize4j:0.5.3")
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
     implementation("xyz.acrylicstyle:minecraft-util:0.5.3")
     compileOnly("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")

@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -27,7 +28,7 @@ import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 
-object UnPunishCommand: Command("unpunish"), TabExecutor {
+object UnPunishCommand: Command("${SABConfig.prefix}unpunish"), TabExecutor {
     private val availableArguments = listOf("id=", "reason=\"\"")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
@@ -57,7 +58,7 @@ object UnPunishCommand: Command("unpunish"), TabExecutor {
             return
         }
         val reason = arguments.get(Contexts.REASON, sender).complete()
-        if (reason.text == "none") return sender.send(SABMessages.Commands.General.noReason.replaceVariables().translate())
+        if (reason.text == "none") return sender.send(SABMessages.Commands.General.noReasonSpecified.replaceVariables().translate())
         val list = SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", id).build())
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while deleting punishment #${id}")

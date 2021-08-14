@@ -49,6 +49,13 @@ object Util {
     fun preloadPermissions(sender: CommandSender) {
         if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
         sender.hasPermission("sab.command.spicyazisaban")
+        sender.hasPermission("sab.check")
+        sender.hasPermission("sab.history")
+        sender.hasPermission("sab.seen")
+        sender.hasPermission("sab.banlist")
+        sender.hasPermission("sab.proofs")
+        sender.hasPermission("sab.delproof")
+        sender.hasPermission("sab.addproof")
         sender.hasPermission("sab.changereason")
         sender.hasPermission("sab.unban")
         sender.hasPermission("sab.unmute")
@@ -77,7 +84,7 @@ object Util {
     /**
      * Add zeros (if missing) to beginning of the string.
      */
-    private fun zero(length: Int, any: Any): String {
+    fun zero(length: Int, any: Any): String {
         val s = any.toString()
         if (s.length >= length) return s
         return "0".repeat(length - s.length) + s
@@ -311,6 +318,16 @@ object Util {
         // 255.255.255.255/32 (255.255.255.255)
         if (numbers[0] >= 240) return false
         return true
+    }
+
+    fun String.isValidIPAddress(): Boolean {
+        val numbers = this.split(".").mapNotNull {
+            try {
+                Integer.parseInt(it, 10)
+            } catch (e: NumberFormatException) { null }
+        }
+        if (numbers.size != 4) return false
+        return numbers.all { it in 0..255 }
     }
 
     fun CommandSender.getServerName() = if (this is ProxiedPlayer) this.server?.info?.name ?: "" else ""

@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
@@ -19,7 +20,7 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object GlobalTempBanCommand: Command("gtempban"), TabExecutor {
+object GlobalTempBanCommand: Command("${SABConfig.prefix}gtempban"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=", "--all")
 
     override fun execute(sender: CommandSender, args: Array<String>) {

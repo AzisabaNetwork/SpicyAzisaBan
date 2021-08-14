@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.sql
 
+import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.config.ServerInfo
 import util.promise.rewrite.Promise
@@ -14,7 +15,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 4
+        const val CURRENT_DATABASE_VERSION = 5
     }
 
     lateinit var punishments: Table
@@ -26,6 +27,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     lateinit var proofs: Table
     lateinit var players: Table
     lateinit var usernameHistory: Table
+    lateinit var ipAddressHistory: Table
 
     fun isConnected() =
         try {
@@ -50,21 +52,21 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             TableDefinition.Builder("extra", DataType.STRING).setDefaultValue("").setAllowNull(false).build(), // Punishment.Flags
         )
         // remove punishments associated with group when group disappears after the punishment
-        punishments = this.define("punishments", dupe)
-        punishmentHistory = this.define("punishmentHistory", dupe)
+        punishments = this.define("punishments", dupe).setupEventListener()
+        punishmentHistory = this.define("punishmentHistory", dupe).setupEventListener()
         groups = this.define(
             "groups",
             arrayOf(
                 TableDefinition.Builder("id", DataType.STRING).setAllowNull(false).setPrimaryKey(true).build(),
             ),
-        )
+        ).setupEventListener()
         serverGroup = this.define(
             "serverGroup",
             arrayOf(
                 TableDefinition.Builder("server", DataType.STRING).setAllowNull(false).setPrimaryKey(true).build(),
                 TableDefinition.Builder("group", DataType.STRING).setAllowNull(false).build(),
             ),
-        )
+        ).setupEventListener()
         settings = this.define(
             "settings",
             arrayOf(
@@ -72,7 +74,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("valueString", DataType.STRING).build(),
                 TableDefinition.Builder("valueInt", DataType.INT).build(),
             ),
-        )
+        ).setupEventListener()
         unpunish = this.define(
             "unpunish",
             arrayOf(
@@ -82,7 +84,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("timestamp", DataType.BIGINT).setAllowNull(false).build(),
                 TableDefinition.Builder("operator", DataType.STRING).setAllowNull(false).build(),
             ),
-        )
+        ).setupEventListener()
         proofs = this.define(
             "proofs",
             arrayOf(
@@ -90,7 +92,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("punish_id", DataType.BIGINT).setAllowNull(false).build(),
                 TableDefinition.Builder("text", DataType.STRING).setAllowNull(false).build(),
             ),
-        )
+        ).setupEventListener()
         players = this.define(
             "players",
             arrayOf(
@@ -99,7 +101,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("ip", DataType.STRING).setAllowNull(true).build(), // could be unix socket
                 TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
             ),
-        )
+        ).setupEventListener()
         usernameHistory = this.define(
             "usernameHistory",
             arrayOf(
@@ -107,8 +109,24 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(),
                 TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).build(),
             ),
-        )
+        ).setupEventListener()
+        ipAddressHistory = this.define(
+            "ipAddressHistory",
+            arrayOf(
+                TableDefinition.Builder("uuid", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("ip", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).build(),
+            ),
+        ).setupEventListener()
         this.sync()
+    }
+
+    private fun Table.setupEventListener(): Table {
+        eventEmitter.on(Table.Events.EXECUTE) {
+            val sql = it[0] as String
+            SpicyAzisaBan.debug("Executing SQL: $sql", 3)
+        }
+        return this
     }
 
     var cachedGroups = DataCache<List<String>>()

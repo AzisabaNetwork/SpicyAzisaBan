@@ -9,28 +9,27 @@ import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
+import net.azisaba.spicyAzisaBan.util.Util.insert
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
-import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
-import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
-import xyz.acrylicstyle.sql.options.FindOptions
+import xyz.acrylicstyle.sql.options.InsertOptions
 
-object ChangeReasonCommand: Command("${SABConfig.prefix}changereason"), TabExecutor {
-    private val availableArguments = listOf("id=", "reason=\"\"")
+object AddProofCommand: Command("${SABConfig.prefix}addproof"), TabExecutor {
+    private val availableArguments = listOf("id=", "text=\"\"")
 
     override fun execute(sender: CommandSender, args: Array<String>) {
-        if (!sender.hasPermission("sab.changereason")) {
+        if (!sender.hasPermission("sab.addproof")) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
-        if (args.isEmpty()) return sender.send(SABMessages.Commands.ChangeReason.usage.replaceVariables().translate())
+        if (args.isEmpty()) return sender.send(SABMessages.Commands.AddProof.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         Promise.create<Unit> { context ->
             execute(sender, arguments)
@@ -47,26 +46,28 @@ object ChangeReasonCommand: Command("${SABConfig.prefix}changereason"), TabExecu
             sender.send(SABMessages.Commands.General.notPunished.replaceVariables().translate())
             return
         }
-        val reason = arguments.get(Contexts.REASON, sender).complete()
+        val text = arguments.getString("text") ?: return sender.send(SABMessages.Commands.General.noProofSpecified.replaceVariables().translate())
         val p = Punishment.fetchActivePunishmentById(id).complete()
             ?: return sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().format(id).translate())
-        val findOptions = FindOptions.Builder()
-            .addWhere("id", p.id)
-            .build()
-        SpicyAzisaBan.instance.connection.punishments
-            .update("reason", reason.text, findOptions)
-            .catch { sender.sendErrorMessage(it) }
-            .complete() ?: return
-        SpicyAzisaBan.instance.connection.punishmentHistory
-            .update("reason", reason.text, findOptions)
-            .catch { sender.sendErrorMessage(it) }
-            .complete() ?: return
-        if (p.type.isMute()) {
-            Punishment.muteCache.toList().forEach { (s) ->
-                if (s.contains(p.target)) Punishment.muteCache.remove(s)
+        val proofId = try {
+            insert {
+                SpicyAzisaBan.instance.connection.proofs.insert(
+                    InsertOptions.Builder()
+                        .addValue("punish_id", p.id)
+                        .addValue("text", text)
+                        .build()
+                )
             }
+        } catch (e: IllegalStateException) {
+            if (e.message == "cancel") return
+            throw e
         }
-        sender.send(SABMessages.Commands.ChangeReason.done.replaceVariables(p.getVariables().complete()).translate())
+        sender.send(
+            SABMessages.Commands.AddProof.done
+                .replaceVariables("id" to proofId.toString(), "pid" to id.toString(), "text" to text)
+                .replaceVariables(p.getVariables().complete())
+                .translate()
+        )
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {

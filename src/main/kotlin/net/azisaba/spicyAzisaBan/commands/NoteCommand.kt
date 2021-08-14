@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -25,7 +26,7 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object NoteCommand: Command("note"), TabExecutor {
+object NoteCommand: Command("${SABConfig.prefix}note"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {

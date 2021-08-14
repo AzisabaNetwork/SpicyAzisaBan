@@ -30,6 +30,8 @@ object SABConfig {
         cfg = YamlConfiguration(file).asObject()
     }
 
+    val prefix = cfg.getString("prefix", "")!!
+
     val database = DatabaseSettings(cfg.getObj("database"))
 
     class DatabaseSettings internal constructor(obj: YamlObject) {

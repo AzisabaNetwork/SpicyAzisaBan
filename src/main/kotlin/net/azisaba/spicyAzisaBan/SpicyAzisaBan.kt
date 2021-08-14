@@ -1,8 +1,10 @@
 package net.azisaba.spicyAzisaBan
 
+import net.azisaba.spicyAzisaBan.commands.AddProofCommand
 import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.CautionCommand
 import net.azisaba.spicyAzisaBan.commands.ChangeReasonCommand
+import net.azisaba.spicyAzisaBan.commands.DelProofCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalCautionCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalIPBanCommand
@@ -21,6 +23,7 @@ import net.azisaba.spicyAzisaBan.commands.KickCommand
 import net.azisaba.spicyAzisaBan.commands.MuteCommand
 import net.azisaba.spicyAzisaBan.commands.NoteCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
+import net.azisaba.spicyAzisaBan.commands.SeenCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.commands.TempIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.TempIPMuteCommand
@@ -68,6 +71,7 @@ class SpicyAzisaBan: Plugin() {
         //     0: off
         //     1: on
         //     2: + additional data/info
+        //     3: + sql queries/executes
         // 99999: + dump stacktrace with debug message
         @JvmStatic
         var debugLevel: Int = 0
@@ -179,7 +183,10 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, UnMuteCommand)
         proxy.pluginManager.registerCommand(this, UnPunishCommand)
         proxy.pluginManager.registerCommand(this, ChangeReasonCommand)
-        // 8 commands left...
+        proxy.pluginManager.registerCommand(this, SeenCommand)
+        proxy.pluginManager.registerCommand(this, AddProofCommand)
+        proxy.pluginManager.registerCommand(this, DelProofCommand)
+        // 5 commands left...
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

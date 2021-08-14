@@ -7,7 +7,7 @@ import util.promise.rewrite.Promise
 interface DatabaseMigration {
     companion object {
         private val migrations = listOf(
-            V1, V2, V3,
+            V1, V2, V3, V4,
         )
 
         fun run(): Promise<Unit> = Promise.create { context ->
@@ -32,7 +32,7 @@ interface DatabaseMigration {
             }
             val version = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
             if (version != SQLConnection.CURRENT_DATABASE_VERSION) {
-                SpicyAzisaBan.instance.logger.warning("Database migration could not upgrade the database version from $version to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
+                SpicyAzisaBan.instance.logger.warning("Database migration did not upgrade the database version from $version to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
             }
             val time = System.currentTimeMillis() - start
             SpicyAzisaBan.instance.logger.info("Completed database migrations (current database version: $version, took ${time}ms)")
