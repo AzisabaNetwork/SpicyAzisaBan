@@ -18,6 +18,7 @@ import net.azisaba.spicyAzisaBan.commands.GlobalTempIPBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempIPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalTempMuteCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalWarningCommand
+import net.azisaba.spicyAzisaBan.commands.HistoryCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
 import net.azisaba.spicyAzisaBan.commands.IPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.KickCommand
@@ -186,14 +187,16 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, UnPunishCommand)
         proxy.pluginManager.registerCommand(this, ChangeReasonCommand)
         proxy.pluginManager.registerCommand(this, SeenCommand)
+        proxy.pluginManager.registerCommand(this, HistoryCommand)
         proxy.pluginManager.registerCommand(this, CheckCommand)
         proxy.pluginManager.registerCommand(this, AddProofCommand)
         proxy.pluginManager.registerCommand(this, DelProofCommand)
-        // 5 commands left...
+        // 3 commands left...
         logger.info("Hewwwwwwwwwoooooo!")
     }
 
     override fun onDisable() {
+        timer.cancel()
         logger.info("Closing database connection")
         connection.close()
         logger.info("Goodbye, World!")

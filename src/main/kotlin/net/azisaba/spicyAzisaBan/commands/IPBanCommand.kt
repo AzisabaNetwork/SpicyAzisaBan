@@ -30,7 +30,7 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object IPBanCommand: Command("${SABConfig.prefix}ipban"), TabExecutor {
+object IPBanCommand: Command("${SABConfig.prefix}ipban", null, "${SABConfig.prefix}ban-ip", "${SABConfig.prefix}banip"), TabExecutor {
     private val availableArguments = listOf("target=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {

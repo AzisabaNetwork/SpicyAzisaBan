@@ -14,6 +14,7 @@ import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ProxyServer
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
@@ -117,6 +118,12 @@ data class Punishment(
                 server,
                 flags,
             )
+        }
+
+        fun readAllFromResultSet(rs: ResultSet): List<Punishment> {
+            val list = mutableListOf<Punishment>()
+            while (rs.next()) list.add(fromResultSet(rs))
+            return list
         }
 
         fun canJoinServer(uuid: UUID?, address: String?, server: String, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
@@ -405,6 +412,32 @@ data class Punishment(
         ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
             player.send(message)
         }
+    }
+
+    fun getHistoryMessage(): Promise<String> = Promise.create { context ->
+        val unpunish: UnPunish? = SpicyAzisaBan.instance.connection.unpunish
+            .findOne(FindOptions.Builder().addWhere("punish_id", this.id).setLimit(1).build())
+            .then { it?.let { UnPunish.fromTableData(this, it) } }
+            .complete()
+        val strikethroughIfUnpunished = if (unpunish == null) "" else "${ChatColor.STRIKETHROUGH}"
+        val unpunishReason = if (unpunish == null) "" else SABMessages.Commands.History.unpunishReason.replaceVariables("reason" to unpunish.reason).translate()
+        val unpunishId = if (unpunish == null) "" else SABMessages.Commands.History.unpunishId.replaceVariables("id" to unpunish.id.toString()).translate()
+        val unpunishOperator = if (unpunish == null) "" else {
+            val opName = unpunish.operator.getProfile().catch {}.complete()?.name ?: "Unknown"
+            SABMessages.Commands.History.unpunishOperator.replaceVariables("operator" to opName).translate()
+        }
+        context.resolve(
+            SABMessages.Commands.History.layout.replaceVariables()
+                .replaceVariables(getVariables().complete())
+                .replaceVariables(
+                    "date" to SABMessages.formatDate(start),
+                    "unpunish_reason" to unpunishReason,
+                    "unpunish_id" to unpunishId,
+                    "unpunish_operator" to unpunishOperator,
+                    "strikethrough_if_unpunished" to strikethroughIfUnpunished,
+                )
+                .translate()
+        )
     }
 
     enum class Flags {

@@ -14,6 +14,8 @@ general:
   permanent: "無期限"
   online: "&aオンライン"
   offline: "&4オフライン"
+  previousPage: "前のページ"
+  nextPage: "次のページ"
   time:
     day: "%d日"
     hour: "%d時間"
@@ -288,24 +290,32 @@ commands:
     usage: "%PREFIX%&a使用法: /history <target=Player/IP> [page=...] [--all] [--active]"
     # Available variables: %TARGET%
     header: "%PREFIX%&c&o%TARGET%&7の履歴:"
-    # Available variables: variables of punishment + %DATE%, %STRIKETHROUGH_IF_UNPUNISHED%
+    # Available variables: variables of punishment + %DATE%, %STRIKETHROUGH_IF_UNPUNISHED%, %UNPUNISH_REASON%, %UNPUNISH_ID%, %UNPUNISH_OPERATOR%
     layout:
-      - "&8[&e%DATE%&8] &8(&e/proofs %ID%&8で証拠を表示)"
+      - "&8[&e%DATE%&8] &8(&e/proofs %ID%&7で証拠を表示&8)"
       - "&c名前/IP &8> &7&o%PLAYER%"
       - "&cタイプ &8> &7&o%TYPE%"
       - "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME%"
-      - "&c理由 &8> &7&o%REASON%"
-      - "&cID &8> &7&o#%ID%"
+      - "&c理由 &8> &7&o%REASON% %UNPUNISH_REASON%"
+      - "&cID &8> &7&o#%ID% %UNPUNISH_ID%"
       - "&cサーバー &8> &7&o%SERVER%"
-      - "&c執行者 &8> &7&o%OPERATOR%"
+      - "&c執行者 &8> &7&o%OPERATOR% %UNPUNISH_OPERATOR%"
     # Available variables: %CURRENT_PAGE%, %MAX_PAGE%, %COUNT%
     footer: "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%"
+    # Available variables: %REASON%
+    unpunishReason: "&8(&7解除理由: &e%REASON%&8)"
+    # Available variables: %ID%
+    unpunishId: "&8(&7解除ID: &e%ID%&8)"
+    # Available variables: %OPERATOR%
+    unpunishOperator: "&8(&7解除者: &e%OPERATOR%&8)"
+    # Available variables: default
+    invalidArguments: "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。"
   check:
     usage: "%PREFIX%&a使用法: /check <target=Player/IP> [--ip] [--only]"
     searching: "%PREFIX%&eプレイヤーを検索中..."
     # Available variables: %NAME%, %UUID%, %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
     layout:
-      - "&cUUID &8> &e%UUID%"
+      - "&cプレイヤー &8> &e%NAME% &8(&e%UUID%&8)"
       - "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)"
       - "&cMute &8> &7%MUTE_COUNT%"
       - "&cBan &8> &7%BAN_COUNT%"

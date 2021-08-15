@@ -18,13 +18,13 @@ import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
-import java.lang.NumberFormatException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.NumberFormatException
 import kotlin.math.floor
 
 object Util {
@@ -233,6 +233,16 @@ object Util {
         return filter { s -> !list.contains(s.replace("(=.*)".toRegex(), "")) }
     }
 
+    @JvmName("listListFilterArgKeysString")
+    fun List<List<String>>.filterArgKeys(args: Array<String>): List<String> {
+        val arguments = args.map { it.replace("(=.*)".toRegex(), "") }
+        val output = mutableListOf<String>()
+        this.forEach { list ->
+            if (list.all { s -> !arguments.contains(s.replace("(=.*)".toRegex(), "")) }) output.addAll(list)
+        }
+        return output
+    }
+
     fun List<String>.filtr(s: String): List<String> = distinct().filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
 
     private val insertLock = Object()
@@ -345,6 +355,12 @@ object Util {
                 }
             }
         }, random, TimeUnit.SECONDS)
+    }
+
+    fun String.toIntOr(def: Int, radix: Int = 10) = try {
+        Integer.parseInt(this, radix)
+    } catch (e: NumberFormatException) {
+        def
     }
 
     operator fun ChatColor.plus(s: String) = "$this$s"

@@ -27,7 +27,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import java.net.InetAddress
 
 object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
-    private val availableArguments = listOf("target=", "--ip", "--only")
+    private val availableArguments = listOf(listOf("target="), listOf("--ip", "-i"), listOf("--only", "-o"))
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission("sab.check")) {
@@ -43,7 +43,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
         }
         Promise.create<Unit> { context ->
             sender.send(SABMessages.Commands.Check.searching.replaceVariables().translate())
-            if (arguments.contains("ip") || target.isValidIPAddress()) {
+            if (arguments.contains("ip") || arguments.contains("-i") || target.isValidIPAddress()) {
                 val ip = if (target.isValidIPAddress()) {
                     target
                 } else {
@@ -62,7 +62,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@create context.resolve()
                 }
-                val punishments = if (arguments.contains("only")) {
+                val punishments = if (arguments.contains("only") || arguments.contains("-o")) {
                     SpicyAzisaBan.instance.connection.punishmentHistory
                         .findAll(FindOptions.Builder().addWhere("target", ip).build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }
@@ -112,7 +112,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@create context.resolve()
                 }
-                val punishments = if (arguments.contains("only")) {
+                val punishments = if (arguments.contains("only") || arguments.contains("-o")) {
                     SpicyAzisaBan.instance.connection.punishmentHistory
                         .findAll(FindOptions.Builder().addWhere("target", pd.uniqueId.toString()).build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }

@@ -88,6 +88,8 @@ object SABMessages {
         val permanent = obj.getMessage("permanent", "無期限")
         val online = obj.getMessage("online", "&aオンライン")
         val offline = obj.getMessage("offline", "&4オフライン")
+        val previousPage = obj.getMessage("previousPage", "前のページ")
+        val nextPage = obj.getMessage("nextPage", "次のページ")
         val datetime = obj.getMessage("datetime", "%YEAR%/%MONTH%/%DAY%-%HOUR%:%MINUTE%:%SECOND%")
 
         object Time {
@@ -278,8 +280,20 @@ object SABMessages {
             private val obj = Commands.obj.getObj("check")
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /check <target=Player/IP> [--ip] [--only]")
             val searching = obj.getMessage("searching", "%PREFIX%&eプレイヤーを検索中...")
-            val layout = obj.getMessage("layout", listOf("&cUUID &8> &e%UUID%", "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
+            val layout = obj.getMessage("layout", listOf("&cプレイヤー &8> &e%NAME% &8(&e%UUID%&8)", "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
             val layoutIP = obj.getMessage("layoutIP", listOf("&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
+        }
+
+        object History {
+            private val obj = Commands.obj.getObj("history")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /history <target=Player/IP> [page=...] [--all] [--active] [--ip] [--only]")
+            val header = obj.getMessage("header", "%PREFIX%&c&o%TARGET%&7の履歴:")
+            val layout = obj.getMessage("layout", listOf("&8[&e%DATE%&8] &8(&e/proofs %ID%&7で証拠を表示&8)", "&c名前/IP &8> &7&o%PLAYER%", "&cタイプ &8> &7&o%TYPE%", "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME%", "&c理由 &8> &7&o%REASON% %UNPUNISH_REASON%", "&cID &8> &7&o#%ID% %UNPUNISH_ID%", "&cサーバー &8> &7&o%SERVER%", "&c執行者 &8> &7&o%OPERATOR% %UNPUNISH_OPERATOR%"))
+            val footer = obj.getMessage("footer", "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%")
+            val unpunishReason = obj.getMessage("unpunishReason", "&8(&7解除理由: &e%REASON%&8)")
+            val unpunishId = obj.getMessage("unpunishId", "&8(&7解除ID: &e%ID%&8)")
+            val unpunishOperator = obj.getMessage("unpunishOperator", "&8(&7解除者: &e%OPERATOR%&8)")
+            val invalidArguments = obj.getMessage("invalidArguments", "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。")
         }
     }
 }

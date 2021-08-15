@@ -11,6 +11,6 @@ object V4: DatabaseMigration {
 
     override fun execute() {
         // it is done via SQLConnection.kt (by adding new table and #sync there)
-        SpicyAzisaBan.instance.settings.setDatabaseVersion(4).complete()
+        SpicyAzisaBan.instance.settings.setDatabaseVersion(5).complete()
     }
 }

@@ -32,7 +32,7 @@ interface DatabaseMigration {
             }
             val version = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
             if (version != SQLConnection.CURRENT_DATABASE_VERSION) {
-                SpicyAzisaBan.instance.logger.warning("Database migration did not upgrade the database version from $version to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
+                SpicyAzisaBan.instance.logger.severe("Database migration did not upgrade the database version from $version to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
             }
             val time = System.currentTimeMillis() - start
             SpicyAzisaBan.instance.logger.info("Completed database migrations (current database version: $version, took ${time}ms)")
