@@ -264,12 +264,12 @@ commands:
     usage: "%PREFIX%&a使用法: /addproof <id=...> <text=\"...\">"
     # %PID% can be used here (punishment id), and %ID% is proof id
     # and %TEXT% for proof text
-    done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(ID: &e%ID%&8)"
+    done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&8)"
   delproof:
     usage: "%PREFIX%&a使用法: /delproof <id=...>"
     # %PID% can be used here (punishment id), and %ID% is proof id
     # and %TEXT% for original proof text
-    done: "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(ID: &e%ID%&8)"
+    done: "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(&7ID: &e%ID%&8)"
 
   seen:
     usage: "%PREFIX%&a使用法: /seen <Player/IP>"
@@ -330,3 +330,10 @@ commands:
       - "&c警告数 &8> &7%WARNING_COUNT%"
       - "&c注意数 &8> &7%CAUTION_COUNT%"
       - "&cノート &8> &7%NOTE_COUNT%"
+  proofs:
+    usage: "%PREFIX%&a使用法: /proofs <ID>"
+    # Available variables: punishment + %PID% (punishment id)
+    header: "%PREFIX%&e処罰&a#%PID%&eの証拠一覧:"
+    # Available variables: %PID% (punishment id), %ID% (proof id), %TEXT% (proof text)
+    layout:
+      - "&c&o証拠ID #%ID% &8> &e&o%TEXT%"

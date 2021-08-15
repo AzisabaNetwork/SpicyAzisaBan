@@ -257,7 +257,7 @@ object Util {
             if (!result.next()) return -1L
             val r = result.getObject(1) as Number
             statement.close()
-            return r.toLong()
+            return r.toLong() + 1L
         }
     }
 

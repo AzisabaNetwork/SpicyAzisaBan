@@ -259,13 +259,13 @@ object SABMessages {
         object AddProof {
             private val obj = Commands.obj.getObj("addproof")
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /addproof <id=...> <text=\"...\">")
-            val done = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(ID: &e%ID%&8)")
+            val done = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&8)")
         }
 
         object DelProof {
             private val obj = Commands.obj.getObj("delproof")
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /delproof <id=...>")
-            val done = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(ID: &e%ID%&8)")
+            val done = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(&7ID: &e%ID%&8)")
         }
 
         object Seen {
@@ -294,6 +294,13 @@ object SABMessages {
             val unpunishId = obj.getMessage("unpunishId", "&8(&7解除ID: &e%ID%&8)")
             val unpunishOperator = obj.getMessage("unpunishOperator", "&8(&7解除者: &e%OPERATOR%&8)")
             val invalidArguments = obj.getMessage("invalidArguments", "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。")
+        }
+
+        object Proofs {
+            private val obj = Commands.obj.getObj("proofs")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /proofs <ID>")
+            val header = obj.getMessage("header", "%PREFIX%&e処罰&a#%PID%&eの証拠一覧:")
+            val layout = obj.getMessage("layout", listOf("&c&o証拠ID #%ID% &8> &e&o%TEXT%"))
         }
     }
 }
