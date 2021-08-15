@@ -1,10 +1,29 @@
 plugins {
     kotlin("jvm") version "1.5.21"
     id("com.github.johnrengelman.shadow") version "6.0.0"
+    `maven-publish`
 }
 
 group = "net.azisaba"
 version = "0.0.17"
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+val javaComponent = components["java"] as AdhocComponentWithVariants
+javaComponent.withVariantsFromConfiguration(configurations["sourcesElements"]) {
+    skip()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+}
 
 repositories {
     mavenLocal()
