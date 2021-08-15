@@ -23,7 +23,7 @@ import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 
-object ChangeReasonCommand: Command("${SABConfig.prefix}changereason"), TabExecutor {
+object ChangeReasonCommand: Command("${SABConfig.prefix}changereason", null, "${SABConfig.prefix}change-reason"), TabExecutor {
     private val availableArguments = listOf("id=", "reason=\"\"")
 
     override fun execute(sender: CommandSender, args: Array<String>) {

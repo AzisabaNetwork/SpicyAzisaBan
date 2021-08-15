@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.sql.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.sql.SQLConnection.Companion.executeAndLog
 
 /**
  * v1 -> v2 converter
@@ -12,8 +13,8 @@ object V1: DatabaseMigration {
     override fun execute() {
         val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
         listOf("punishments", "punishmentHistory").forEach { table ->
-            statement.execute("UPDATE `$table` SET `server` = \"global\" WHERE `server` IS NULL")
-            statement.execute("ALTER TABLE `$table` MODIFY `server` VARCHAR(255) NOT NULL")
+            statement.executeAndLog("UPDATE `$table` SET `server` = \"global\" WHERE `server` IS NULL")
+            statement.executeAndLog("ALTER TABLE `$table` MODIFY `server` VARCHAR(255) NOT NULL")
         }
         SpicyAzisaBan.instance.settings.setDatabaseVersion(2).complete()
         statement.close()

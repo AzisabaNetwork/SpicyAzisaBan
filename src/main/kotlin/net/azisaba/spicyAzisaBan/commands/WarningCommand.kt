@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
@@ -63,8 +64,9 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "warn"), TabE
             .complete() ?: return
         p.notifyToAll().complete()
         if (SABConfig.BanOnWarning.threshold > 0) {
-            val st =
-                SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?")
+            val sql = "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?"
+            SQLConnection.logSql(sql)
+            val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
             val rs = st.executeQuery()
             val count = rs.getInt(1)
             st.close()

@@ -4,6 +4,7 @@ import net.azisaba.spicyAzisaBan.commands.AddProofCommand
 import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.CautionCommand
 import net.azisaba.spicyAzisaBan.commands.ChangeReasonCommand
+import net.azisaba.spicyAzisaBan.commands.CheckCommand
 import net.azisaba.spicyAzisaBan.commands.DelProofCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalBanCommand
 import net.azisaba.spicyAzisaBan.commands.GlobalCautionCommand
@@ -117,7 +118,8 @@ class SpicyAzisaBan: Plugin() {
             override fun run() {
                 try {
                     val statement = connection.connection.createStatement()
-                    statement.execute("SELECT 1;")
+                    SQLConnection.logSql("SELECT 1 (keep-alive)")
+                    statement.execute("SELECT 1")
                     statement.close()
                 } catch (e: SQLException) {
                     logger.warning("Could not execute keep-alive ping")
@@ -184,6 +186,7 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, UnPunishCommand)
         proxy.pluginManager.registerCommand(this, ChangeReasonCommand)
         proxy.pluginManager.registerCommand(this, SeenCommand)
+        proxy.pluginManager.registerCommand(this, CheckCommand)
         proxy.pluginManager.registerCommand(this, AddProofCommand)
         proxy.pluginManager.registerCommand(this, DelProofCommand)
         // 5 commands left...

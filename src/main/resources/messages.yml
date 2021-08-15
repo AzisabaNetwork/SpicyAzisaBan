@@ -43,7 +43,7 @@ commands:
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
 
-  # Available variables:
+  # Available variables (punishment):
   # %ID% - Punishment ID
   # %PLAYER% - Player name or IP if IP-based bans
   # %TARGET% - UUID of player or IP if IP-based bans
@@ -284,3 +284,39 @@ commands:
       - "&6%PLAYERS%"
   warns:
     notWarnedYet: "%PREFIX%&c&oまだ警告を受けていません。"
+  history:
+    usage: "%PREFIX%&a使用法: /history <target=Player/IP> [page=...] [--all] [--active]"
+    # Available variables: %TARGET%
+    header: "%PREFIX%&c&o%TARGET%&7の履歴:"
+    # Available variables: variables of punishment + %DATE%, %STRIKETHROUGH_IF_UNPUNISHED%
+    layout:
+      - "&8[&e%DATE%&8] &8(&e/proofs %ID%&8で証拠を表示)"
+      - "&c名前/IP &8> &7&o%PLAYER%"
+      - "&cタイプ &8> &7&o%TYPE%"
+      - "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME%"
+      - "&c理由 &8> &7&o%REASON%"
+      - "&cID &8> &7&o#%ID%"
+      - "&cサーバー &8> &7&o%SERVER%"
+      - "&c執行者 &8> &7&o%OPERATOR%"
+    # Available variables: %CURRENT_PAGE%, %MAX_PAGE%, %COUNT%
+    footer: "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%"
+  check:
+    usage: "%PREFIX%&a使用法: /check <target=Player/IP> [--ip] [--only]"
+    searching: "%PREFIX%&eプレイヤーを検索中..."
+    # Available variables: %NAME%, %UUID%, %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
+    layout:
+      - "&cUUID &8> &e%UUID%"
+      - "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)"
+      - "&cMute &8> &7%MUTE_COUNT%"
+      - "&cBan &8> &7%BAN_COUNT%"
+      - "&c警告数 &8> &7%WARNING_COUNT%"
+      - "&c注意数 &8> &7%CAUTION_COUNT%"
+      - "&cノート &8> &7%NOTE_COUNT%"
+    # Available variables: %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
+    layoutIP:
+      - "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)"
+      - "&cMute &8> &7%MUTE_COUNT%"
+      - "&cBan &8> &7%BAN_COUNT%"
+      - "&c警告数 &8> &7%WARNING_COUNT%"
+      - "&c注意数 &8> &7%CAUTION_COUNT%"
+      - "&cノート &8> &7%NOTE_COUNT%"

@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment.Flags.Companion.toDatabase
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.getProfile
@@ -166,7 +167,9 @@ data class Punishment(
 
         fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
             if (uuid == null && ip == null) throw IllegalArgumentException("Either uuid or ip must not be null")
-            val s = SpicyAzisaBan.instance.connection.connection.prepareStatement("SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)")
+            val sql = "SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)"
+            SQLConnection.logSql(sql)
+            val s = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
             s.setString(1, uuid?.toString() ?: ip)
             s.setString(2, ip ?: uuid.toString())
             s.setString(3, server)

@@ -273,5 +273,13 @@ object SABMessages {
             val layout = obj.getMessage("layout", listOf("%PREFIX%&c%PLAYER%&eは&c%SINCE%前&eから%STATUS%&eです。", "&7過去の名前 &8> &e&o%NAME_HISTORY%", "&7最近のIPアドレス &8> &e&o%IP% &7(&e%HOSTNAME%&7)", "&7過去のすべてのIPアドレス &8> &e&o%IP_HISTORY%"))
             val layoutIP = obj.getMessage("layoutIP", listOf("%PREFIX%&eこのプレイヤーは過去に%PLAYERS_COUNT%個のアカウントで接続しています:", "&6%PLAYERS%"))
         }
+
+        object Check {
+            private val obj = Commands.obj.getObj("check")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /check <target=Player/IP> [--ip] [--only]")
+            val searching = obj.getMessage("searching", "%PREFIX%&eプレイヤーを検索中...")
+            val layout = obj.getMessage("layout", listOf("&cUUID &8> &e%UUID%", "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
+            val layoutIP = obj.getMessage("layoutIP", listOf("&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
+        }
     }
 }

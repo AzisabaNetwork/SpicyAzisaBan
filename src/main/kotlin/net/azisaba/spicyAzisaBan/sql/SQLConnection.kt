@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.sql
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.config.ServerInfo
+import org.intellij.lang.annotations.Language
 import util.promise.rewrite.Promise
 import util.ref.DataCache
 import xyz.acrylicstyle.sql.DataType
@@ -11,11 +12,21 @@ import xyz.acrylicstyle.sql.Table
 import xyz.acrylicstyle.sql.TableDefinition
 import xyz.acrylicstyle.sql.options.FindOptions
 import java.sql.SQLException
+import java.sql.Statement
 import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
         const val CURRENT_DATABASE_VERSION = 5
+
+        fun logSql(s: String) {
+            SpicyAzisaBan.debug("Executing SQL: $s", 3)
+        }
+
+        fun Statement.executeAndLog(@Language("SQL") sql: String): Boolean {
+            logSql(sql)
+            return this.execute(sql)
+        }
     }
 
     lateinit var punishments: Table
@@ -124,7 +135,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     private fun Table.setupEventListener(): Table {
         eventEmitter.on(Table.Events.EXECUTE) {
             val sql = it[0] as String
-            SpicyAzisaBan.debug("Executing SQL: $sql", 3)
+            logSql(sql)
         }
         return this
     }

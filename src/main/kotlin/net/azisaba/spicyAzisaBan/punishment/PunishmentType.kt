@@ -15,6 +15,7 @@ enum class PunishmentType(val id: String, val base: PunishmentType?, val temp: B
     NOTE("note", null, false, "sab.note"),
     ;
 
+    fun getName() = id.replaceFirstChar { c -> c.uppercase() }
     fun isBan() = this == BAN || this == TEMP_BAN || this == IP_BAN || this == TEMP_IP_BAN
     fun isMute() = this == MUTE || this == TEMP_MUTE || this == IP_MUTE || this == TEMP_IP_MUTE
     fun isIPBased() = this == IP_BAN || this == TEMP_IP_BAN || this == IP_MUTE || this == TEMP_IP_MUTE

@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
@@ -240,7 +241,9 @@ object Util {
         synchronized(insertLock) {
             fn()
             val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
-            val result = statement.executeQuery("SELECT LAST_INSERT_ID()")
+            val sql = "SELECT LAST_INSERT_ID()"
+            SQLConnection.logSql(sql)
+            val result = statement.executeQuery(sql)
             if (!result.next()) return -1L
             val r = result.getObject(1) as Number
             statement.close()
@@ -343,4 +346,6 @@ object Util {
             }
         }, random, TimeUnit.SECONDS)
     }
+
+    operator fun ChatColor.plus(s: String) = "$this$s"
 }
