@@ -2,6 +2,7 @@ package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.commands.AddProofCommand
 import net.azisaba.spicyAzisaBan.commands.BanCommand
+import net.azisaba.spicyAzisaBan.commands.BanListCommand
 import net.azisaba.spicyAzisaBan.commands.CautionCommand
 import net.azisaba.spicyAzisaBan.commands.ChangeReasonCommand
 import net.azisaba.spicyAzisaBan.commands.CheckCommand
@@ -35,6 +36,7 @@ import net.azisaba.spicyAzisaBan.commands.UnBanCommand
 import net.azisaba.spicyAzisaBan.commands.UnMuteCommand
 import net.azisaba.spicyAzisaBan.commands.UnPunishCommand
 import net.azisaba.spicyAzisaBan.commands.WarningCommand
+import net.azisaba.spicyAzisaBan.commands.WarnsCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
@@ -46,8 +48,6 @@ import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.translate
-import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.plugin.Plugin
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
@@ -135,18 +135,7 @@ class SpicyAzisaBan: Plugin() {
                     connection.punishments
                         .findAll(FindOptions.Builder().addWhere("type", PunishmentType.WARNING.name).build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }
-                        .thenDo { punishments ->
-                            punishments.forEach { p ->
-                                if (p.flags.contains(Punishment.Flags.SEEN)) return@forEach
-                                val title = ProxyServer.getInstance().createTitle()
-                                title.fadeIn(0)
-                                title.fadeOut(0)
-                                title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
-                                title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title))
-                                title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle))
-                                ProxyServer.getInstance().getPlayer(p.getTargetUUID()).sendTitle(title)
-                            }
-                        }
+                        .thenDo { punishments -> punishments.forEach { p -> p.sendTitle() } }
                 } catch (e: SQLException) {
                     logger.severe("Could not fetch punishments")
                     e.printStackTrace()
@@ -190,10 +179,11 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, SeenCommand)
         proxy.pluginManager.registerCommand(this, HistoryCommand)
         proxy.pluginManager.registerCommand(this, CheckCommand)
+        proxy.pluginManager.registerCommand(this, BanListCommand)
+        proxy.pluginManager.registerCommand(this, WarnsCommand)
         proxy.pluginManager.registerCommand(this, AddProofCommand)
         proxy.pluginManager.registerCommand(this, DelProofCommand)
         proxy.pluginManager.registerCommand(this, ProofsCommand)
-        // 2 commands left...
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

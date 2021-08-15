@@ -16,6 +16,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer
 import util.UUIDUtil
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
+import util.ref.DataCache
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import java.net.InetAddress
@@ -50,6 +51,7 @@ object Util {
     fun preloadPermissions(sender: CommandSender) {
         if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
         sender.hasPermission("sab.command.spicyazisaban")
+        sender.hasPermission("sab.warns")
         sender.hasPermission("sab.check")
         sender.hasPermission("sab.history")
         sender.hasPermission("sab.seen")
@@ -274,11 +276,22 @@ object Util {
 
     fun CommandSender.hasNotifyPermissionOf(type: PunishmentType) = hasPermission("sab.notify.${type.id}")
 
+    private val profileCache = mutableMapOf<UUID, DataCache<PlayerProfile>>()
+
     fun UUID.getProfile(): Promise<PlayerProfile> = Promise.create { context ->
         if (this == UUIDUtil.NIL) return@create context.resolve(SimplePlayerProfile("CONSOLE", this))
-        PlayerData.getByUUID(this)
-            .thenDo { context.resolve(it) }
-            .catch { context.reject(it) }
+        val cache = profileCache[this]
+        val profile = cache?.get()
+        if (cache == null || profile == null || cache.ttl - System.currentTimeMillis() <= 10000) {
+            PlayerData.getByUUID(this)
+                .thenDo {
+                    context.resolve(it)
+                    profileCache[this] = DataCache(profile, System.currentTimeMillis() + 1000L * 60L)
+                }
+                .catch { context.reject(it) }
+        } else {
+            context.resolve(profile)
+        }
     }
 
     fun ProxiedPlayer.kick(reason: String) {

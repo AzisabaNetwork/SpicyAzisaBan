@@ -111,6 +111,7 @@ object SABMessages {
             val invalidPlayer = obj.getMessage("invalidPlayer", "%PREFIX%&cプレイヤーが見つかりません。")
             val invalidTime = obj.getMessage("invalidTime", "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。")
             val invalidIPAddress = obj.getMessage("invalidIPAddress", "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。")
+            val invalidPunishmentType = obj.getMessage("invalidPunishmentType", "%PREFIX%&c無効な処罰タイプです。")
             val timeNotSpecified = obj.getMessage("timeNotSpecified", "%PREFIX%&c時間が指定されていません。")
             val samePunishmentAppliedToSameIPAddress = obj.getMessage("samePunishmentAppliedToSameIPAddress", "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。")
             val alreadyPunished = obj.getMessage("alreadyPunished", "%PREFIX%&cこのアカウントはすでに(同じサーバー、同じ種類で)処罰されています!")
@@ -301,6 +302,21 @@ object SABMessages {
             val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /proofs <ID>")
             val header = obj.getMessage("header", "%PREFIX%&e処罰&a#%PID%&eの証拠一覧:")
             val layout = obj.getMessage("layout", listOf("&c&o証拠ID #%ID% &8> &e&o%TEXT%"))
+        }
+
+        object Warns {
+            private val obj = Commands.obj.getObj("warns")
+            val notWarnedYet = obj.getMessage("notWarnedYet", "%PREFIX%&c&oまだ警告を受けていません。")
+            val header = obj.getMessage("header", "%PREFIX%&c有効な警告一覧:")
+            val layout = obj.getMessage("layout", listOf("&8[&e%DATE%&8]", "&cタイプ &8> &7&o%TYPE%", "&c対象サーバー &8> &7&o%SERVER%", "&c理由 &8> &7&o%REASON%"))
+        }
+
+        object BanList {
+            private val obj = Commands.obj.getObj("banlist")
+            val usage = obj.getMessage("usage", "%PREFIX%&a使用法: /banlist [page=...] [type=...] [server=...] [--all] [--active]")
+            val header = obj.getMessage("header", "%PREFIX%&7処罰履歴:")
+            val footer = obj.getMessage("footer", "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%")
+            val invalidArguments = obj.getMessage("invalidArguments", "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。")
         }
     }
 }

@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.util.contexts
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
@@ -25,6 +26,7 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender
     if (context == Contexts.REASON) return getReason() as Promise<T>
     if (context == Contexts.TIME) return getTime(sender) as Promise<T>
     if (context == Contexts.IP_ADDRESS) return getIPAddress(sender) as Promise<T>
+    if (context == Contexts.PUNISHMENT_TYPE) return Promise.resolve(getPunishmentType(sender) as T)
     return Promise.reject(IllegalArgumentException("Unknown context: " + context.key))
 }
 
@@ -104,4 +106,15 @@ private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddres
     }
     sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
     context.resolve(IPAddressContext(false, ""))
+}
+
+private fun ArgumentParser.getPunishmentType(sender: CommandSender): PunishmentTypeContext {
+    val type = getString("type") ?: return PunishmentTypeContext(true, null)
+    return try {
+        val pType = PunishmentType.valueOf(type)
+        PunishmentTypeContext(true, pType)
+    } catch (e: IllegalArgumentException) {
+        sender.send(SABMessages.Commands.General.invalidPunishmentType.replaceVariables().translate())
+        PunishmentTypeContext(false, null)
+    }
 }

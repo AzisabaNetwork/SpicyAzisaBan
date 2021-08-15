@@ -171,7 +171,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
             if (page > 1) {
                 backText.color = ChatColor.YELLOW
                 backText.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text(SABMessages.General.previousPage.translate()))
-                backText.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/history target=$target page=${page - 1} ${if (active) "--active" else ""} ${if (all) "--all" else ""} ${if (ipOpt) "-i" else ""} ${if (only) "-o" else ""}")
+                backText.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/${SABConfig.prefix}history target=$target page=${page - 1} ${if (active) "--active" else ""} ${if (all) "--all" else ""} ${if (ipOpt) "-i" else ""} ${if (only) "-o" else ""}")
             } else {
                 backText.color = ChatColor.GRAY
             }
@@ -179,7 +179,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
             if (page < maxPage) {
                 nextText.color = ChatColor.YELLOW
                 nextText.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, Text(SABMessages.General.nextPage.translate()))
-                nextText.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/history target=$target page=${page + 1} ${if (active) "--active" else ""} ${if (all) "--all" else ""} ${if (ipOpt) "-i" else ""} ${if (only) "-o" else ""}")
+                nextText.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/${SABConfig.prefix}history target=$target page=${page + 1} ${if (active) "--active" else ""} ${if (all) "--all" else ""} ${if (ipOpt) "-i" else ""} ${if (only) "-o" else ""}")
             } else {
                 nextText.color = ChatColor.GRAY
             }

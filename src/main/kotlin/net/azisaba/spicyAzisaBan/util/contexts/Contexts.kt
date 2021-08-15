@@ -22,5 +22,7 @@ class Contexts<T : Context> private constructor(val key: String) {
         val TIME = Contexts<TimeContext>("time")
 
         val IP_ADDRESS = Contexts<IPAddressContext>("target")
+
+        val PUNISHMENT_TYPE = Contexts<PunishmentTypeContext>("type")
     }
 }

@@ -50,7 +50,7 @@ data class PlayerData(
         fun createOrUpdate(player: ProxiedPlayer): Promise<PlayerData> = Promise.create { context ->
             val time = System.currentTimeMillis()
             val name = SpicyAzisaBan.instance.connection.usernameHistory
-                .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId).setOrderBy("last_seen").setOrder(Sort.DESC).setLimit(1).build())
+                .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).setOrderBy("last_seen").setOrder(Sort.DESC).setLimit(1).build())
                 .then { td -> td?.getString("name") }
                 .complete()
             if (name != player.name.lowercase()) {
@@ -67,8 +67,9 @@ data class PlayerData(
             }
             if (player.socketAddress.getIPAddress() != null) {
                 val ip = SpicyAzisaBan.instance.connection.ipAddressHistory
-                    .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId).addWhere("ip", player.getIPAddress()).build())
+                    .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).addWhere("ip", player.getIPAddress()).build())
                     .then { td -> td?.getString("ip") }
+                    .catch { it.printStackTrace() }
                     .complete()
                 if (ip == null) {
                     SpicyAzisaBan.debug("Updating ipAddressHistory of ${player.name} (${player.uniqueId}) (old: $ip)")

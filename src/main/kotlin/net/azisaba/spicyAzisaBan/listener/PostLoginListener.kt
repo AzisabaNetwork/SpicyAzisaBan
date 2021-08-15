@@ -6,6 +6,7 @@ import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.event.PostLoginEvent
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.event.EventHandler
+import util.kt.promise.rewrite.catch
 import java.util.concurrent.TimeUnit
 
 object PostLoginListener: Listener {
@@ -17,7 +18,7 @@ object PostLoginListener: Listener {
             PlayerData.createOrUpdate(e.player).thenDo {
                 SpicyAzisaBan.debug("Updated player data of ${e.player.uniqueId} (${e.player.name})")
                 SpicyAzisaBan.debug(it.toString(), 2)
-            }
+            }.catch { it.printStackTrace() }
         }, 3, TimeUnit.SECONDS)
     }
 }

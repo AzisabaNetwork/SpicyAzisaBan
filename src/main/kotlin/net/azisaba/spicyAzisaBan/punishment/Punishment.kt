@@ -16,6 +16,7 @@ import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.TextComponent
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import util.ref.DataCache
@@ -229,6 +230,18 @@ data class Punishment(
         }
     }
 
+    fun sendTitle() {
+        if (type != PunishmentType.WARNING && type != PunishmentType.CAUTION) return
+        if (flags.contains(Flags.SEEN)) return
+        val title = ProxyServer.getInstance().createTitle()
+        title.fadeIn(0)
+        title.fadeOut(0)
+        title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
+        title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.translate()))
+        title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.translate()))
+        ProxyServer.getInstance().getPlayer(getTargetUUID()).sendTitle(title)
+    }
+
     fun removeIfExpired(): Promise<Unit> = Promise.create { context ->
         if (isExpired() && !pendingRemoval.contains(id)) {
             pendingRemoval.add(id)
@@ -270,6 +283,8 @@ data class Punishment(
                 "server" to if (server.lowercase() == "global") SABMessages.General.global else SABConfig.serverNames.getOrDefault(server.lowercase(), server.lowercase()),
                 "duration" to Util.unProcessTime(end - System.currentTimeMillis()),
                 "time" to Util.unProcessTime(end - start),
+                "date" to SABMessages.formatDate(start),
+                "end_date" to if (end == -1L) "N/A" else SABMessages.formatDate(end)
             )
         }
 

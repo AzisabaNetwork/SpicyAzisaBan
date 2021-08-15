@@ -62,16 +62,26 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "warn"), TabE
                 sender.sendErrorMessage(it)
             }
             .complete() ?: return
+        p.getBannedMessage().thenDo { msg ->
+            ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.send(msg)
+        }
         p.notifyToAll().complete()
+        p.sendTitle()
         if (SABConfig.BanOnWarning.threshold > 0) {
             val sql = "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?"
             SQLConnection.logSql(sql)
             val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
+            st.setString(1, player.profile.uniqueId.toString())
+            st.setString(2, server.name)
             val rs = st.executeQuery()
+            rs.next()
             val count = rs.getInt(1)
             st.close()
-            if (count % SABConfig.BanOnWarning.threshold == 0) {
-                ProxyServer.getInstance().pluginManager.dispatchCommand(ProxyServer.getInstance().console, "${SABConfig.prefix}gtempban player=${player.profile.name} reason=\"${SABConfig.BanOnWarning.reason}\" server=${server.name} time=${SABConfig.BanOnWarning.time}")
+            if (count >= SABConfig.BanOnWarning.threshold) {
+                ProxyServer.getInstance().pluginManager.dispatchCommand(
+                    ProxyServer.getInstance().console,
+                    "${SABConfig.prefix}gtempban player=${player.profile.name} reason=\"${SABConfig.BanOnWarning.reason.replaceVariables("count" to count.toString()).translate()}\" server=${server.name} time=${SABConfig.BanOnWarning.time}",
+                )
             }
         }
         sender.send(SABMessages.Commands.Warning.done.replaceVariables(p.getVariables().complete()).translate())

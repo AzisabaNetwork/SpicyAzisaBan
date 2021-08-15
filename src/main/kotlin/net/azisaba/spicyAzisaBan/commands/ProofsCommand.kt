@@ -22,7 +22,7 @@ object ProofsCommand: Command("${SABConfig.prefix}proofs"), TabExecutor {
         if (args.isEmpty()) return sender.send(SABMessages.Commands.Proofs.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         val id = try {
-            arguments.getString("id")?.toLong() ?: -1
+            arguments.getString("id")?.toLong() ?: arguments.arguments.getOrNull(0)?.toLong() ?: -1
         } catch (e: NumberFormatException) {
             sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate())
             return

@@ -33,11 +33,12 @@ blockedCommandsWhenMuted:
   - minecraft:tell
   - minecraft:me
 banOnWarning:
-  # if warning count hits 3, the player would be banned with specified reason
+  # if warning count hits 3, 4, 5..., the player would be banned with specified reason
   # this feature will be disabled if you set this value to <= 0
   threshold: 3
   time: "1mo"
-  reason: ":boom:"
+  # Available variables: %PREFIX%, %COUNT& (current warnings count)
+  reason: "You've got %COUNT% warnings so bye"
 warning:
   # Don't set to 1s because it's terrible because we fetch the punishments from database every time we check for warnings
   sendTitleEvery: 10s

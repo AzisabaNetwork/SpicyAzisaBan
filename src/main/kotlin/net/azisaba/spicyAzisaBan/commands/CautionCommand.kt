@@ -20,6 +20,7 @@ import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
+import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
@@ -55,13 +56,16 @@ object CautionCommand: Command("${SABConfig.prefix}caution"), TabExecutor {
         val server = arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, sender).complete()
         val p = Punishment
-            .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.WARNING, -1, server.name)
+            .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.CAUTION, -1, server.name)
             .insert()
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)
             }
             .complete() ?: return
+        p.getBannedMessage().thenDo { msg ->
+            ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.send(msg)
+        }
         p.notifyToAll().complete()
         sender.send(SABMessages.Commands.Warning.done.replaceVariables(p.getVariables().complete()).translate())
     }

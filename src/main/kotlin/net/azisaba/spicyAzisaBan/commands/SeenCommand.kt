@@ -25,6 +25,9 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
         if (!sender.hasPermission("sab.seen")) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
+        if (args.isEmpty()) {
+            return sender.send(SABMessages.Commands.Seen.usage.replaceVariables().translate())
+        }
         Promise.create<Unit> { context ->
             sender.send(SABMessages.Commands.Seen.searching.replaceVariables().translate())
             if (args[0].isValidIPAddress()) {
