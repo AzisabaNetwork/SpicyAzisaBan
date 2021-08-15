@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.punishment
 
+// Do NOT remove "temp"
 enum class PunishmentType(val id: String, val base: PunishmentType?, val temp: Boolean, val perm: String) {
     BAN("ban", null, false, "sab.ban.perm"),
     TEMP_BAN("tempban", BAN, true, "sab.ban.temp"),
