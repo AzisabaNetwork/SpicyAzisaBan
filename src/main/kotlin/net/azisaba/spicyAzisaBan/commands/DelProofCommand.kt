@@ -46,7 +46,7 @@ object DelProofCommand: Command("${SABConfig.prefix}delproof"), TabExecutor {
         if (list.isEmpty()) return sender.send(SABMessages.Commands.General.proofNotFound.replaceVariables().format(id).translate())
         val proof = Proof.fromTableData(list[0]).complete()!!
         sender.send(
-            SABMessages.Commands.AddProof.done
+            SABMessages.Commands.DelProof.done
                 .replaceVariables("id" to proof.id.toString(), "pid" to proof.punishment.id.toString(), "text" to proof.text)
                 .replaceVariables(proof.punishment.getVariables().complete())
                 .translate()
