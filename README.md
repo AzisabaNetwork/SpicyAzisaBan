@@ -35,3 +35,15 @@
 - `sab.caution`
 - `sab.kick`
 - `sab.note`
+- `sab.notify.ban`
+- `sab.notify.tempban`
+- `sab.notify.ipban`
+- `sab.notify.tempipban`
+- `sab.notify.mute`
+- `sab.notify.tempmute`
+- `sab.notify.ipmute`
+- `sab.notify.tempipmute`
+- `sab.notify.warn`
+- `sab.notify.caution`
+- `sab.notify.kick`
+- `sab.notify.note`
