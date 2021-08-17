@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
+import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
@@ -23,7 +24,7 @@ object CheckGlobalBanListener: Listener {
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                 context.resolve(false)
             }, 3, TimeUnit.SECONDS)
-            val p = Punishment.canJoinServer(e.connection.uniqueId, e.connection.socketAddress.getIPAddress(), "global").complete()
+            val p = Punishment.canJoinServer(e.connection.uniqueId, e.connection.socketAddress.getIPAddress()?.reconstructIPAddress(), "global").complete()
             if (p != null) {
                 e.isCancelled = true
                 e.setCancelReason(*TextComponent.fromLegacyText(p.getBannedMessage().complete()))

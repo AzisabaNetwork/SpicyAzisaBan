@@ -41,7 +41,6 @@ import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
-import net.azisaba.spicyAzisaBan.listener.PreloadPermissionsOnJoinListener
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
@@ -144,7 +143,6 @@ class SpicyAzisaBan: Plugin() {
                 }
             }
         }, ReloadableSABConfig.Warning.sendTitleEvery, ReloadableSABConfig.Warning.sendTitleEvery)
-        proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)

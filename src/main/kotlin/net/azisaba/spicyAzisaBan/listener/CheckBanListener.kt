@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.kick
+import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
@@ -24,7 +25,7 @@ object CheckBanListener: Listener {
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                 context.resolve(false)
             }, 3, TimeUnit.SECONDS)
-            val p = Punishment.canJoinServer(e.player.uniqueId, e.player.socketAddress.getIPAddress(), e.target.name.lowercase()).complete()
+            val p = Punishment.canJoinServer(e.player.uniqueId, e.player.socketAddress.getIPAddress()?.reconstructIPAddress(), e.target.name.lowercase()).complete()
             if (p != null) {
                 e.isCancelled = true
                 if (e.reason.shouldKick()) {

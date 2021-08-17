@@ -8,6 +8,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
+import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
@@ -31,7 +32,7 @@ object CheckMuteListener: Listener {
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                 context.resolve(false)
             }, 3, TimeUnit.SECONDS)
-            val p = Punishment.canSpeak(player.uniqueId, player.socketAddress.getIPAddress(), player.getServerName()).complete()
+            val p = Punishment.canSpeak(player.uniqueId, player.socketAddress.getIPAddress()?.reconstructIPAddress(), player.getServerName()).complete()
             if (p != null) {
                 e.isCancelled = true
                 player.send(p.getBannedMessage().complete())

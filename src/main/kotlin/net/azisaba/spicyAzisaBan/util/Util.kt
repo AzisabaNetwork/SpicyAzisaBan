@@ -1,7 +1,7 @@
 package net.azisaba.spicyAzisaBan.util
 
+import com.google.common.net.InetAddresses
 import net.azisaba.spicyAzisaBan.ReloadableSABConfig
-import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -25,7 +25,6 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import kotlin.NumberFormatException
 import kotlin.math.floor
 
 object Util {
@@ -38,6 +37,9 @@ object Util {
         }
     }
 
+    /**
+     * Prints stacktrace to console and sends "error" message to sender.
+     */
     fun CommandSender.sendErrorMessage(throwable: Throwable) {
         throwable.printStackTrace()
         send(SABMessages.General.error.replaceVariables().translate())
@@ -46,7 +48,7 @@ object Util {
     private var lastPreloadedPermissions = 0L
 
     /**
-     * (Pre)load permissions so permissions will show up on LuckPerms suggestions.
+     * (Pre)load permissions so permissions will show up on LuckPerms suggestions... but it's not working well...
      */
     fun preloadPermissions(sender: CommandSender) {
         if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
@@ -76,7 +78,7 @@ object Util {
     }
 
     /**
-     * Add zeros (if missing) to beginning of the string.
+     * Add missing zeros to beginning of the string.
      */
     fun zero(length: Int, any: Any): String {
         val s = any.toString()
@@ -84,20 +86,37 @@ object Util {
         return "0".repeat(length - s.length) + s
     }
 
+    /**
+     * Try to get IP address of the socket address. null if this isn't instance of InetSocketAddress.
+     */
     fun SocketAddress.getIPAddress() = if (this is InetSocketAddress) this.getIPAddress() else null
 
+    /**
+     * Returns the IP address of the socket address.
+     */
     fun InetSocketAddress.getIPAddress() = address.getIPAddress()
 
+    /**
+     * Returns the IP address of the InetAddress.
+     */
     fun InetAddress.getIPAddress() = hostAddress.replaceFirst("(.*)%.*".toRegex(), "$1")
 
+    /**
+     * Try to get the IP address of the player.
+     * @throws IllegalArgumentException if player is connecting via something other than InetSocketAddress (e.g. unix socket)
+     */
     fun ProxiedPlayer.getIPAddress(): String {
         require(socketAddress is InetSocketAddress) { "Player $name is connecting via unix socket" }
         return (socketAddress as InetSocketAddress).getIPAddress()
     }
 
+    /**
+     * Concatenates one or more lists.
+     */
     fun <T> Iterable<T>.concat(vararg another: List<T>?) = this.toMutableList().apply { another.filterNotNull().forEach { addAll(it) } }
 
     /**
+     * Time format in string -> Time in milliseconds
      * @sample net.azisaba.spicyAzisaBan.test.ProcessTimeTest
      */
     @Throws(IllegalArgumentException::class)
@@ -134,6 +153,9 @@ object Util {
         return time
     }
 
+    /**
+     * Time in milliseconds -> formatted time text
+     */
     fun unProcessTime(l: Long): String {
         if (l < 0L) return SABMessages.General.permanent
         var time = l
@@ -164,8 +186,14 @@ object Util {
         return SABMessages.formatDateTime(d, h, m, s)
     }
 
+    /**
+     * Returns colored string of the boolean.
+     */
     fun Boolean.toMinecraft() = if (this) "${ChatColor.GREEN}true" else "${ChatColor.RED}false"
 
+    /**
+     * Translates '&' into section char.
+     */
     fun String.translate() = ChatColor.translateAlternateColorCodes('&', this)!!
 
     fun List<String>.filterArgKeys(args: Array<String>): List<String> {
@@ -183,10 +211,16 @@ object Util {
         return output
     }
 
+    /**
+     * Returns list that matches/starts with specified string.
+     */
     fun List<String>.filtr(s: String): List<String> = distinct().filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
 
     private val insertLock = Object()
 
+    /**
+     * Executes `fn` and returns the result of `SELECT LAST_INSERT_ID()`.
+     */
     fun insert(fn: () -> Unit): Long {
         synchronized(insertLock) {
             fn()
@@ -201,21 +235,35 @@ object Util {
         }
     }
 
+    /**
+     * #insert but without return value
+     */
     fun insertNoId(fn: () -> Unit) {
         synchronized(insertLock) {
             fn()
         }
     }
 
+    /**
+     * Try to get the uuid of the sender.
+     * @return Player's uuid if sender is ProxiedPlayer, NIL otherwise
+     */
     fun CommandSender.getUniqueId(): UUID = when (this) {
         is ProxiedPlayer -> this.uniqueId
         else -> UUIDUtil.NIL
     }
 
+    /**
+     * Checks if sender has "notify" permission for a punishment type.
+     */
     fun CommandSender.hasNotifyPermissionOf(type: PunishmentType) = hasPermission("sab.notify.${type.id}")
 
     private val profileCache = mutableMapOf<UUID, DataCache<PlayerProfile>>()
 
+    /**
+     * Fetches the PlayerProfile of player's uuid.
+     * The result may be cached. and always returns `CONSOLE` for NIL uuid.
+     */
     fun UUID.getProfile(): Promise<PlayerProfile> = Promise.create { context ->
         if (this == UUIDUtil.NIL) return@create context.resolve(SimplePlayerProfile("CONSOLE", this))
         val cache = profileCache[this]
@@ -232,17 +280,33 @@ object Util {
         }
     }
 
+    /**
+     * Kicks the player with specified reason. The string will be automatically converted into TextComponent.
+     */
     fun ProxiedPlayer.kick(reason: String) {
         this.disconnect(*TextComponent.fromLegacyText(reason.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
     }
 
+    /**
+     * Reconstructs(Formats) IP address.
+     * For example, this method converts `0001.001.01.1` into `1.1.1.1`.
+     */
+    @Suppress("UnstableApiUsage")
     fun String.reconstructIPAddress(): String {
-        if (!isPunishableIP()) error("not a valid ip address")
-        val numbers = this.split(".").map { Integer.parseInt(it, 10) }
-        return "${numbers[0]}.${numbers[1]}.${numbers[2]}.${numbers[3]}"
+        if (!isValidIPAddress()) error("not a valid ip address")
+        return InetAddresses.forString(this).getIPAddress()
     }
 
+    /**
+     * Checks if the ip address (v4 only) is punishable.
+     * The IP address must NOT be:
+     * - Private address (e.g. 127.0.0.1, 192.168.xxx.xxx)
+     * - Reserved address
+     * IPv6 is not checked thus always returns true for IPv6 addresses.
+     */
     fun String.isPunishableIP(): Boolean {
+        if (!isValidIPAddress()) throw IllegalArgumentException("Invalid IP address: $this")
+        if (!isValidIPv4Address()) return true // skip IPv6 checks
         val numbers = this.split(".").mapNotNull {
             try {
                 Integer.parseInt(it, 10)
@@ -284,7 +348,16 @@ object Util {
         return true
     }
 
-    fun String.isValidIPAddress(): Boolean {
+    /**
+     * Checks if the string is valid IP address.
+     */
+    @Suppress("UnstableApiUsage")
+    fun String.isValidIPAddress(): Boolean = InetAddresses.isInetAddress(this)
+
+    /**
+     * Checks if the string is valid IPv4 address.
+     */
+    private fun String.isValidIPv4Address(): Boolean {
         val numbers = this.split(".").mapNotNull {
             try {
                 Integer.parseInt(it, 10)
@@ -294,8 +367,14 @@ object Util {
         return numbers.all { it in 0..255 }
     }
 
+    /**
+     * Try to get the server name of the server they're in. May be null if server is null or the sender isn't player.
+     */
     fun CommandSender.getServerName() = if (this is ProxiedPlayer) this.server?.info?.name ?: "" else ""
 
+    /**
+     * Sends the message to specified server after 100 + (random time in range 0-300) seconds.
+     */
     fun ServerInfo.broadcastMessageAfterRandomTime(server: String) {
         val s = SABMessages.getBannedMessage(server).replaceVariables().translate()
         val random = 100 + (Math.random() * 300).toLong()
@@ -308,11 +387,17 @@ object Util {
         }, random, TimeUnit.SECONDS)
     }
 
+    /**
+     * Try to parse int or fallbacks to `def` if fails.
+     */
     fun String.toIntOr(def: Int, radix: Int = 10) = try {
         Integer.parseInt(this, radix)
     } catch (e: NumberFormatException) {
         def
     }
 
+    /**
+     * Extension method to allow `ChatColor.XXXX + string`.
+     */
     operator fun ChatColor.plus(s: String) = "$this$s"
 }
