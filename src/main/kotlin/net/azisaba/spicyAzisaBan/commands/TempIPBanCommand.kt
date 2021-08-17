@@ -90,6 +90,7 @@ object TempIPBanCommand: Command("${SABConfig.prefix}tempipban", null, "${SABCon
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
+        if (!sender.hasPermission(PunishmentType.TEMP_IP_BAN.perm)) return emptyList()
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)

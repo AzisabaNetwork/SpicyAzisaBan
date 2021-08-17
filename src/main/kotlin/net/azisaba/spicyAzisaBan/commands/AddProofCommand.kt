@@ -71,6 +71,7 @@ object AddProofCommand: Command("${SABConfig.prefix}addproof"), TabExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
+        if (!sender.hasPermission("sab.addproof")) return emptyList()
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)

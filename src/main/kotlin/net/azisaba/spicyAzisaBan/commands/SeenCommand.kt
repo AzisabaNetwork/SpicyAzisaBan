@@ -78,6 +78,7 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
+        if (!sender.hasPermission("sab.seen")) return emptyList()
         if (args.size == 1) return ProxyServer.getInstance().players
             .filterIndexed { i, _ -> i < 500 }
             .map { it.name }

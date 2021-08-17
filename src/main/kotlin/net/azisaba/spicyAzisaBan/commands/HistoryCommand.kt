@@ -196,6 +196,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
+        if (!sender.hasPermission("sab.history")) return emptyList()
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)

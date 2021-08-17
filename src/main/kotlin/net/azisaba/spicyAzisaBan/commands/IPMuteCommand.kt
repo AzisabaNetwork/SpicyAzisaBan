@@ -73,6 +73,7 @@ object IPMuteCommand: Command("${SABConfig.prefix}ipmute"), TabExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
+        if (!sender.hasPermission(PunishmentType.IP_MUTE.perm)) return emptyList()
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)

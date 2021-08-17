@@ -71,6 +71,7 @@ object CautionCommand: Command("${SABConfig.prefix}caution"), TabExecutor {
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
+        if (!sender.hasPermission(PunishmentType.WARNING.perm)) return emptyList()
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
