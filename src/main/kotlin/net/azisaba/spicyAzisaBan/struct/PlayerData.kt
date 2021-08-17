@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.struct
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.insertNoId
 import net.md_5.bungee.api.connection.ProxiedPlayer
@@ -43,9 +44,44 @@ data class PlayerData(
             SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $uuid") }
 
+        fun getByName(name: String): Promise<PlayerData> = Promise.create { context ->
+            val sql = "SELECT * FROM `players` WHERE LOWER(`name`) LIKE LOWER(?) ORDER BY `last_seen` DESC LIMIT 1"
+            SQLConnection.logSql(sql)
+            val ps = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
+            ps.setString(1, "%$name%")
+            val rs = ps.executeQuery()
+            if (!rs.next()) {
+                MojangAPI.getUniqueId(name)
+                    .then { uuid ->
+                        val sql2 = "INSERT INTO `players` (`uuid`, `name`, `ip`, `last_seen`) VALUES (?, ?, ?, ?)"
+                        SQLConnection.logSql(sql2)
+                        val ps2 = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql2)
+                        ps2.setString(1, uuid.toString())
+                        ps2.setString(2, name)
+                        ps2.setString(3, "1.1.1.1")
+                        ps2.setLong(4, System.currentTimeMillis())
+                        insertNoId {
+                            ps2.executeUpdate()
+                        }
+                        PlayerData(uuid, name, "1.1.1.1", System.currentTimeMillis())
+                    }
+                    .catch { context.reject(IllegalArgumentException("no player data found for $name")) }
+                    .complete()
+                    ?.let { return@create context.resolve(it) }
+                return@create
+            }
+            val uuid = UUID.fromString(rs.getString("uuid"))
+            val theName = rs.getString("name")
+            val ip = rs.getString("ip")
+            val lastSeen = rs.getLong("last_seen")
+            return@create context.resolve(PlayerData(uuid, theName, ip, lastSeen))
+        }
+
+        /*
         fun getByName(name: String): Promise<PlayerData> =
             SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("name", name).setOrderBy("last_seen").setOrder(Sort.DESC).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $name") }
+        */
 
         fun createOrUpdate(player: ProxiedPlayer): Promise<PlayerData> = Promise.create { context ->
             val time = System.currentTimeMillis()
