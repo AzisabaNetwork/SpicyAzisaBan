@@ -176,6 +176,11 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         return group?.get()
     }
 
+    fun isGroupExists(group: String): Promise<Boolean> =
+        SpicyAzisaBan.instance.connection.groups
+            .findOne(FindOptions.Builder().addWhere("id", group).build())
+            .then { it != null }
+
     fun getGroupByServer(server: String): Promise<String?> {
         if (server == "global") return Promise.resolve(null)
         return serverGroup.findOne(FindOptions.Builder().addWhere("server", server).setLimit(1).build())

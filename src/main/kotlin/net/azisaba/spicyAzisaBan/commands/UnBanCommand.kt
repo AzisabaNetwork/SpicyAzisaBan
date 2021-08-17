@@ -62,6 +62,15 @@ object UnBanCommand: Command("${SABConfig.prefix}unban"), TabExecutor {
             .complete()
             ?: return sender.send(SABMessages.Commands.General.notPunished.replaceVariables().translate())
         SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", p.id).build()).complete()
+        val permission = if (SpicyAzisaBan.instance.connection.isGroupExists(p.server).complete()) {
+            "sab.punish.group.${p.server}"
+        } else {
+            "sab.punish.server.${p.server}"
+        }
+        if (!sender.hasPermission(permission)) {
+            sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
+            return
+        }
         val time = System.currentTimeMillis()
         val upid = try {
             insert {
