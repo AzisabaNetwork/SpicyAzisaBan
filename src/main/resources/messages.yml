@@ -45,6 +45,7 @@ commands:
     proofNotFound: "%PREFIX%&c証拠#%dが見つかりません!"
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
+    reloadedConfiguration: "%PREFIX%&a設定を再読み込みしました。"
 
   # Available variables (punishment):
   # %DATE%

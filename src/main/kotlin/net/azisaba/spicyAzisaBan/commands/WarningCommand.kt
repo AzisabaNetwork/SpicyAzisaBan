@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
@@ -67,7 +68,7 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "warn"), TabE
         }
         p.notifyToAll().complete()
         p.sendTitle()
-        if (SABConfig.BanOnWarning.threshold > 0) {
+        if (ReloadableSABConfig.BanOnWarning.threshold > 0) {
             val sql = "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?"
             SQLConnection.logSql(sql)
             val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
@@ -77,10 +78,10 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "warn"), TabE
             rs.next()
             val count = rs.getInt(1)
             st.close()
-            if (count >= SABConfig.BanOnWarning.threshold) {
+            if (count >= ReloadableSABConfig.BanOnWarning.threshold) {
                 ProxyServer.getInstance().pluginManager.dispatchCommand(
                     ProxyServer.getInstance().console,
-                    "${SABConfig.prefix}gtempban player=${player.profile.name} reason=\"${SABConfig.BanOnWarning.reason.replaceVariables("count" to count.toString()).translate()}\" server=${server.name} time=${SABConfig.BanOnWarning.time}",
+                    "${SABConfig.prefix}gtempban player=${player.profile.name} reason=\"${ReloadableSABConfig.BanOnWarning.reason.replaceVariables("count" to count.toString()).translate()}\" server=${server.name} time=${ReloadableSABConfig.BanOnWarning.time}",
                 )
             }
         }

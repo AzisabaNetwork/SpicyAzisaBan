@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.listener
 
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
@@ -23,7 +24,7 @@ object CheckMuteListener: Listener {
     fun onChat(e: ChatEvent) {
         if (e.sender !is ProxiedPlayer) return
         val player = e.sender as ProxiedPlayer
-        if (e.message.startsWith("/") && !SABConfig.getBlockedCommandsWhenMuted(player.getServerName()).any { s ->
+        if (e.message.startsWith("/") && !ReloadableSABConfig.getBlockedCommandsWhenMuted(player.getServerName()).any { s ->
                 e.message == "/$s" || e.message.startsWith("/$s ") || e.message.matches("^/.*:$s(\$|\\s+)".toRegex())
         }) return
         val res = Promise.create<Boolean> { context ->

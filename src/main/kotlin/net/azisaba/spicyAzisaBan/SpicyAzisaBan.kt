@@ -96,6 +96,8 @@ class SpicyAzisaBan: Plugin() {
     }
 
     override fun onEnable() {
+        SABConfig
+        ReloadableSABConfig.reload()
         logger.info("Connecting to database...")
         connection = SQLConnection(
             SABConfig.database.host,
@@ -141,7 +143,7 @@ class SpicyAzisaBan: Plugin() {
                     e.printStackTrace()
                 }
             }
-        }, SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery)
+        }, ReloadableSABConfig.Warning.sendTitleEvery, ReloadableSABConfig.Warning.sendTitleEvery)
         proxy.pluginManager.registerListener(this, PreloadPermissionsOnJoinListener)
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)

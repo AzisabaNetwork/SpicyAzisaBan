@@ -1,6 +1,6 @@
 package net.azisaba.spicyAzisaBan.punishment
 
-import net.azisaba.spicyAzisaBan.SABConfig
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -45,7 +45,7 @@ data class UnPunish(
                 "type" to punishment.type.getName(),
                 "reason" to reason,
                 "preason" to punishment.reason,
-                "server" to if (punishment.server.lowercase() == "global") SABMessages.General.global else SABConfig.serverNames.getOrDefault(punishment.server.lowercase(), punishment.server.lowercase()),
+                "server" to if (punishment.server.lowercase() == "global") SABMessages.General.global else ReloadableSABConfig.serverNames.getOrDefault(punishment.server.lowercase(), punishment.server.lowercase()),
                 "duration" to Util.unProcessTime(punishment.end - System.currentTimeMillis()),
                 "time" to Util.unProcessTime(punishment.end - punishment.start),
             )

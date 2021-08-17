@@ -1,6 +1,6 @@
 package net.azisaba.spicyAzisaBan.util.contexts
 
-import net.azisaba.spicyAzisaBan.SABConfig
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.filtr
@@ -15,7 +15,7 @@ data class ReasonContext(val text: String): Context {
             // don't look for a group if specified explicitly by server parameter
             val groupOrServer = server
                 ?: (SpicyAzisaBan.instance.connection.getCachedGroupByServer(defaultServer) ?: defaultServer)
-            return SABConfig.defaultReasons[type]!![groupOrServer]?.map { "reason=\"$it\"" }?.filtr(args.last()) ?: emptyList()
+            return ReloadableSABConfig.defaultReasons[type]!![groupOrServer]?.map { "reason=\"$it\"" }?.filtr(args.last()) ?: emptyList()
         }
     }
 }

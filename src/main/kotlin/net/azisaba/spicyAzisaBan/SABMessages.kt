@@ -52,7 +52,7 @@ object SABMessages {
     fun String.replaceVariables(vararg pairs: Pair<String, String>) = replaceVariables(mapOf(*pairs))
 
     fun getBannedMessage(server: String) =
-        SABConfig.customBannedMessage[server] ?: Commands.General.removedFromServer
+        ReloadableSABConfig.customBannedMessage[server] ?: Commands.General.removedFromServer
 
     fun formatDateTime(day: Int, hour: Int, minute: Int, second: Int): String {
         var s = ""
@@ -127,6 +127,7 @@ object SABMessages {
         object Sab {
             private val obj = Commands.obj.getObj("sab")
             val setDebugLevel = obj.getMessage("setDebugLevel", "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。")
+            val reloadedConfiguration = obj.getMessage("reloadedConfiguration", "%PREFIX%&a設定を再読み込みしました。")
         }
 
         object Ban {

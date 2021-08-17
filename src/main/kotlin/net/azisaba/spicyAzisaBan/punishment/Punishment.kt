@@ -1,6 +1,6 @@
 package net.azisaba.spicyAzisaBan.punishment
 
-import net.azisaba.spicyAzisaBan.SABConfig
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -214,7 +214,7 @@ data class Punishment(
         val title = ProxyServer.getInstance().createTitle()
         title.fadeIn(0)
         title.fadeOut(0)
-        title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
+        title.stay((ReloadableSABConfig.Warning.titleStayTime / 50L).toInt())
         title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.translate()))
         title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.translate()))
         ProxyServer.getInstance().getPlayer(getTargetUUID()).sendTitle(title)
@@ -258,7 +258,7 @@ data class Punishment(
                 "operator" to profile.name,
                 "type" to type.id.replaceFirstChar { it.uppercase() },
                 "reason" to reason,
-                "server" to if (server.lowercase() == "global") SABMessages.General.global else SABConfig.serverNames.getOrDefault(server.lowercase(), server.lowercase()),
+                "server" to if (server.lowercase() == "global") SABMessages.General.global else ReloadableSABConfig.serverNames.getOrDefault(server.lowercase(), server.lowercase()),
                 "duration" to Util.unProcessTime(end - System.currentTimeMillis()),
                 "time" to Util.unProcessTime(end - start),
                 "date" to SABMessages.formatDate(start),

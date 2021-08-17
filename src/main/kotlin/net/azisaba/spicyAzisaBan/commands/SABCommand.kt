@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
@@ -9,6 +10,7 @@ import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
 import net.azisaba.spicyAzisaBan.util.Util.insert
 import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
@@ -39,6 +41,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab creategroup <group>")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletegroup <group>")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab debug [debugLevel = 0-99999]")
+        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab reload")
     }
 
     private fun CommandSender.sendGroupHelp() {
@@ -206,6 +209,15 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     }
                 }
                 sender.send(SABMessages.Commands.Sab.setDebugLevel.replaceVariables().format(SpicyAzisaBan.debugLevel).translate())
+            }
+            "reload" -> {
+                try {
+                    ReloadableSABConfig.reload()
+                } catch (e: Exception) {
+                    sender.sendErrorMessage(e)
+                    return
+                }
+                sender.send(SABMessages.Commands.Sab.reloadedConfiguration.replaceVariables().translate())
             }
             else -> sender.sendHelp()
         }

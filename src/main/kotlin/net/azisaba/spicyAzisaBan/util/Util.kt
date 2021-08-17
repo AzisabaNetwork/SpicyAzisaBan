@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.util
 
+import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
@@ -249,7 +250,7 @@ object Util {
         }
         if (numbers.size != 4) return false
         if (numbers.any { it !in 0..255 }) return false
-        if (SABConfig.enableDebugFeatures && (this == "127.0.0.1" || (numbers[0] == 192 && numbers[1] == 168))) return true
+        if (ReloadableSABConfig.enableDebugFeatures && (this == "127.0.0.1" || (numbers[0] == 192 && numbers[1] == 168))) return true
         // Reserved IP addresses
         // 0.0.0.0/8 (0.0.0.0 - 0.255.255.255)
         if (numbers[0] == 0) return false
