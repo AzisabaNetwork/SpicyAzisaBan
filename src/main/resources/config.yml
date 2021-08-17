@@ -28,9 +28,15 @@ defaultReasons:
       - "ban reason (lobby) 2"
 # a player wouldn't be able to bypass with eg /minecraft:tell
 blockedCommandsWhenMuted:
-  - tell
-  - r
-  - me
+  # server: Array<String>
+  # "global" would affect all servers
+  global:
+    - tell
+    - r
+    - me
+  life:
+    - rpc
+    - me
 banOnWarning:
   # if warning count hits 3, 4, 5..., the player would be banned with specified reason
   # this feature will be disabled if you set this value to <= 0

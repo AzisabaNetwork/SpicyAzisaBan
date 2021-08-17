@@ -22,10 +22,10 @@ object CheckMuteListener: Listener {
     @EventHandler
     fun onChat(e: ChatEvent) {
         if (e.sender !is ProxiedPlayer) return
-        if (e.message.startsWith("/") && !SABConfig.blockedCommandsWhenMuted.any { s ->
+        val player = e.sender as ProxiedPlayer
+        if (e.message.startsWith("/") && !SABConfig.getBlockedCommandsWhenMuted(player.getServerName()).any { s ->
                 e.message == "/$s" || e.message.startsWith("/$s ") || e.message.matches("^/.*:$s(\$|\\s+)".toRegex())
         }) return
-        val player = e.sender as ProxiedPlayer
         val res = Promise.create<Boolean> { context ->
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                 context.resolve(false)

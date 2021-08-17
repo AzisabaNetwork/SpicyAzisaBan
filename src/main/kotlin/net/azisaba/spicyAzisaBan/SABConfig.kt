@@ -4,6 +4,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.getMessage
 import net.azisaba.spicyAzisaBan.SABMessages.getObj
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.concat
 import util.ResourceLocator
 import util.base.Bytes
 import util.yaml.YamlConfiguration
@@ -67,7 +68,17 @@ object SABConfig {
     }
 
     val enableDebugFeatures = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!).asObject().getBoolean("enableDebugFeatures", false)
-    val blockedCommandsWhenMuted = cfg.getArray("blockedCommandsWhenMuted")?.mapNotNull { if (Objects.isNull(it)) null else it.toString() } ?: emptyList()
+    private val blockedCommandsWhenMuted = cfg.getObj("blockedCommandsWhenMuted").let { yaml ->
+        val map = mutableMapOf<String, List<String>>()
+        yaml.rawData.keys.forEach { key ->
+            map[key] = yaml.getArray(key)?.mapNotNull { if (Objects.isNull(it)) null else it.toString() } ?: listOf()
+        }
+        map.toMap()
+    }
+
+    fun getBlockedCommandsWhenMuted(server: String): List<String> =
+        (blockedCommandsWhenMuted["global"]?.toMutableList() ?: mutableListOf())
+            .concat(blockedCommandsWhenMuted[server])
 
     object BanOnWarning {
         private val obj = cfg.getObj("banOnWarning")
