@@ -23,17 +23,6 @@ data class UnPunish(
     val operator: UUID,
 ) {
     companion object {
-        fun fromTableData(td: TableData): Promise<UnPunish> = Promise.create { context ->
-            val id = td.getLong("id")!!
-            val punishId = td.getLong("punish_id")!!
-            val reason = td.getString("reason")!!
-            val timestamp = td.getLong("timestamp")!!
-            val operator = UUID.fromString(td.getString("operator"))!!
-            val p = Punishment.fetchPunishmentById(punishId).complete()
-                ?: return@create context.reject(IllegalArgumentException("Missing punishment $punishId"))
-            context.resolve(UnPunish(id, p, reason, timestamp, operator))
-        }
-
         fun fromTableData(punishment: Punishment, td: TableData): UnPunish {
             val id = td.getLong("id")!!
             val punishId = td.getLong("punish_id")!!
@@ -53,7 +42,7 @@ data class UnPunish(
                 "player" to punishment.name,
                 "target" to punishment.target,
                 "operator" to profile.name,
-                "type" to punishment.type.id.replaceFirstChar { it.uppercase() },
+                "type" to punishment.type.getName(),
                 "reason" to reason,
                 "preason" to punishment.reason,
                 "server" to if (punishment.server.lowercase() == "global") SABMessages.General.global else SABConfig.serverNames.getOrDefault(punishment.server.lowercase(), punishment.server.lowercase()),

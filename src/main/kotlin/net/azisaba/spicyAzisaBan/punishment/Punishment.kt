@@ -173,7 +173,7 @@ data class Punishment(
             context.resolve(punishValue)
         }
 
-        fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
+        private fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
             if (uuid == null && ip == null) throw IllegalArgumentException("Either uuid or ip must not be null")
             val sql = "SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)"
             SQLConnection.logSql(sql)
@@ -193,31 +193,9 @@ data class Punishment(
             SpicyAzisaBan.instance.connection.punishments.findOne(FindOptions.Builder().addWhere("id", id).setLimit(1).build())
                 .then { it?.let { fromTableData(it) } }
 
-        fun fetchActivePunishmentsByTarget(target: String): Promise<List<Punishment>> =
-            SpicyAzisaBan.instance.connection.punishments.findAll(FindOptions.Builder().addWhere("target", target).build())
-                .then { it.map { td -> fromTableData(td) } }
-
-        fun fetchActivePunishmentsByTarget(target: String, type: PunishmentType, server: String): Promise<List<Punishment>> =
-            SpicyAzisaBan.instance
-                .connection
-                .punishments
-                .findAll(FindOptions.Builder().addWhere("target", target).addWhere("type", type.name).addWhere("server", server).build())
-                .then { it.map { td -> fromTableData(td) } }
-
-        fun fetchActivePunishmentsByTarget(target: String, server: String): Promise<List<Punishment>> =
-            SpicyAzisaBan.instance
-                .connection
-                .punishments
-                .findAll(FindOptions.Builder().addWhere("target", target).addWhere("server", server).build())
-                .then { it.map { td -> fromTableData(td) } }
-
         fun fetchPunishmentById(id: Long): Promise<Punishment?> =
             SpicyAzisaBan.instance.connection.punishmentHistory.findOne(FindOptions.Builder().addWhere("id", id).setLimit(1).build())
                 .then { it?.let { fromTableData(it) } }
-
-        fun fetchPunishmentsByTarget(target: String): Promise<List<Punishment>> =
-            SpicyAzisaBan.instance.connection.punishmentHistory.findAll(FindOptions.Builder().addWhere("target", target).build())
-                .then { it.map { td -> fromTableData(td) } }
     }
 
     init {

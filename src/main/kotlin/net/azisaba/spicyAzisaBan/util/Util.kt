@@ -22,7 +22,6 @@ import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
-import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.NumberFormatException
@@ -76,74 +75,12 @@ object Util {
     }
 
     /**
-     * Formats timestamp to "year/month/day hour:minute:second.millisecond"
-     */
-    fun formatDateTime(millis: Long): String {
-        val cal = Calendar.getInstance()
-        cal.timeInMillis = millis
-        return cal.formatDateTime()
-    }
-
-    /**
      * Add zeros (if missing) to beginning of the string.
      */
     fun zero(length: Int, any: Any): String {
         val s = any.toString()
         if (s.length >= length) return s
         return "0".repeat(length - s.length) + s
-    }
-
-    /**
-     * Formats calendar to "year/month/day hour:minute:second.millisecond"
-     */
-    fun Calendar.formatDateTime(): String {
-        val year = zero(4, this[Calendar.YEAR])
-        val month = zero(2, this[Calendar.MONTH] + 1)
-        val day = zero(2, this[Calendar.DAY_OF_MONTH])
-        val hour = zero(2, this[Calendar.HOUR_OF_DAY])
-        val minute = zero(2, this[Calendar.MINUTE])
-        val second = zero(2, this[Calendar.SECOND])
-        val millisecond = zero(3, this[Calendar.MILLISECOND])
-        return "$year/$month/$day $hour:$minute:$second.$millisecond"
-    }
-
-    /**
-     * you know what this method does (unless you're drunk).
-     */
-    fun Calendar.getBeginAndEndOfMonth(): Pair<Long, Long> {
-        val c = this.clone() as Calendar
-        c[Calendar.DAY_OF_MONTH] = 1
-        c[Calendar.HOUR_OF_DAY] = 0
-        c[Calendar.MINUTE] = 0
-        c[Calendar.SECOND] = 0
-        c[Calendar.MILLISECOND] = 0
-        val first = c.timeInMillis
-        var newMonth = c[Calendar.MONTH] + 1
-        if (newMonth > 11) {
-            c.set(Calendar.YEAR, c[Calendar.YEAR] + 1)
-            newMonth -= 12
-        }
-        c[Calendar.MONTH] = newMonth
-        val second = c.timeInMillis - 1
-        return first to second
-    }
-
-    /**
-     * this method gets current month. nothing else.
-     */
-    fun getCurrentMonth() = Calendar.getInstance()[Calendar.MONTH]
-
-    /**
-     * Sets the month, but it makes sure that the month is not future.
-     */
-    fun Calendar.convertMonth(month: Int) {
-        if (month < 0 || month > 11) error("Invalid month (must be 0-11 inclusive): $month")
-        val backToThePast = month > getCurrentMonth()
-        if (backToThePast) {
-            this[Calendar.YEAR]--
-            this[Calendar.MONTH] = month
-        }
-        this[Calendar.MONTH] = month
     }
 
     fun SocketAddress.getIPAddress() = if (this is InetSocketAddress) this.getIPAddress() else null
