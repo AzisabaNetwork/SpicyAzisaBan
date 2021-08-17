@@ -70,7 +70,9 @@ object UnPunishCommand: Command("${SABConfig.prefix}unpunish"), TabExecutor {
             return
         }
         val p = Punishment.fromTableData(list[0])
-        val permission = if (SpicyAzisaBan.instance.connection.isGroupExists(p.server).complete()) {
+        val permission = if (p.server == "global") {
+            "sab.punish.global"
+        } else if (SpicyAzisaBan.instance.connection.isGroupExists(p.server).complete()) {
             "sab.punish.group.${p.server}"
         } else {
             "sab.punish.server.${p.server}"

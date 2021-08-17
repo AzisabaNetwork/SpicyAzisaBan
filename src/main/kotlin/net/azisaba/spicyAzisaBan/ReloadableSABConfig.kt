@@ -37,7 +37,6 @@ object ReloadableSABConfig {
                 }
                 map[type] = m2
             }
-            SpicyAzisaBan.instance.logger.info("Loaded defaultReasons: $map")
             map.toMap()
         }
 

@@ -61,7 +61,9 @@ object UnMuteCommand: Command("${SABConfig.prefix}unmute"), TabExecutor {
             .catch { sender.sendErrorMessage(it) }
             .complete()
             ?: return sender.send(SABMessages.Commands.General.notPunished.replaceVariables().translate())
-        val permission = if (SpicyAzisaBan.instance.connection.isGroupExists(p.server).complete()) {
+        val permission = if (p.server == "global") {
+            "sab.punish.global"
+        } else if (SpicyAzisaBan.instance.connection.isGroupExists(p.server).complete()) {
             "sab.punish.group.${p.server}"
         } else {
             "sab.punish.server.${p.server}"
