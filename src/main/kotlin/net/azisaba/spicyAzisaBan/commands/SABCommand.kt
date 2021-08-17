@@ -29,7 +29,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), TabExecutor {
-    private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug")
+    private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug", "reload")
     private val groupCommands = listOf("add", "remove", "info")
 
     private val groupRemoveConfirmation = mutableMapOf<UUID, String>()
