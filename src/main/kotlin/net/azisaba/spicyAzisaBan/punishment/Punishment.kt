@@ -130,7 +130,7 @@ data class Punishment(
         fun canJoinServer(uuid: UUID?, address: String?, server: String, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
             if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
             val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
-            val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
+            val ps = fetchActivePunishmentsBy(uuid, address, server, group)
             if (ps.isEmpty()) return@create context.resolve(null)
             var punishment: Punishment? = null
             ps.filter { p -> p.type.isBan() }.forEach { p ->
@@ -153,7 +153,7 @@ data class Punishment(
                 SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: ChatEvent on $server)")
                 muteCache["$uuid,$address"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
                 val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
-                val ps = fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid, address, server, group)
+                val ps = fetchActivePunishmentsBy(uuid, address, server, group)
                 if (ps.isEmpty()) return@create context.resolve(null)
                 var punishment: Punishment? = null
                 ps.filter { p -> p.type.isMute() }.forEach { p ->
@@ -173,7 +173,7 @@ data class Punishment(
             context.resolve(punishValue)
         }
 
-        private fun fetchActivePunishmentsByUUIDAndIPAddressAndServerAndGroupName(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
+        private fun fetchActivePunishmentsBy(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
             if (uuid == null && ip == null) throw IllegalArgumentException("Either uuid or ip must not be null")
             val sql = "SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)"
             SQLConnection.logSql(sql)
