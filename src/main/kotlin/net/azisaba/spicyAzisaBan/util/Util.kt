@@ -89,7 +89,7 @@ object Util {
     /**
      * Try to get IP address of the socket address. null if this isn't instance of InetSocketAddress.
      */
-    fun SocketAddress.getIPAddress() = if (this is InetSocketAddress) this.getIPAddress() else null
+    fun SocketAddress?.getIPAddress() = if (this is InetSocketAddress) this.getIPAddress() else null
 
     /**
      * Returns the IP address of the socket address.
@@ -231,7 +231,7 @@ object Util {
             if (!result.next()) return -1L
             val r = result.getObject(1) as Number
             statement.close()
-            return r.toLong() + 1L
+            return r.toLong()
         }
     }
 

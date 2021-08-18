@@ -101,9 +101,10 @@ data class PlayerData(
                     ).catch { it.printStackTrace() }.complete()
                 }
             }
-            if (player.socketAddress.getIPAddress() != null) {
+            val addr = player.socketAddress.getIPAddress()
+            if (addr != null) {
                 val ip = SpicyAzisaBan.instance.connection.ipAddressHistory
-                    .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).addWhere("ip", player.getIPAddress()).build())
+                    .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).addWhere("ip", addr).build())
                     .then { td -> td?.getString("ip") }
                     .catch { it.printStackTrace() }
                     .complete()
@@ -113,7 +114,7 @@ data class PlayerData(
                         SpicyAzisaBan.instance.connection.ipAddressHistory.insert(
                             InsertOptions.Builder()
                                 .addValue("uuid", player.uniqueId.toString())
-                                .addValue("ip", player.socketAddress.getIPAddress())
+                                .addValue("ip", addr)
                                 .addValue("last_seen", System.currentTimeMillis())
                                 .build()
                         ).catch { it.printStackTrace() }.complete()
@@ -126,11 +127,11 @@ data class PlayerData(
                         .addWhere("uuid", player.uniqueId.toString())
                         .addValue("uuid", player.uniqueId.toString())
                         .addValue("name", player.name)
-                        .addValue("ip", player.socketAddress.getIPAddress())
+                        .addValue("ip", addr)
                         .addValue("last_seen", time)
                         .build()
                 ).catch { it.printStackTrace() }.complete()
-                context.resolve(PlayerData(player.uniqueId, player.name, player.socketAddress.getIPAddress(), time))
+                context.resolve(PlayerData(player.uniqueId, player.name, addr, time))
             }
         }
 

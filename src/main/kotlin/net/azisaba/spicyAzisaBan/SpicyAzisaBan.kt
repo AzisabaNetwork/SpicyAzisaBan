@@ -40,6 +40,7 @@ import net.azisaba.spicyAzisaBan.commands.WarnsCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
+import net.azisaba.spicyAzisaBan.listener.PlayerDisconnectListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
@@ -147,6 +148,7 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)
         proxy.pluginManager.registerListener(this, CheckMuteListener)
+        proxy.pluginManager.registerListener(this, PlayerDisconnectListener)
         proxy.pluginManager.registerCommand(this, SABCommand)
         proxy.pluginManager.registerCommand(this, GlobalBanCommand)
         proxy.pluginManager.registerCommand(this, BanCommand)

@@ -81,7 +81,7 @@ object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
             }
             .complete() ?: return
         p.notifyToAll().complete()
-        sender.send(SABMessages.Commands.Ban.done.replaceVariables(p.getVariables().complete()).translate())
+        sender.send(SABMessages.Commands.Kick.done.replaceVariables(p.getVariables().complete()).translate())
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {

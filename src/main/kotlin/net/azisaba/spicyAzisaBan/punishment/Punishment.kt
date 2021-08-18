@@ -211,13 +211,14 @@ data class Punishment(
     fun sendTitle() {
         if (type != PunishmentType.WARNING && type != PunishmentType.CAUTION) return
         if (flags.contains(Flags.SEEN)) return
+        val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return
         val title = ProxyServer.getInstance().createTitle()
         title.fadeIn(0)
         title.fadeOut(0)
         title.stay((ReloadableSABConfig.Warning.titleStayTime / 50L).toInt())
         title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.translate()))
         title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.translate()))
-        ProxyServer.getInstance().getPlayer(getTargetUUID()).sendTitle(title)
+        player.sendTitle(title)
     }
 
     fun removeIfExpired(): Promise<Unit> = Promise.create { context ->
