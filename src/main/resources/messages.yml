@@ -334,6 +334,7 @@ commands:
       - "&c警告数 &8> &7%WARNING_COUNT%"
       - "&c注意数 &8> &7%CAUTION_COUNT%"
       - "&cノート &8> &7%NOTE_COUNT%"
+      - "&cキック &8> &7%KICK_COUNT%"
     # Available variables: %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
     layoutIP:
       - "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)"
