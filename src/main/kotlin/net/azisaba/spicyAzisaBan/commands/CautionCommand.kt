@@ -33,7 +33,7 @@ object CautionCommand: Command("${SABConfig.prefix}caution"), TabExecutor {
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (sender !is ProxiedPlayer) return sender.send("${ChatColor.RED}This command cannot be used from console!")
-        if (!sender.hasPermission(PunishmentType.WARNING.perm)) {
+        if (!sender.hasPermission(PunishmentType.CAUTION.perm)) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return sender.send(SABMessages.Commands.Caution.usage.replaceVariables().translate())
@@ -67,11 +67,11 @@ object CautionCommand: Command("${SABConfig.prefix}caution"), TabExecutor {
             ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.send(msg)
         }
         p.notifyToAll().complete()
-        sender.send(SABMessages.Commands.Warning.done.replaceVariables(p.getVariables().complete()).translate())
+        sender.send(SABMessages.Commands.Caution.done.replaceVariables(p.getVariables().complete()).translate())
     }
 
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
-        if (!sender.hasPermission(PunishmentType.WARNING.perm)) return emptyList()
+        if (!sender.hasPermission(PunishmentType.CAUTION.perm)) return emptyList()
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
