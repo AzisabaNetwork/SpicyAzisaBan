@@ -5,7 +5,6 @@ import net.azisaba.spicyAzisaBan.SABMessages.getObj
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.concat
-import util.ResourceLocator
 import util.yaml.YamlConfiguration
 import util.yaml.YamlObject
 import java.io.File
@@ -40,8 +39,6 @@ object ReloadableSABConfig {
             map.toMap()
         }
 
-    val enableDebugFeatures
-        get() = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!).asObject().getBoolean("enableDebugFeatures", false)
     private val blockedCommandsWhenMuted
         get() = cfg.getObj("blockedCommandsWhenMuted").let { yaml ->
             val map = mutableMapOf<String, List<String>>()

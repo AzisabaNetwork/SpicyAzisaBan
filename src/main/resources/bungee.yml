@@ -3,6 +3,6 @@ main: net.azisaba.spicyAzisaBan.SpicyAzisaBan
 version: 0.0.23
 author: acrylic-style
 
-# enables debug features:
+# setting to true will enable debug features:
 # - allow ip banning for some local addresses (127.0.0.1 and 192.168.0.0/16)
-enableDebugFeatures: true
+enableDebugFeatures: false

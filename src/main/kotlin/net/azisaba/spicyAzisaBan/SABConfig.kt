@@ -40,4 +40,9 @@ object SABConfig {
         val keepAlive = obj.getInt("keepAlive", 300) // in seconds
         val failsafe = obj.getBoolean("failsafe", true)
     }
+
+    val enableDebugFeatures =
+        YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!)
+            .asObject()
+            .getBoolean("enableDebugFeatures", false)
 }
