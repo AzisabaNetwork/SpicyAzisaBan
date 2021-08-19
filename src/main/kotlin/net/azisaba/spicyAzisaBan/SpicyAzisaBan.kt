@@ -144,8 +144,8 @@ class SpicyAzisaBan: Plugin() {
                 }
             }
         }, ReloadableSABConfig.Warning.sendTitleEvery, ReloadableSABConfig.Warning.sendTitleEvery)
-        proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
-        proxy.pluginManager.registerListener(this, CheckBanListener)
+        //proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
+        //proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)
         proxy.pluginManager.registerListener(this, CheckMuteListener)
         proxy.pluginManager.registerListener(this, PlayerDisconnectListener)
