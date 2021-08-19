@@ -137,6 +137,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                                     ).complete()
                                 }
                             }
+                            .catch { sender.sendErrorMessage(it) }
                             .complete()
                         groupRemoveConfirmation.remove(sender.getUniqueId())
                     }
