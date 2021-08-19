@@ -272,7 +272,7 @@ object Util {
             PlayerData.getByUUID(this)
                 .thenDo {
                     context.resolve(it)
-                    profileCache[this] = DataCache(profile, System.currentTimeMillis() + 1000L * 60L)
+                    profileCache[this] = DataCache(profile, System.currentTimeMillis() + 1000L * 60L * 60L)
                 }
                 .catch { context.reject(it) }
         } else {
