@@ -62,7 +62,7 @@ object BanListCommand: Command("${SABConfig.prefix}banlist"), TabExecutor {
         if (!all) whereList.add("unpunish.punish_id IS NULL" to emptyList())
         Promise.create<Unit> { context ->
             val server = if (arguments.containsKey("server")) {
-                arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return@create context.resolve() }.name
+                arguments.get(Contexts.SERVER_NO_PERM_CHECK, sender).complete().apply { if (!isSuccess) return@create context.resolve() }.name
             } else {
                 null
             }

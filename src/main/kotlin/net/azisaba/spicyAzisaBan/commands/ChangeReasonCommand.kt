@@ -61,11 +61,7 @@ object ChangeReasonCommand: Command("${SABConfig.prefix}changereason", null, "${
             .update("reason", reason.text, findOptions)
             .catch { sender.sendErrorMessage(it) }
             .complete() ?: return
-        if (p.type.isMute()) {
-            Punishment.muteCache.toList().forEach { (s) ->
-                if (s.contains(p.target)) Punishment.muteCache.remove(s)
-            }
-        }
+        p.clearCache()
         sender.send(SABMessages.Commands.ChangeReason.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

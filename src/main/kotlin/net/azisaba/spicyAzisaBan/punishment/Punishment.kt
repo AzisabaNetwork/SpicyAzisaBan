@@ -141,10 +141,15 @@ data class Punishment(
                     punishment = p
                 }
             }
+            canJoinServerCachedData[Triple(uuid, address, server)] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 120L) // 2 hours
             context.resolve(punishment)
         }
 
-        val muteCache = mutableMapOf<String, DataCache<Punishment>>()
+        private val canJoinServerCachedData = mutableMapOf<Triple<UUID?, String?, String>, DataCache<Punishment>>()
+        fun canJoinServerCached(uuid: UUID?, address: String?, server: String): Pair<Boolean, Punishment?> =
+            canJoinServerCachedData[Triple(uuid, address, server)]?.let { Pair(true, it.get()) } ?: Pair(false, null)
+
+        private val muteCache = mutableMapOf<String, DataCache<Punishment>>()
 
         fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
             if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
@@ -232,12 +237,27 @@ data class Punishment(
             ).thenDo {
                 SpicyAzisaBan.debug("Removed punishment #${id} (reason: expired)")
             }.complete()
-            muteCache.toList().forEach { (s) ->
-                if (s.contains(target)) muteCache.remove(s)
-            }
+            clearCache()
             pendingRemoval.remove(id)
         }
         context.resolve()
+    }
+
+    fun clearCache() {
+        if (type.isBan()) {
+            val toRemove = mutableListOf<Triple<UUID?, String?, String>>()
+            canJoinServerCachedData.keys.forEach { triple ->
+                if (triple.first.toString() == target || triple.second == target) {
+                    toRemove.add(triple)
+                }
+            }
+            toRemove.forEach { canJoinServerCachedData.remove(it) }
+        }
+        if (type.isMute()) {
+            muteCache.toList().forEach { (s) ->
+                if (s.contains(target)) muteCache.remove(s)
+            }
+        }
     }
 
     fun getProofs(): Promise<List<Proof>> =
@@ -358,11 +378,7 @@ data class Punishment(
                 .complete() == null
         }
         if (cancel) return@create
-        if (type.isMute()) {
-            muteCache.toList().forEach { (s) ->
-                if (s.contains(target)) muteCache.remove(s)
-            }
-        }
+        clearCache()
         return@create context.resolve(
             Punishment(
                 id,

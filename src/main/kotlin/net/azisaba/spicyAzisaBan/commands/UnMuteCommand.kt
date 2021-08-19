@@ -96,11 +96,7 @@ object UnMuteCommand: Command("${SABConfig.prefix}unmute"), TabExecutor {
             throw e
         }
         UnPunish(upid, p, reason.text, time, sender.getUniqueId()).notifyToAll().complete()
-        if (p.type.isMute()) {
-            Punishment.muteCache.toList().forEach { (s) ->
-                if (s.contains(p.target)) Punishment.muteCache.remove(s)
-            }
-        }
+        p.clearCache()
         sender.send(SABMessages.Commands.Unpunish.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

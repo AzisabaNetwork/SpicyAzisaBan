@@ -21,21 +21,30 @@ import java.util.concurrent.TimeUnit
 object CheckBanListener: Listener {
     @EventHandler
     fun onLogin(e: ServerConnectEvent) {
+        val currentServer = e.player.server?.info
+        val ipAddress = e.player.socketAddress.getIPAddress()?.reconstructIPAddress()
+        val pair = Punishment.canJoinServerCached(e.player.uniqueId, ipAddress, e.target.name.lowercase())
+        if (pair.first) { // true = cached, false = not cached
+            val p = pair.second ?: return
+            e.isCancelled = true
+            if (e.reason.shouldKick()) {
+                e.player.kick(p.getBannedMessage().complete())
+            } else {
+                e.player.send(p.getBannedMessage().complete())
+            }
+            return
+        }
         Promise.create<Boolean> { context ->
             Thread {
                 ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                     context.resolve(false)
-                }, 3, TimeUnit.SECONDS)
-                val p = Punishment.canJoinServer(
-                    e.player.uniqueId,
-                    e.player.socketAddress.getIPAddress()?.reconstructIPAddress(),
-                    e.target.name.lowercase()
-                ).complete()
+                }, 1, TimeUnit.SECONDS)
+                val p = Punishment.canJoinServer(e.player.uniqueId, ipAddress, e.target.name.lowercase()).complete()
                 if (p != null) {
-                    e.isCancelled = true
-                    if (e.reason.shouldKick()) {
+                    if (currentServer == null || e.player.server == null) {
                         e.player.kick(p.getBannedMessage().complete())
-                    } else {
+                    } else if (e.player.server?.info == currentServer) {
+                        e.player.connect(currentServer)
                         e.player.send(p.getBannedMessage().complete())
                     }
                 }
@@ -45,10 +54,10 @@ object CheckBanListener: Listener {
             if (!res) {
                 SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.player.uniqueId} (Timed out)")
                 if (SABConfig.database.failsafe) {
-                    e.isCancelled = true
-                    if (e.reason.shouldKick()) {
+                    if (currentServer == null || e.player.server == null) {
                         e.player.kick(SABMessages.General.error.replaceVariables().translate())
-                    } else {
+                    } else if (e.player.server?.info == currentServer) {
+                        e.player.connect(currentServer)
                         e.player.send(SABMessages.General.error.replaceVariables().translate())
                     }
                 }
@@ -57,14 +66,14 @@ object CheckBanListener: Listener {
             SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.player.uniqueId}")
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
-                e.isCancelled = true
-                if (e.reason.shouldKick()) {
+                if (currentServer == null || e.player.server == null) {
                     e.player.kick(SABMessages.General.error.replaceVariables().translate())
-                } else {
+                } else if (e.player.server?.info == currentServer) {
+                    e.player.connect(currentServer)
                     e.player.send(SABMessages.General.error.replaceVariables().translate())
                 }
             }
-        }.complete()
+        }
     }
 
     private fun ServerConnectEvent.Reason.shouldKick() = when (this) {

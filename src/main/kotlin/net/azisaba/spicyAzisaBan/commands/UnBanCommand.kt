@@ -96,6 +96,7 @@ object UnBanCommand: Command("${SABConfig.prefix}unban"), TabExecutor {
             throw e
         }
         UnPunish(upid, p, reason.text, time, sender.getUniqueId()).notifyToAll().complete()
+        p.clearCache()
         sender.send(SABMessages.Commands.Unpunish.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

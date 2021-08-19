@@ -22,7 +22,8 @@ import java.sql.SQLException
 @Suppress("UNCHECKED_CAST")
 fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender): Promise<T> {
     if (context == Contexts.PLAYER) return getPlayer(sender) as Promise<T>
-    if (context == Contexts.SERVER) return getServer(sender) as Promise<T>
+    if (context == Contexts.SERVER) return getServer(sender, true) as Promise<T>
+    if (context == Contexts.SERVER_NO_PERM_CHECK) return getServer(sender, false) as Promise<T>
     if (context == Contexts.REASON) return getReason() as Promise<T>
     if (context == Contexts.TIME) return getTime(sender) as Promise<T>
     if (context == Contexts.IP_ADDRESS) return getIPAddress(sender) as Promise<T>
@@ -46,17 +47,17 @@ private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerConte
     context.resolve(PlayerContext(true, profile))
 }
 
-private fun ArgumentParser.getServer(sender: CommandSender): Promise<ServerContext> = Promise.create { context ->
+private fun ArgumentParser.getServer(sender: CommandSender, checkPermission: Boolean): Promise<ServerContext> = Promise.create { context ->
     var isGroup = false
     val server = getString("server") ?: "global"
     if (server == "global") {
-        if (!sender.hasPermission("sab.punish.global")) {
+        if (checkPermission && !sender.hasPermission("sab.punish.global")) {
             sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
             return@create context.resolve(ServerContext(false, server, false))
         }
     } else {
         if (SpicyAzisaBan.instance.connection.getAllGroups().complete().contains(server)) {
-            if (!sender.hasPermission("sab.punish.group.$server")) {
+            if (checkPermission && !sender.hasPermission("sab.punish.group.$server")) {
                 sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
                 return@create context.resolve(ServerContext(false, server, false))
             }
@@ -66,7 +67,7 @@ private fun ArgumentParser.getServer(sender: CommandSender): Promise<ServerConte
                 sender.send(SABMessages.Commands.General.invalidServer.replaceVariables().translate())
                 return@create context.resolve(ServerContext(false, server, false))
             }
-            if (!sender.hasPermission("sab.punish.server.$server")) {
+            if (checkPermission && !sender.hasPermission("sab.punish.server.$server")) {
                 sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
                 return@create context.resolve(ServerContext(false, server, false))
             }

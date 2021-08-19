@@ -14,6 +14,8 @@ class Contexts<T : Context> private constructor(val key: String) {
          */
         val SERVER = Contexts<ServerContext>("server")
 
+        val SERVER_NO_PERM_CHECK = Contexts<ServerContext>("server")
+
         /**
          * Returns reason but returns "none" if blank or null and can never fail.
          */
