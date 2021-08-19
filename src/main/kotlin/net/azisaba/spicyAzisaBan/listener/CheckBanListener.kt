@@ -60,7 +60,7 @@ object CheckBanListener: Listener {
         }
     }
 
-    fun ServerConnectEvent.Reason.shouldKick() = when (this) {
+    private fun ServerConnectEvent.Reason.shouldKick() = when (this) {
         ServerConnectEvent.Reason.JOIN_PROXY,
         ServerConnectEvent.Reason.KICK_REDIRECT,
         ServerConnectEvent.Reason.LOBBY_FALLBACK,

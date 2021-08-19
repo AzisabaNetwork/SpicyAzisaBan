@@ -128,6 +128,7 @@ object SABMessages {
             private val obj = Commands.obj.getObj("sab")
             val setDebugLevel = obj.getMessage("setDebugLevel", "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。")
             val reloadedConfiguration = obj.getMessage("reloadedConfiguration", "%PREFIX%&a設定を再読み込みしました。")
+            val deleteGroupUnpunishReason = obj.getMessage("deleteGroupUnpunishReason", "グループ'%GROUP%'の削除")
         }
 
         object Ban {

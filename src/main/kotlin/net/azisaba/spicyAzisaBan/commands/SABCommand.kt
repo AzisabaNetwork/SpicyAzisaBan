@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
+import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
 import net.azisaba.spicyAzisaBan.util.Util.insert
@@ -118,7 +119,25 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     .thenDo {
                         SpicyAzisaBan.instance.connection.cachedGroups.set(null)
                         sender.send("$PREFIX${ChatColor.GREEN}グループに関連付けられた処罰を削除中...")
-                        SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("server", groupName).build()).complete()
+                        SpicyAzisaBan.instance.connection.punishments
+                            .delete(FindOptions.Builder().addWhere("server", groupName).build())
+                            .then { it.map { td -> Punishment.fromTableData(td) } }
+                            .then { list ->
+                                val reason = SABMessages.Commands.Sab.deleteGroupUnpunishReason
+                                    .replaceVariables("group" to groupName)
+                                    .translate()
+                                list.forEach { p ->
+                                    SpicyAzisaBan.instance.connection.unpunish.insert(
+                                        InsertOptions.Builder()
+                                            .addValue("punish_id", p.id)
+                                            .addValue("reason", reason)
+                                            .addValue("timestamp", System.currentTimeMillis())
+                                            .addValue("operator", sender.getUniqueId().toString())
+                                            .build()
+                                    ).complete()
+                                }
+                            }
+                            .complete()
                         groupRemoveConfirmation.remove(sender.getUniqueId())
                     }
                     .then { sender.send("$PREFIX${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を削除しました。") }

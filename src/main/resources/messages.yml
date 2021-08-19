@@ -46,6 +46,7 @@ commands:
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
     reloadedConfiguration: "%PREFIX%&a設定を再読み込みしました。"
+    deleteGroupUnpunishReason: "グループ'%GROUP%'の削除" # Available variables: default, %GROUP% (group name being removed)
 
   # Available variables (punishment):
   # %DATE%

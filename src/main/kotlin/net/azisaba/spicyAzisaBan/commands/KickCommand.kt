@@ -59,6 +59,10 @@ object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
             sender.send(SABMessages.Commands.General.offlinePlayer.replaceVariables().translate())
             return
         }
+        if (!proxiedPlayer.getServerName().equals(server.name, true)) {
+            sender.send(SABMessages.Commands.General.offlinePlayer.replaceVariables().translate())
+            return
+        }
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.KICK, -1, server.name)
             .insert()
