@@ -20,16 +20,30 @@ import java.util.concurrent.TimeUnit
 object CheckGlobalBanListener: Listener {
     @EventHandler
     fun onLogin(e: LoginEvent) {
-        val res = Promise.create<Boolean> { context ->
-            ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
-                context.resolve(false)
-            }, 3, TimeUnit.SECONDS)
-            val p = Punishment.canJoinServer(e.connection.uniqueId, e.connection.socketAddress.getIPAddress()?.reconstructIPAddress(), "global").complete()
-            if (p != null) {
-                e.isCancelled = true
-                e.setCancelReason(*TextComponent.fromLegacyText(p.getBannedMessage().complete()))
+        Promise.create<Boolean> { context ->
+            Thread {
+                ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+                    context.resolve(false)
+                }, 3, TimeUnit.SECONDS)
+                val p = Punishment.canJoinServer(
+                    e.connection.uniqueId,
+                    e.connection.socketAddress.getIPAddress()?.reconstructIPAddress(),
+                    "global"
+                ).complete()
+                if (p != null) {
+                    e.isCancelled = true
+                    e.setCancelReason(*TextComponent.fromLegacyText(p.getBannedMessage().complete()))
+                }
+                context.resolve(true)
+            }.start()
+        }.thenDo { res ->
+            if (!res) {
+                SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.connection.uniqueId} (Timed out)")
+                if (SABConfig.database.failsafe) {
+                    e.isCancelled = true
+                    e.setCancelReason(*TextComponent.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
+                }
             }
-            context.resolve(true)
         }.catch {
             SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.connection.uniqueId}")
             it.printStackTrace()
@@ -38,12 +52,5 @@ object CheckGlobalBanListener: Listener {
                 e.setCancelReason(*TextComponent.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
             }
         }.complete()
-        if (!res) {
-            SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.connection.uniqueId} (Timed out)")
-            if (SABConfig.database.failsafe) {
-                e.isCancelled = true
-                e.setCancelReason(*TextComponent.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
-            }
-        }
     }
 }

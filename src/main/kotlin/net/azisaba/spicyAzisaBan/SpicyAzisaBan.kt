@@ -37,6 +37,8 @@ import net.azisaba.spicyAzisaBan.commands.UnMuteCommand
 import net.azisaba.spicyAzisaBan.commands.UnPunishCommand
 import net.azisaba.spicyAzisaBan.commands.WarningCommand
 import net.azisaba.spicyAzisaBan.commands.WarnsCommand
+import net.azisaba.spicyAzisaBan.listener.CheckBanListener
+import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
 import net.azisaba.spicyAzisaBan.listener.PlayerDisconnectListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
@@ -142,8 +144,8 @@ class SpicyAzisaBan: Plugin() {
                 }
             }
         }, SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery)
-        //proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
-        //proxy.pluginManager.registerListener(this, CheckBanListener)
+        proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
+        proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)
         proxy.pluginManager.registerListener(this, CheckMuteListener)
         proxy.pluginManager.registerListener(this, PlayerDisconnectListener)
