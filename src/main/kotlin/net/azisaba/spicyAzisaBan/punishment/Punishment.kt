@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.punishment
 
 import net.azisaba.spicyAzisaBan.ReloadableSABConfig
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
@@ -215,7 +216,7 @@ data class Punishment(
         val title = ProxyServer.getInstance().createTitle()
         title.fadeIn(0)
         title.fadeOut(0)
-        title.stay((ReloadableSABConfig.Warning.titleStayTime / 50L).toInt())
+        title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
         title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.translate()))
         title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.translate()))
         player.sendTitle(title)

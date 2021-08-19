@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.SABMessages.getObj
+import net.azisaba.spicyAzisaBan.util.Util
 import util.ResourceLocator
 import util.base.Bytes
 import util.yaml.YamlConfiguration
@@ -45,4 +46,13 @@ object SABConfig {
         YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!)
             .asObject()
             .getBoolean("enableDebugFeatures", false)
+
+    object Warning {
+        private val obj
+            get() = cfg.getObj("warning")
+        val sendTitleEvery
+            get() = Util.processTime(obj.getString("sendTitleEvery", "10s"))
+        val titleStayTime
+            get() = Util.processTime(obj.getString("titleStayTime", "5s"))
+    }
 }

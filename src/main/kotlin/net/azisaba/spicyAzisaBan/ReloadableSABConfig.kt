@@ -3,7 +3,6 @@ package net.azisaba.spicyAzisaBan
 import net.azisaba.spicyAzisaBan.SABMessages.getMessage
 import net.azisaba.spicyAzisaBan.SABMessages.getObj
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
-import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.concat
 import util.yaml.YamlConfiguration
 import util.yaml.YamlObject
@@ -62,15 +61,6 @@ object ReloadableSABConfig {
             get() = obj.getString("time", "1mo")!!
         val reason
             get() = obj.getString("reason", "You've got $threshold warnings")!!
-    }
-
-    object Warning {
-        private val obj
-            get() = cfg.getObj("warning")
-        val sendTitleEvery
-            get() = Util.processTime(obj.getString("sendTitleEvery", "10s"))
-        val titleStayTime
-            get() = Util.processTime(obj.getString("titleStayTime", "5s"))
     }
 
     val customBannedMessage
