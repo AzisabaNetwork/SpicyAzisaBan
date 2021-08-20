@@ -64,8 +64,9 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                 } else {
                     SABMessages.General.online.translate()
                 }
-                val ipd = pd.ip?.let { PlayerData.getByIP(it).catch { e -> sender.sendErrorMessage(e) }.complete() }
+                val ipd = pd.ip?.let { PlayerData.getAllByIP(it).catch { e -> sender.sendErrorMessage(e) }.complete() }
                     ?.filter { pd2 -> pd2.uniqueId != pd.uniqueId }
+                val iPlayers = ipd?.joinToString(", ") { if (it.ip != pd.ip) "${it.name}*" else it.name }.toString()
                 sender.send(
                     SABMessages.Commands.Seen.layout
                         .replaceVariables(
@@ -76,7 +77,7 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                             "hostname" to pd.ip?.let { InetAddress.getByName(pd.ip).hostName }.toString(),
                             "name_history" to pd.getUsernameHistory().complete().distinct().joinToString(", "),
                             "ip_history" to pd.getIPAddressHistory().complete().distinct().joinToString(", "),
-                            "same_ip_players" to ipd?.joinToString(", ").toString(),
+                            "same_ip_players" to iPlayers,
                             "same_ip_players_count" to ipd?.size.toString(),
                         )
                         .translate()
