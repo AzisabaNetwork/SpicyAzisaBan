@@ -56,7 +56,7 @@ object AddProofCommand: Command("${SABConfig.prefix}addproof"), TabExecutor {
                         .addValue("punish_id", p.id)
                         .addValue("text", text)
                         .build()
-                )
+                ).complete()
             }
         } catch (e: IllegalStateException) {
             if (e.message == "cancel") return
