@@ -29,7 +29,7 @@ import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 
-object WarningCommand: Command("${SABConfig.prefix}warning", null, "warn"), TabExecutor {
+object WarningCommand: Command("${SABConfig.prefix}warning", null, "${SABConfig.prefix}warn"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(sender: CommandSender, args: Array<String>) {

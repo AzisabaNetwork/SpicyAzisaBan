@@ -37,6 +37,7 @@ import net.azisaba.spicyAzisaBan.commands.UnMuteCommand
 import net.azisaba.spicyAzisaBan.commands.UnPunishCommand
 import net.azisaba.spicyAzisaBan.commands.WarningCommand
 import net.azisaba.spicyAzisaBan.commands.WarnsCommand
+import net.azisaba.spicyAzisaBan.commands.WhereCommand
 import net.azisaba.spicyAzisaBan.listener.CheckBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckGlobalBanListener
 import net.azisaba.spicyAzisaBan.listener.CheckMuteListener
@@ -186,6 +187,7 @@ class SpicyAzisaBan: Plugin() {
         proxy.pluginManager.registerCommand(this, AddProofCommand)
         proxy.pluginManager.registerCommand(this, DelProofCommand)
         proxy.pluginManager.registerCommand(this, ProofsCommand)
+        proxy.pluginManager.registerCommand(this, WhereCommand)
         logger.info("Hewwwwwwwwwoooooo!")
     }
 

@@ -320,5 +320,11 @@ object SABMessages {
             val footer = obj.getMessage("footer", "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%")
             val invalidArguments = obj.getMessage("invalidArguments", "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。")
         }
+
+        object Where {
+            private val obj = Commands.obj.getObj("where")
+            val usage = obj.getMessage("usage", "%PREFIX%使用法: /where <Player>")
+            val result = obj.getMessage("result", "%PREFIX%&c&o%PLAYER%&aは&e&o%SERVER%&aにいます。")
+        }
     }
 }
