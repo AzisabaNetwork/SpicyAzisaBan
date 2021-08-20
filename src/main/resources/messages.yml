@@ -361,7 +361,3 @@ commands:
     footer: "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%"
     # Available variables: default
     invalidArguments: "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。"
-  where:
-    usage: "%PREFIX%使用法: /where <Player>"
-    # Available variables: %PLAYER%, %SERVER%
-    result: "%PREFIX%&c&o%PLAYER%&aは&e&o%SERVER%&aにいます。"
