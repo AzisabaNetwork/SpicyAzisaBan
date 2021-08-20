@@ -279,12 +279,13 @@ commands:
   seen:
     usage: "%PREFIX%&a使用法: /seen <Player/IP>"
     searching: "%PREFIX%&eプレイヤーを検索中..."
-    # Available variables: %PLAYER%, %SINCE%, %STATUS%, %NAME_HISTORY%, %IP%, %HOSTNAME%, %IP_HISTORY%
+    # Available variables: %PLAYER%, %SINCE%, %STATUS%, %NAME_HISTORY%, %IP%, %HOSTNAME%, %IP_HISTORY%, %SAME_IP_PLAYERS%, %SAME_IP_PLAYERS_COUNT%
     layout:
       - "%PREFIX%&c&o%PLAYER%&eは&c%SINCE%前&eから%STATUS%&eです。"
       - "&7過去の名前 &8> &e&o%NAME_HISTORY%"
       - "&7最近のIPアドレス &8> &e&o%IP% &7(&e%HOSTNAME%&7)"
       - "&7過去のすべてのIPアドレス &8> &e&o%IP_HISTORY%"
+      - "&7同じIPで接続しているプレイヤー &8> &6%SAME_IP_PLAYERS%"
     # Available variables: %PLAYERS_COUNT%, %PLAYERS%, %HOSTNAME%, %IP_ADDRESS%
     layoutIP:
       - "%PREFIX%&c&o%IP_ADDRESS% &8(&e&o%HOSTNAME%&8)&eは過去に%PLAYERS_COUNT%個のアカウントで接続しています:"
