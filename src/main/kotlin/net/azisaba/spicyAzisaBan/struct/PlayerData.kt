@@ -36,6 +36,12 @@ data class PlayerData(
             SpicyAzisaBan.instance.connection.players.findAll(FindOptions.Builder().addWhere("ip", ip).build())
                 .then { list -> list.map { td -> fromTableData(td) } }
 
+        fun getAllByIP(ip: String): Promise<List<PlayerData>> =
+            SpicyAzisaBan.instance.connection.ipAddressHistory.findAll(FindOptions.Builder().addWhere("ip", ip).build())
+                .then { list -> list.distinctBy { td -> td.getString("uuid") } }
+                .then { list -> list.map { td -> UUID.fromString(td.getString("uuid")) } }
+                .then { list -> list.map { uuid -> getByUUID(uuid).complete() } }
+
         fun getByUUID(uuid: UUID): Promise<PlayerData> =
             SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid.toString()).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $uuid") }

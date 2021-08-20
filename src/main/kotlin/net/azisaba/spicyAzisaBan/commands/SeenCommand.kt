@@ -31,19 +31,21 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
         Promise.create<Unit> { context ->
             sender.send(SABMessages.Commands.Seen.searching.replaceVariables().translate())
             if (args[0].isValidIPAddress()) {
-                val pd = PlayerData.getByIP(args[0]).catch { sender.sendErrorMessage(it) }.complete()
+                val pd = PlayerData.getAllByIP(args[0]).catch { sender.sendErrorMessage(it) }.complete()
                 if (pd == null || pd.isEmpty()) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@create context.resolve()
                 }
                 val hostname = InetAddress.getByName(args[0]).hostName
+                // * = the player has different ip currently
+                val players = pd.joinToString(", ") { if (it.ip != args[0]) "${it.name}*" else it.name }
                 sender.send(
                     SABMessages.Commands.Seen.layoutIP
                         .replaceVariables(
                             "hostname" to hostname,
                             "ip_address" to args[0],
                             "players_count" to pd.size.toString(),
-                            "players" to pd.joinToString(", ") { it.name },
+                            "players" to players,
                         )
                         .translate()
                 )
