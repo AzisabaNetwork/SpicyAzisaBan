@@ -285,9 +285,9 @@ commands:
       - "&7過去の名前 &8> &e&o%NAME_HISTORY%"
       - "&7最近のIPアドレス &8> &e&o%IP% &7(&e%HOSTNAME%&7)"
       - "&7過去のすべてのIPアドレス &8> &e&o%IP_HISTORY%"
-    # Available variables: %PLAYERS_COUNT%, %PLAYERS%
+    # Available variables: %PLAYERS_COUNT%, %PLAYERS%, %HOSTNAME%, %IP_ADDRESS%
     layoutIP:
-      - "%PREFIX%&eこのプレイヤーは過去に%PLAYERS_COUNT%個のアカウントで接続しています:"
+      - "%PREFIX%&c&o%IP_ADDRESS% &8(&e&o%HOSTNAME%&8)&eは過去に%PLAYERS_COUNT%個のアカウントで接続しています:"
       - "&6%PLAYERS%"
   warns:
     notWarnedYet: "%PREFIX%&c&oまだ警告を受けていません。"

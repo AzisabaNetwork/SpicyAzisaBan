@@ -36,9 +36,12 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@create context.resolve()
                 }
+                val hostname = InetAddress.getByName(args[0]).hostName
                 sender.send(
                     SABMessages.Commands.Seen.layoutIP
                         .replaceVariables(
+                            "hostname" to hostname,
+                            "ip_address" to args[0],
                             "players_count" to pd.size.toString(),
                             "players" to pd.joinToString(", ") { it.name },
                         )
