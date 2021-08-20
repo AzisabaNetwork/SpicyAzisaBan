@@ -45,38 +45,6 @@ object Util {
         send(SABMessages.General.error.replaceVariables().translate())
     }
 
-    private var lastPreloadedPermissions = 0L
-
-    /**
-     * (Pre)load permissions so permissions will show up on LuckPerms suggestions... but it's not working well...
-     */
-    fun preloadPermissions(sender: CommandSender) {
-        if (System.currentTimeMillis() - lastPreloadedPermissions > 60000) return
-        sender.hasPermission("sab.command.spicyazisaban")
-        sender.hasPermission("sab.warns")
-        sender.hasPermission("sab.check")
-        sender.hasPermission("sab.history")
-        sender.hasPermission("sab.seen")
-        sender.hasPermission("sab.banlist")
-        sender.hasPermission("sab.proofs")
-        sender.hasPermission("sab.delproof")
-        sender.hasPermission("sab.addproof")
-        sender.hasPermission("sab.changereason")
-        sender.hasPermission("sab.unban")
-        sender.hasPermission("sab.unmute")
-        sender.hasPermission("sab.unpunish")
-        sender.hasPermission("sab.punish.global")
-        PunishmentType.values().forEach { type ->
-            sender.hasPermission(type.perm)
-            sender.hasNotifyPermissionOf(type)
-        }
-        SpicyAzisaBan.instance.connection.getAllGroups().then {
-            it.forEach { group -> sender.hasPermission("sab.punish.group.$group") }
-        }
-        ProxyServer.getInstance().servers.keys.forEach { server -> sender.hasPermission("sab.punish.server.$server") }
-        lastPreloadedPermissions = System.currentTimeMillis()
-    }
-
     /**
      * Add missing zeros to beginning of the string.
      */

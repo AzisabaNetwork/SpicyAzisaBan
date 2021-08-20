@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit
 object PostLoginListener: Listener {
     @EventHandler
     fun onPostLogin(e: PostLoginEvent) {
-        Util.preloadPermissions(e.player)
         ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
             if (!e.player.isConnected) return@schedule
             updatePlayerDataAsync(e.player)
