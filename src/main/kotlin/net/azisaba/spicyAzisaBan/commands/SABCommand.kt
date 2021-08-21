@@ -233,6 +233,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
             "reload" -> {
                 try {
                     ReloadableSABConfig.reload()
+                    SABMessages.reload()
                 } catch (e: Exception) {
                     sender.sendErrorMessage(e)
                     return
