@@ -14,6 +14,9 @@ class ProcessTimeTest {
         assert(Util.processTime("1y1y1y7mo5d1h2m5s") == 3 * year + 7 * month + 5 * day + 1 * hour + 2 * minute + 5 * second) {
             "${Util.processTime("1y1y1y7mo5d1h2m5s")} != ${3 * year + 7 * month + 5 * day + 1 * hour + 2 * minute + 5 * second}"
         }
+        assert(Util.processTime("1000y") == 1000 * year) {
+            "${Util.processTime("1000y")} != ${1000 * year}"
+        }
     }
 
     @Test

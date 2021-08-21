@@ -3,11 +3,12 @@ package net.azisaba.spicyAzisaBan.test
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class UtilTest {
     @Test
     fun testPunishableIP() {
-        assert(!"I am not an IP address".isPunishableIP())
+        assertThrows<IllegalArgumentException> { !"I am not an IP address".isPunishableIP() }
         assert(!"255.255.255.255".isPunishableIP())
         assert(!"123.456.789.012".isPunishableIP())
         assert(!"0.0.0.0".isPunishableIP())
