@@ -17,6 +17,7 @@ import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
+import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -86,6 +87,7 @@ object TempMuteCommand: Command("${SABConfig.prefix}tempmute"), TabExecutor {
         if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
         if (s.startsWith("server=")) return ServerContext.tabComplete(s)
         if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.TEMP_MUTE, args, sender.getServerName())
+        if (s.startsWith("time=")) return TimeContext.tabComplete(s)
         return emptyList()
     }
 }
