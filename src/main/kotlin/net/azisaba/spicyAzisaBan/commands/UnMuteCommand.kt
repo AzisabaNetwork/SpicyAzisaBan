@@ -73,7 +73,10 @@ object UnMuteCommand: Command("${SABConfig.prefix}unmute"), TabExecutor {
             return
         }
         val time = System.currentTimeMillis()
-        SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", p.id).build()).complete()
+        SpicyAzisaBan.instance.connection.punishments
+            .delete(FindOptions.Builder().addWhere("id", p.id).build())
+            .catch { e -> sender.sendErrorMessage(e) }
+            .complete() ?: return
         val upid = try {
             insert {
                 SpicyAzisaBan.instance.connection.unpunish

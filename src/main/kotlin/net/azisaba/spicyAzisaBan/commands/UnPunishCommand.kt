@@ -59,17 +59,11 @@ object UnPunishCommand: Command("${SABConfig.prefix}unpunish"), TabExecutor {
         }
         val reason = arguments.get(Contexts.REASON, sender).complete()
         if (reason.text == "none") return sender.send(SABMessages.Commands.General.noReasonSpecified.replaceVariables().translate())
-        val list = SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", id).build())
-            .catch {
-                SpicyAzisaBan.instance.logger.warning("Something went wrong while deleting punishment #${id}")
-                sender.sendErrorMessage(it)
-            }
-            .complete() ?: return
-        if (list.isEmpty()) {
+        val p = Punishment.fetchActivePunishmentById(id).complete()
+        if (p == null) {
             sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().format(id).translate())
             return
         }
-        val p = Punishment.fromTableData(list[0])
         val permission = if (p.server == "global") {
             "sab.punish.global"
         } else if (SpicyAzisaBan.instance.connection.isGroupExists(p.server).complete()) {
@@ -81,6 +75,12 @@ object UnPunishCommand: Command("${SABConfig.prefix}unpunish"), TabExecutor {
             sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
             return
         }
+        SpicyAzisaBan.instance.connection.punishments.delete(FindOptions.Builder().addWhere("id", id).build())
+            .catch {
+                SpicyAzisaBan.instance.logger.warning("Something went wrong while deleting punishment #${id}")
+                sender.sendErrorMessage(it)
+            }
+            .complete() ?: return
         val time = System.currentTimeMillis()
         val upid = try {
             insert {
