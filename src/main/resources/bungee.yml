@@ -1,6 +1,6 @@
 name: SpicyAzisaBan
 main: net.azisaba.spicyAzisaBan.SpicyAzisaBan
-version: 0.0.28-dev
+version: 0.0.28
 author: acrylic-style
 
 # setting to true will enable debug features:
