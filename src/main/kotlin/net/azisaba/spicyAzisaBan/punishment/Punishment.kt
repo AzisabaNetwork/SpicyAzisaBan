@@ -153,11 +153,11 @@ data class Punishment(
 
         fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
             if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
-            val punish = muteCache["$uuid,$address"]
+            val punish = muteCache["$uuid,$address,$server"]
             val punishValue = punish?.get()
             if (noCache || punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
                 SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: ChatEvent on $server)")
-                muteCache["$uuid,$address"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
+                muteCache["$uuid,$address,$server"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
                 val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
                 val ps = fetchActivePunishmentsBy(uuid, address, server, group)
                 if (ps.isEmpty()) return@create context.resolve(null)
@@ -169,7 +169,7 @@ data class Punishment(
                         punishment = p
                     }
                 }
-                muteCache["$uuid,$address"] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 30L)
+                muteCache["$uuid,$address,$server"] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 30L)
                 return@create context.resolve(punishment)
             }
             if (punishValue?.isExpired() == true) {
