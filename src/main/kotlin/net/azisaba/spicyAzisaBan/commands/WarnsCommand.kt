@@ -22,9 +22,6 @@ import xyz.acrylicstyle.sql.options.FindOptions
 object WarnsCommand: Command("${SABConfig.prefix}warns"), TabExecutor {
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (sender !is ProxiedPlayer) return sender.send("e^1")
-        if (!sender.hasPermission("sab.warns")) {
-            return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
-        }
         Promise.create<Unit> { context ->
             val ps = SpicyAzisaBan.instance.connection.punishments
                 .findAll(FindOptions.Builder().addWhere("target", sender.uniqueId.toString()).build())
