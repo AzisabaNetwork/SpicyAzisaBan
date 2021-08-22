@@ -8,7 +8,6 @@
 
 ## Permissions
 - `sab.command.spicyazisaban`
-- `sab.warns`
 - `sab.check`
 - `sab.history`
 - `sab.seen`
