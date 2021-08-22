@@ -11,6 +11,7 @@ import java.io.File
 import java.util.Calendar
 
 object SABMessages {
+    private lateinit var defCfg: YamlObject
     private lateinit var cfg: YamlObject
 
     init {
@@ -21,14 +22,13 @@ object SABMessages {
         val dir = File("./plugins/SpicyAzisaBan")
         dir.mkdir()
         val file = File(dir, "messages.yml")
+        val input = ResourceLocator.getInstance(SABMessages::class.java).getResourceAsStream("/messages.yml")
+            ?: error("Could not find messages.yml in jar file!")
         if (!file.exists()) {
-            val input = ResourceLocator.getInstance(SABMessages::class.java).getResourceAsStream("/messages.yml")
-            if (input == null) {
-                println("[SpicyAzisaBan] Could not find messages.yml in jar file!")
-            } else {
-                Bytes.copy(input, file)
-            }
+            Bytes.copy(input, file)
+            SpicyAzisaBan.instance.logger.info("Generated default messages.yml")
         }
+        defCfg = YamlConfiguration(input).asObject()
         cfg = YamlConfiguration(file).asObject()
     }
 
@@ -40,15 +40,9 @@ object SABMessages {
         return this.getArray(key)?.mapNotNull { o -> o?.toString() }?.joinToString("${ChatColor.RESET}\n") ?: def
     }
 
-    fun YamlObject.getMessage(key: String, def: List<String>): String {
-        val raw = this.rawData[key] ?: def
-        if (raw is String) return raw
-        return this.getArray(key)?.mapNotNull { o -> o?.toString() }?.joinToString("${ChatColor.RESET}\n")
-            ?: def.joinToString("${ChatColor.RESET}\n")
-    }
-
     fun String.replaceVariables(variables: Map<String, String> = mapOf()): String {
         var s = replace("%PREFIX%", SpicyAzisaBan.PREFIX)
+            .replace("%CMD_PREFIX%", SABConfig.prefix)
         variables.forEach { (key, value) -> s = s.replace("%${key.uppercase()}%", value) }
         return s
     }
@@ -84,245 +78,273 @@ object SABMessages {
     }
 
     object General {
+        private val defObj get() = defCfg.getObj("general")
         private val obj get() = cfg.getObj("general")
-        val prefix get() = obj.getMessage("prefix", "&c&lSpicyAzisaBan &8&l» &r")
-        val missingPermissions get() = obj.getMessage("missingPermissions", "%PREFIX%&c権限がありません!")
-        val error get() = obj.getMessage("error", "%PREFIX%&c処理中に不明なエラーが発生しました。")
-        val global get() = obj.getMessage("global", "全サーバー")
-        val permanent get() = obj.getMessage("permanent", "無期限")
-        val online get() = obj.getMessage("online", "&aオンライン")
-        val offline get() = obj.getMessage("offline", "&4オフライン")
-        val previousPage get() = obj.getMessage("previousPage", "前のページ")
-        val nextPage get() = obj.getMessage("nextPage", "次のページ")
-        val datetime get() = obj.getMessage("datetime", "%YEAR%/%MONTH%/%DAY%-%HOUR%:%MINUTE%:%SECOND%")
+        val prefix get() = obj.getMessage("prefix", defObj.getMessage("prefix"))
+        val missingPermissions get() = obj.getMessage("missingPermissions", defObj.getMessage("missingPermissions"))
+        val error get() = obj.getMessage("error", defObj.getMessage("error"))
+        val none get() = obj.getMessage("none", defObj.getMessage("none"))
+        val global get() = obj.getMessage("global", defObj.getMessage("global"))
+        val permanent get() = obj.getMessage("permanent", defObj.getMessage("permanent"))
+        val online get() = obj.getMessage("online", defObj.getMessage("online"))
+        val offline get() = obj.getMessage("offline", defObj.getMessage("offline"))
+        val previousPage get() = obj.getMessage("previousPage", defObj.getMessage("previousPage"))
+        val nextPage get() = obj.getMessage("nextPage", defObj.getMessage("nextPage"))
+        val datetime get() = obj.getMessage("datetime", defObj.getMessage("datetime"))
 
         object Time {
+            private val defObj get() = General.defObj.getObj("time")
             private val obj get() = General.obj.getObj("time")
-            val day get() = obj.getMessage("day", "%d日")
-            val hour get() = obj.getMessage("hour", "%d時間")
-            val minute get() = obj.getMessage("minute", "%d分")
-            val second get() = obj.getMessage("second", "%d秒")
+            val day get() = obj.getMessage("day", defObj.getMessage("day"))
+            val hour get() = obj.getMessage("hour", defObj.getMessage("hour"))
+            val minute get() = obj.getMessage("minute", defObj.getMessage("minute"))
+            val second get() = obj.getMessage("second", defObj.getMessage("second"))
         }
     }
 
     object Commands {
+        private val defObj get() = defCfg.getObj("commands")
         private val obj get() = cfg.getObj("commands")
 
         object General {
+            private val defObj get() = Commands.defObj.getObj("general")
             private val obj get() = Commands.obj.getObj("general")
-            val invalidGroup get() = obj.getMessage("invalidGroup", "%PREFIX%&c無効なグループ名です。")
-            val invalidServer get() = obj.getMessage("invalidServer", "%PREFIX%&c無効なサーバー名です。")
-            val invalidPlayer get() = obj.getMessage("invalidPlayer", "%PREFIX%&cプレイヤーが見つかりません。")
-            val invalidTime get() = obj.getMessage("invalidTime", "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。")
-            val invalidIPAddress get() = obj.getMessage("invalidIPAddress", "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。")
-            val invalidPunishmentType get() = obj.getMessage("invalidPunishmentType", "%PREFIX%&c無効な処罰タイプです。")
-            val timeNotSpecified get() = obj.getMessage("timeNotSpecified", "%PREFIX%&c時間が指定されていません。")
-            val samePunishmentAppliedToSameIPAddress get() = obj.getMessage("samePunishmentAppliedToSameIPAddress", "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。")
-            val alreadyPunished get() = obj.getMessage("alreadyPunished", "%PREFIX%&cこのアカウントはすでに(同じサーバー、同じ種類で)処罰されています!")
-            val removedFromServer get() = obj.getMessage("removedFromServer", "&cプレイヤーがこのサーバーから抹消された。")
-            val offlinePlayer get() = obj.getMessage("offlinePlayer", "%PREFIX%&cこのプレイヤーはオフラインです。")
-            val notPunished get() = obj.getMessage("notPunished", "%PREFIX%&cこのアカウントは処罰されていません!")
-            val noReasonSpecified get() = obj.getMessage("noReasonSpecified", "%PREFIX%&c理由が指定されていません!")
-            val noProofSpecified get() = obj.getMessage("noProofSpecified", "%PREFIX%&c証拠が指定されていません!")
-            val punishmentNotFound get() = obj.getMessage("punishmentNotFound", "%PREFIX%&c処罰#%dが見つかりません!")
-            val proofNotFound get() = obj.getMessage("proofNotFound", "%PREFIX%&c証拠#%dが見つかりません!")
+            val invalidGroup get() = obj.getMessage("invalidGroup", defObj.getMessage("invalidGroup"))
+            val invalidServer get() = obj.getMessage("invalidServer", defObj.getMessage("invalidServer"))
+            val invalidPlayer get() = obj.getMessage("invalidPlayer", defObj.getMessage("invalidPlayer"))
+            val invalidTime get() = obj.getMessage("invalidTime", defObj.getMessage("invalidTime"))
+            val invalidIPAddress get() = obj.getMessage("invalidIPAddress", defObj.getMessage("invalidIPAddress"))
+            val invalidPunishmentType get() = obj.getMessage("invalidPunishmentType", defObj.getMessage("invalidPunishmentType"))
+            val timeNotSpecified get() = obj.getMessage("timeNotSpecified", defObj.getMessage("timeNotSpecified"))
+            val samePunishmentAppliedToSameIPAddress get() = obj.getMessage("samePunishmentAppliedToSameIPAddress", defObj.getMessage("samePunishmentAppliedToSameIPAddress"))
+            val alreadyPunished get() = obj.getMessage("alreadyPunished", defObj.getMessage("alreadyPunished"))
+            val removedFromServer get() = obj.getMessage("removedFromServer", defObj.getMessage("removedFromServer"))
+            val offlinePlayer get() = obj.getMessage("offlinePlayer", defObj.getMessage("offlinePlayer"))
+            val notPunished get() = obj.getMessage("notPunished", defObj.getMessage("notPunished"))
+            val noReasonSpecified get() = obj.getMessage("noReasonSpecified", defObj.getMessage("noReasonSpecified"))
+            val noProofSpecified get() = obj.getMessage("noProofSpecified", defObj.getMessage("noProofSpecified"))
+            val punishmentNotFound get() = obj.getMessage("punishmentNotFound", defObj.getMessage("punishmentNotFound"))
+            val proofNotFound get() = obj.getMessage("proofNotFound", defObj.getMessage("proofNotFound"))
         }
 
         object Sab {
+            private val defObj get() = Commands.defObj.getObj("sab")
             private val obj get() = Commands.obj.getObj("sab")
-            val setDebugLevel get() = obj.getMessage("setDebugLevel", "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。")
-            val reloadedConfiguration get() = obj.getMessage("reloadedConfiguration", "%PREFIX%&a設定を再読み込みしました。")
-            val deleteGroupUnpunishReason get() = obj.getMessage("deleteGroupUnpunishReason", "グループ'%GROUP%'の削除")
+            val setDebugLevel get() = obj.getMessage("setDebugLevel", defObj.getMessage("setDebugLevel"))
+            val reloadedConfiguration get() = obj.getMessage("reloadedConfiguration", defObj.getMessage("reloadedConfiguration"))
+            val deleteGroupUnpunishReason get() = obj.getMessage("deleteGroupUnpunishReason", defObj.getMessage("deleteGroupUnpunishReason"))
         }
 
         object Ban {
+            private val defObj get() = Commands.defObj.getObj("ban")
             private val obj get() = Commands.obj.getObj("ban")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /ban <player=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gban <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にBanされました!")
-            val notify get() = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&e&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7&o#%ID%")
-            val layout get() = obj.getMessage("layout", "%PREFIX%&7永久BANされました!\n\n&c対象サーバー &8&l» &7&o%SERVER%\n&c理由 &8&l» &7&o%REASON%")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object TempBan {
+            private val defObj get() = Commands.defObj.getObj("tempban")
             private val obj get() = Commands.obj.getObj("tempban")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /tempban <player=...> <reason=\"...\"> <time=...> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempban <player=...> <reason=\"...\"> <time=...> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempBanされました!")
-            val notify get() = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7&o#%ID%&r\n&7期間 &8> &7&o%TIME%")
-            val layout get() = obj.getMessage("layout", "%PREFIX%&7永久BANされました!\n\n&c対象サーバー &8&l» &7全サーバー\n&c理由 &8&l» &7%REASON%\n&c期間 &8&l» &7&o%DURATION%")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object IPBan {
+            private val defObj get() = Commands.defObj.getObj("ipban")
             private val obj get() = Commands.obj.getObj("ipban")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /ipban <target=Player/IP> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipban <target=Player/IP> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%TARGET%&r&7は、正常にIPBanされました!")
-            val notify get() = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からIPBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7#&o%ID%")
-            val layout get() = obj.getMessage("layout", "%PREFIX%&7永久IP BANされました!\n\n&c対象サーバー &8&l» &7全サーバー\n&c理由 &8&l» &7%REASON%")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("done"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object TempIPBan {
+            private val defObj get() = Commands.defObj.getObj("tempipban")
             private val obj get() = Commands.obj.getObj("tempipban")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /tempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%TARGET%&r&7は、正常にTempIPBanされました!")
-            val notify get() = obj.getMessage("notify", "&c&o%PLAYER%&r&7は、&5&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempIPBanされました。&r\n&7理由 &8> &7&o%REASON%&r\n&7ID &8> &7#&o%ID%&r\n&7期間 &8> &7&o%TIME%")
-            val layout get() = obj.getMessage("layout", "%PREFIX%&7一時的にIP BANされました!\n\n&c対象サーバー &8&l» &7全サーバー&r\n&c理由 &8&l» &7%REASON%&r\n&c期間 &8&l» &7&o%DURATION%")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object Mute {
+            private val defObj get() = Commands.defObj.getObj("mute")
             private val obj get() = Commands.obj.getObj("mute")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /mute <player=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gmute <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にMuteされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
-            val layout1 get() = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは永久ミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
-            val layout2 get() = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは永久ミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout1 get() = obj.getMessage("layout1", defObj.getMessage("layout1"))
+            val layout2 get() = obj.getMessage("layout2", defObj.getMessage("layout2"))
         }
 
         object TempMute {
+            private val defObj get() = Commands.defObj.getObj("tempmute")
             private val obj get() = Commands.obj.getObj("tempmute")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /tempmute <player=...> <reason=\"...\\\"> <time=...> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempmute <player=...> <reason=\"...\"> <time=...> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempMuteされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
-            val layout1 get() = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
-            val layout2 get() = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout1 get() = obj.getMessage("layout1", defObj.getMessage("layout1"))
+            val layout2 get() = obj.getMessage("layout2", defObj.getMessage("layout2"))
         }
 
         object IPMute {
+            private val defObj get() = Commands.defObj.getObj("ipmute")
             private val obj get() = Commands.obj.getObj("ipmute")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /ipmute <target=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gipmute <target=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
-            val layout1 get() = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは永久IPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
-            val layout2 get() = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは永久IPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout1 get() = obj.getMessage("layout1", defObj.getMessage("layout1"))
+            val layout2 get() = obj.getMessage("layout2", defObj.getMessage("layout2"))
         }
 
         object TempIPMute {
+            private val defObj get() = Commands.defObj.getObj("tempipmute")
             private val obj get() = Commands.obj.getObj("tempipmute")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /tempipmute <target=...> <reason=\"...\\\"> <time=...> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gtempipmute <target=...> <reason=\"...\"> <time=...> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%", "&7期間 &8> &7&o%TIME%"))
-            val layout1 get() = obj.getMessage("layout1", listOf("%PREFIX%&cあなたは一時的にIPミュートされました!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
-            val layout2 get() = obj.getMessage("layout2", listOf("%PREFIX%&cあなたは一時的にIPミュートされています!", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%", "&7期間 &8> &7&o%DURATION%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout1 get() = obj.getMessage("layout1", defObj.getMessage("layout1"))
+            val layout2 get() = obj.getMessage("layout2", defObj.getMessage("layout2"))
         }
 
         object Warning {
+            private val defObj get() = Commands.defObj.getObj("warning")
             private val obj get() = Commands.obj.getObj("warning")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /warning <player=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gwarning <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にWarnされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
-            val layout get() = obj.getMessage("layout", listOf("%PREFIX%&c警告を受けました", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
-            val title get() = obj.getMessage("title", "&cあなたは警告を受けました!")
-            val subtitle get() = obj.getMessage("subtitle", "&6/warns&eで表示を解除することができます")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
+            val title get() = obj.getMessage("title", defObj.getMessage("title"))
+            val subtitle get() = obj.getMessage("subtitle", defObj.getMessage("subtitle"))
         }
 
         object Caution {
+            private val defObj get() = Commands.defObj.getObj("caution")
             private val obj get() = Commands.obj.getObj("caution")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /caution <player=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にCautionされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
-            val layout get() = obj.getMessage("layout", listOf("%PREFIX%&c注意を受けました", "&7対象サーバー &8> &7&o%SERVER%", "&7理由 &8> &7&o%REASON%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object Kick {
+            private val defObj get() = Commands.defObj.getObj("kick")
             private val obj get() = Commands.obj.getObj("kick")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /kick <player=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gkick <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にKickされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
-            val layout get() = obj.getMessage("layout", listOf("%PREFIX%&cサーバーからキックされました", "&7理由 &8> &7&o%REASON%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object Note {
+            private val defObj get() = Commands.defObj.getObj("note")
             private val obj get() = Commands.obj.getObj("note")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /note <player=...> <reason=\"...\"> [server=...]")
-            val globalUsage get() = obj.getMessage("globalUsage", "%PREFIX%&a使用法: /gnote <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にNoteされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。", "&7理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
         }
 
         object Unpunish {
+            private val defObj get() = Commands.defObj.getObj("unpunish")
             private val obj get() = Commands.obj.getObj("unpunish")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /unpunish <id=...> <reason=\"...\"> [server=...]")
-            val unbanUsage get() = obj.getMessage("unbanUsage", "%PREFIX%&a使用法: /unban <player=...> <reason=\"...\"> [server=...]")
-            val unmuteUsage get() = obj.getMessage("unmuteUsage", "%PREFIX%&a使用法: /unmute <player=...> <reason=\"...\"> [server=...]")
-            val done get() = obj.getMessage("done", "%PREFIX%&c&o%PLAYER%&r&7は、正常にUnpunishされました!")
-            val notify get() = obj.getMessage("notify", listOf("&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からUnpunishされました。", "&7処罰タイプ &8> &7&o%TYPE%", "&7処罰理由 &8> &7&o%PREASON%", "&7処罰ID &8> &7&o#%PID%", "&7解除理由 &8> &7&o%REASON%", "&7ID &8> &7&o#%ID%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val unbanUsage get() = obj.getMessage("unbanUsage", defObj.getMessage("unbanUsage"))
+            val unmuteUsage get() = obj.getMessage("unmuteUsage", defObj.getMessage("unmuteUsage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
         }
 
         object ChangeReason {
+            private val defObj get() = Commands.defObj.getObj("changereason")
             private val obj get() = Commands.obj.getObj("changereason")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /changereason <id=...> <reason=\"...\">")
-            val done get() = obj.getMessage("done", "&7処罰&a#%ID%&7は正常に更新されました。")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
         }
 
         object AddProof {
+            private val defObj get() = Commands.defObj.getObj("addproof")
             private val obj get() = Commands.obj.getObj("addproof")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /addproof <id=...> <text=\"...\">")
-            val done get() = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&8)")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
         }
 
         object DelProof {
+            private val defObj get() = Commands.defObj.getObj("delproof")
             private val obj get() = Commands.obj.getObj("delproof")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /delproof <id=...>")
-            val done get() = obj.getMessage("done", "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(&7ID: &e%ID%&8)")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
         }
 
         object Seen {
+            private val defObj get() = Commands.defObj.getObj("seen")
             private val obj get() = Commands.obj.getObj("seen")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /seen <Player/IP>")
-            val searching get() = obj.getMessage("searching", "%PREFIX%&eプレイヤーを検索中...")
-            val layout get() = obj.getMessage("layout", listOf("%PREFIX%&c%PLAYER%&eは&c%SINCE%前&eから%STATUS%&eです。", "&7過去の名前 &8> &e&o%NAME_HISTORY%", "&7最近のIPアドレス &8> &e&o%IP% &7(&e%HOSTNAME%&7)", "&7過去のすべてのIPアドレス &8> &e&o%IP_HISTORY%"))
-            val layoutIP get() = obj.getMessage("layoutIP", listOf("%PREFIX%&eこのプレイヤーは過去に%PLAYERS_COUNT%個のアカウントで接続しています:", "&6%PLAYERS%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val searching get() = obj.getMessage("searching", defObj.getMessage("searching"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
+            val layoutIP get() = obj.getMessage("layoutIP", defObj.getMessage("layoutIP"))
         }
 
         object Check {
+            private val defObj get() = Commands.defObj.getObj("check")
             private val obj get() = Commands.obj.getObj("check")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /check <target=Player/IP> [--ip] [--only]")
-            val searching get() = obj.getMessage("searching", "%PREFIX%&eプレイヤーを検索中...")
-            val layout get() = obj.getMessage("layout", listOf("&cプレイヤー &8> &e%NAME% &8(&e%UUID%&8)", "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
-            val layoutIP get() = obj.getMessage("layoutIP", listOf("&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)", "&cMute &8> &7%MUTE_COUNT%", "&cBan &8> &7%BAN_COUNT%", "&c警告数 &8> &7%WARNING_COUNT%", "&c注意数 &8> &7%CAUTION_COUNT%", "&cノート &8> &7%NOTE_COUNT%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val searching get() = obj.getMessage("searching", defObj.getMessage("searching"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
+            val layoutIP get() = obj.getMessage("layoutIP", defObj.getMessage("layoutIP"))
         }
 
         object History {
+            private val defObj get() = Commands.defObj.getObj("history")
             private val obj get() = Commands.obj.getObj("history")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /history <target=Player/IP> [page=...] [--all] [--active] [--ip] [--only]")
-            val header get() = obj.getMessage("header", "%PREFIX%&c&o%TARGET%&7の履歴:")
-            val layout get() = obj.getMessage("layout", listOf("&8[&e%DATE%&8] &8(&e/proofs %ID%&7で証拠を表示&8)", "&c名前/IP &8> &7&o%PLAYER%", "&cタイプ &8> &7&o%TYPE%", "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME%", "&c理由 &8> &7&o%REASON% %UNPUNISH_REASON%", "&cID &8> &7&o#%ID% %UNPUNISH_ID%", "&cサーバー &8> &7&o%SERVER%", "&c執行者 &8> &7&o%OPERATOR% %UNPUNISH_OPERATOR%"))
-            val footer get() = obj.getMessage("footer", "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%")
-            val unpunishReason get() = obj.getMessage("unpunishReason", "&8(&7解除理由: &e%REASON%&8)")
-            val unpunishId get() = obj.getMessage("unpunishId", "&8(&7解除ID: &e%ID%&8)")
-            val unpunishOperator get() = obj.getMessage("unpunishOperator", "&8(&7解除者: &e%OPERATOR%&8)")
-            val invalidArguments get() = obj.getMessage("invalidArguments", "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val header get() = obj.getMessage("header", defObj.getMessage("header"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
+            val footer get() = obj.getMessage("footer", defObj.getMessage("footer"))
+            val unpunishReason get() = obj.getMessage("unpunishReason", defObj.getMessage("unpunishReason"))
+            val unpunishId get() = obj.getMessage("unpunishId", defObj.getMessage("unpunishId"))
+            val unpunishOperator get() = obj.getMessage("unpunishOperator", defObj.getMessage("unpunishOperator"))
+            val invalidArguments get() = obj.getMessage("invalidArguments", defObj.getMessage("invalidArguments"))
         }
 
         object Proofs {
+            private val defObj get() = Commands.defObj.getObj("proofs")
             private val obj get() = Commands.obj.getObj("proofs")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /proofs <ID>")
-            val header get() = obj.getMessage("header", "%PREFIX%&e処罰&a#%PID%&eの証拠一覧:")
-            val layout get() = obj.getMessage("layout", listOf("&c&o証拠ID #%ID% &8> &e&o%TEXT%"))
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val header get() = obj.getMessage("header", defObj.getMessage("header"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object Warns {
+            private val defObj get() = Commands.defObj.getObj("warns")
             private val obj get() = Commands.obj.getObj("warns")
-            val notWarnedYet get() = obj.getMessage("notWarnedYet", "%PREFIX%&c&oまだ警告を受けていません。")
-            val header get() = obj.getMessage("header", "%PREFIX%&c有効な警告一覧:")
-            val layout get() = obj.getMessage("layout", listOf("&8[&e%DATE%&8]", "&cタイプ &8> &7&o%TYPE%", "&c対象サーバー &8> &7&o%SERVER%", "&c理由 &8> &7&o%REASON%"))
+            val notWarnedYet get() = obj.getMessage("notWarnedYet", defObj.getMessage("notWarnedYet"))
+            val header get() = obj.getMessage("header", defObj.getMessage("header"))
+            val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
         object BanList {
+            private val defObj get() = Commands.defObj.getObj("banlist")
             private val obj get() = Commands.obj.getObj("banlist")
-            val usage get() = obj.getMessage("usage", "%PREFIX%&a使用法: /banlist [page=...] [type=...] [server=...] [--all] [--active]")
-            val header get() = obj.getMessage("header", "%PREFIX%&7処罰履歴:")
-            val footer get() = obj.getMessage("footer", "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%")
-            val invalidArguments get() = obj.getMessage("invalidArguments", "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val header get() = obj.getMessage("header", defObj.getMessage("header"))
+            val footer get() = obj.getMessage("footer", defObj.getMessage("footer"))
+            val invalidArguments get() = obj.getMessage("invalidArguments", defObj.getMessage("invalidArguments"))
         }
     }
 }

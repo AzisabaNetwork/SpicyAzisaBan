@@ -96,7 +96,7 @@ class SpicyAzisaBan: Plugin() {
     }
 
     override fun onEnable() {
-        SABConfig
+        if (SABConfig.prefix.contains("\\s+".toRegex())) throw IllegalArgumentException("prefix (in config.yml) contains whitespace")
         ReloadableSABConfig.reload()
         logger.info("Connecting to database...")
         connection = SQLConnection(

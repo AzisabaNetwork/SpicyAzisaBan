@@ -3,6 +3,7 @@
 #
 # Available variables:
 # %PREFIX% - general.prefix
+# %CMD_PREFIX% - prefix in config.yml (might be empty)
 
 general:
   prefix: "&c&lSpicyAzisaBan &8&l» &r"
@@ -10,6 +11,7 @@ general:
   error: "%PREFIX%&c処理中に不明なエラーが発生しました。"
 
   # these are "words" and you can't use variables here
+  none: "なし"
   global: "全サーバー"
   permanent: "無期限"
   online: "&aオンライン"
@@ -61,8 +63,8 @@ commands:
   # %DURATION% - Times left until the punishment expires
   # %TIME% - Duration of punishment
   ban:
-    usage: "%PREFIX%&a使用法: /ban <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gban <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%ban <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gban <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にBanされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からBanされました。"
@@ -78,8 +80,8 @@ commands:
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"
   tempban:
-    usage: "%PREFIX%&a使用法: /tempban <player=...> <reason=\"...\"> <time=...> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gtempban <player=...> <reason=\"...\"> <time=...> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%tempban <player=...> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gtempban <player=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempBanされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&r&7で&e&o%OPERATOR%&r&7からTempBanされました。"
@@ -97,8 +99,8 @@ commands:
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"
   ipban:
-    usage: "%PREFIX%&a使用法: /ipban <target=Player/IP> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gipban <target=Player/IP> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%ipban <target=Player/IP> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gipban <target=Player/IP> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPBanされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からIPBanされました。"
@@ -114,8 +116,8 @@ commands:
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"
   tempipban:
-    usage: "%PREFIX%&a使用法: /tempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gtempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%tempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gtempipban <target=Player/IP> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPBanされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPBanされました。"
@@ -133,8 +135,8 @@ commands:
       - "&7お問い合わせ:"
       - "&eDiscord &8» &c&ncoming soon"
   mute:
-    usage: "%PREFIX%&a使用法: /mute <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gmute <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%mute <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gmute <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にMuteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からMuteされました。"
@@ -149,8 +151,8 @@ commands:
       - "&7対象サーバー &8> &7&o%SERVER%"
       - "&7理由 &8> &7&o%REASON%"
   tempmute:
-    usage: "%PREFIX%&a使用法: /tempmute <player=...> <reason=\"...\"> <time=...> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gtempmute <player=...> <reason=\"...\"> <time=...> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%tempmute <player=...> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gtempmute <player=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempMuteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempMuteされました。"
@@ -168,8 +170,8 @@ commands:
       - "&7理由 &8> &7&o%REASON%"
       - "&7期間 &8> &7&o%DURATION%"
   ipmute:
-    usage: "%PREFIX%&a使用法: /ipmute <target=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gipmute <target=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%ipmute <target=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gipmute <target=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にIPMuteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からIPMuteされました。"
@@ -184,8 +186,8 @@ commands:
       - "&7対象サーバー &8> &7&o%SERVER%"
       - "&7理由 &8> &7&o%REASON%"
   tempipmute:
-    usage: "%PREFIX%&a使用法: /tempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gtempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%tempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gtempipmute <target=...> <reason=\"...\"> <time=...> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にTempIPMuteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からTempIPMuteされました。"
@@ -203,8 +205,8 @@ commands:
       - "&7理由 &8> &7&o%REASON%"
       - "&7期間 &8> &7&o%DURATION%"
   warning:
-    usage: "%PREFIX%&a使用法: /warning <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gwarning <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%warning <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gwarning <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にWarnされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からWarnされました。"
@@ -216,10 +218,10 @@ commands:
       - "&c対象サーバー &8> &7&o%SERVER%"
       - "&c理由 &8> &7&o%REASON%"
     title: "&cあなたは警告を受けました!"
-    subtitle: "&6/warns&eで表示を解除することができます"
+    subtitle: "&6/%CMD_PREFIX%warns&eで表示を解除することができます"
   caution:
-    usage: "%PREFIX%&a使用法: /caution <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gcaution <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%caution <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gcaution <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にCautionされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からCautionされました。"
@@ -231,8 +233,8 @@ commands:
       - "&c対象サーバー &8> &7&o%SERVER%"
       - "&c理由 &8> &7&o%REASON%"
   kick:
-    usage: "%PREFIX%&a使用法: /kick <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gkick <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%kick <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gkick <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にKickされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からKickされました。"
@@ -242,17 +244,17 @@ commands:
       - "%PREFIX%&cサーバーからキックされました"
       - "&c理由 &8> &7%REASON%"
   note:
-    usage: "%PREFIX%&a使用法: /note <player=...> <reason=\"...\"> [server=...]"
-    globalUsage: "%PREFIX%&a使用法: /gnote <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%note <player=...> <reason=\"...\"> [server=...]"
+    globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gnote <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にNoteされました!"
     notify:
       - "&c&o%PLAYER%&r&7は、&e&o%SERVER%&7で&e&o%OPERATOR%&r&7からNoteされました。"
       - "&7理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
   unpunish:
-    usage: "%PREFIX%&a使用法: /unpunish <id=...> <reason=\"...\">"
-    unbanUsage: "%PREFIX%&a使用法: /unban <player=...> <reason=\"...\"> [server=...]"
-    unmuteUsage: "%PREFIX%&a使用法: /unmute <player=...> <reason=\"...\"> [server=...]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%unpunish <id=...> <reason=\"...\">"
+    unbanUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%unban <player=...> <reason=\"...\"> [server=...]"
+    unmuteUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%unmute <player=...> <reason=\"...\"> [server=...]"
     done: "%PREFIX%&c&o%PLAYER%&r&7は、正常にUnpunishされました!"
     # %TYPE%, %PREASON%, %PID% can be used here
     notify:
@@ -263,21 +265,21 @@ commands:
       - "&7解除理由 &8> &7&o%REASON%"
       - "&7ID &8> &7&o#%ID%"
   changereason:
-    usage: "%PREFIX%&a使用法: /changereason <id=...> <reason=\"...\">"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%changereason <id=...> <reason=\"...\">"
     done: "%PREFIX%&7処罰&a#%ID%&7は正常に更新されました。"
   addproof:
-    usage: "%PREFIX%&a使用法: /addproof <id=...> <text=\"...\">"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%addproof <id=...> <text=\"...\">"
     # %PID% can be used here (punishment id), and %ID% is proof id
     # and %TEXT% for proof text
     done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&8)"
   delproof:
-    usage: "%PREFIX%&a使用法: /delproof <id=...>"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%delproof <id=...>"
     # %PID% can be used here (punishment id), and %ID% is proof id
     # and %TEXT% for original proof text
     done: "%PREFIX%&7処罰&a#%PID%&7から証拠を削除しました。&8(&7ID: &e%ID%&8)"
 
   seen:
-    usage: "%PREFIX%&a使用法: /seen <Player/IP>"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%seen <Player/IP>"
     searching: "%PREFIX%&eプレイヤーを検索中..."
     # Available variables: %PLAYER%, %SINCE%, %STATUS%, %NAME_HISTORY%, %IP%, %HOSTNAME%, %IP_HISTORY%, %SAME_IP_PLAYERS%, %SAME_IP_PLAYERS_COUNT%
     layout:
@@ -302,12 +304,12 @@ commands:
       - "&c対象サーバー &8> &7&o%SERVER%"
       - "&c理由 &8> &7&o%REASON%"
   history:
-    usage: "%PREFIX%&a使用法: /history <target=Player/IP> [page=...] [--all] [--active]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%history <target=Player/IP> [page=...] [--all] [--active]"
     # Available variables: %TARGET%
     header: "%PREFIX%&c&o%TARGET%&7の履歴:"
     # Available variables: variables of punishment + %DATE%, %STRIKETHROUGH_IF_UNPUNISHED%, %UNPUNISH_REASON%, %UNPUNISH_ID%, %UNPUNISH_OPERATOR%
     layout:
-      - "&8[&e%DATE%&8] &8(&e/proofs %ID%&7で証拠を表示&8)"
+      - "&8[&e%DATE%&8] &8(&e/%CMD_PREFIX%proofs %ID%&7で証拠を表示&8)"
       - "&c名前/IP &8> &7&o%PLAYER%"
       - "&cタイプ &8> &7&o%TYPE%"
       - "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME%"
@@ -326,7 +328,7 @@ commands:
     # Available variables: default
     invalidArguments: "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。"
   check:
-    usage: "%PREFIX%&a使用法: /check <target=Player/IP> [--ip] [--only]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%check <target=Player/IP> [--ip] [--only]"
     searching: "%PREFIX%&eプレイヤーを検索中..."
     # Available variables: %NAME%, %UUID%, %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
     layout:
@@ -347,14 +349,14 @@ commands:
       - "&c注意数 &8> &7%CAUTION_COUNT%"
       - "&cノート &8> &7%NOTE_COUNT%"
   proofs:
-    usage: "%PREFIX%&a使用法: /proofs <ID>"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%proofs <ID>"
     # Available variables: punishment + %PID% (punishment id)
     header: "%PREFIX%&e処罰&a#%PID%&eの証拠一覧:"
     # Available variables: %PID% (punishment id), %ID% (proof id), %TEXT% (proof text)
     layout:
       - "&c&o証拠ID #%ID% &8> &e&o%TEXT%"
   banlist:
-    usage: "%PREFIX%&a使用法: /banlist [page=...] [type=...] [server=...] [--all] [--active]"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%banlist [page=...] [type=...] [server=...] [--all] [--active]"
     # Available variables: default
     header: "%PREFIX%&7処罰履歴:"
     # Available variables: %CURRENT_PAGE%, %MAX_PAGE%, %COUNT%
