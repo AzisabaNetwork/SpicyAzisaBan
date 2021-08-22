@@ -27,6 +27,7 @@ import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
+import java.util.concurrent.TimeUnit
 
 object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
@@ -76,7 +77,9 @@ object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
                         .filter { it.name.startsWith("lobby") }
                         .random()
                     proxiedPlayer.connect(lobby)
-                    proxiedPlayer.send(p.getBannedMessage().complete())
+                    ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+                        proxiedPlayer.send(p.getBannedMessage().complete())
+                    }, 2, TimeUnit.SECONDS)
                 }
             }
             .catch {
