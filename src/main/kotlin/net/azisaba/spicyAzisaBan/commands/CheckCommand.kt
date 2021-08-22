@@ -15,7 +15,10 @@ import net.azisaba.spicyAzisaBan.util.Util.plus
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.IPAddressContext
+import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
+import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.plugin.Command
@@ -27,7 +30,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import java.net.InetAddress
 
 object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
-    private val availableArguments = listOf(listOf("target="), listOf("--ip", "-i"), listOf("--only", "-o"))
+    private val availableArguments = listOf(listOf("target="), listOf("--ip", "-i"), listOf("--only", "-o"), listOf("server="))
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission("sab.check")) {
@@ -41,8 +44,15 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
         if (target.isNullOrBlank()) {
             return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
+        val only = arguments.contains("only") || arguments.contains("-o")
+        val specifiedServer = arguments.containsKey("server")
+        val whereServer = if (specifiedServer) " AND `server` = ?" else ""
         Promise.create<Unit> { context ->
             sender.send(SABMessages.Commands.Check.searching.replaceVariables().translate())
+            val server = arguments.get(Contexts.SERVER_NO_PERM_CHECK, sender)
+                .complete()
+                .apply { if (!isSuccess) return@create }
+                .name
             if (arguments.contains("ip") || arguments.contains("-i") || target.isValidIPAddress()) {
                 val ip = if (target.isValidIPAddress()) {
                     target
@@ -62,27 +72,46 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@create context.resolve()
                 }
-                val punishments = if (arguments.contains("only") || arguments.contains("-o")) {
+                val punishments = if (only) {
                     SpicyAzisaBan.instance.connection.punishmentHistory
-                        .findAll(FindOptions.Builder().addWhere("target", ip).build())
+                        .findAll(FindOptions.Builder().addWhere("target", ip).apply { if (specifiedServer) addWhere("server", server) }.build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }
                         .complete()
                 } else {
                     var where = pd.joinToString(" OR ") { "`target` = ?" }
                     if (where.isNotBlank()) where = " OR $where"
-                    val sql = "SELECT * FROM `punishmentHistory` WHERE `target` = ?$where"
+                    val sql = "SELECT * FROM `punishments` WHERE `target` = ?$where$whereServer"
                     SQLConnection.logSql(sql)
                     val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-                    st.setObject(1, ip)
+                    st.setString(1, ip)
                     pd.forEachIndexed { index, playerData ->
-                        st.setObject(index + 2, playerData.uniqueId.toString())
+                        st.setString(index + 2, playerData.uniqueId.toString())
                     }
+                    if (specifiedServer) st.setString(pd.size + 2, server)
                     val ps = mutableListOf<Punishment>()
                     val rs = st.executeQuery()
                     while (rs.next()) ps.add(Punishment.fromResultSet(rs))
                     st.close()
                     ps
                 }
+                val banInfo = Punishment.canJoinServer(null, ip, server, true)
+                    .then {
+                        if (it == null) {
+                            SABMessages.General.none.translate()
+                        } else {
+                            SABMessages.Commands.Check.muteInfo.replaceVariables(it.getVariables().complete()).translate()
+                        }
+                    }
+                    .complete()
+                val muteInfo = Punishment.canSpeak(null, ip, server, true)
+                    .then {
+                        if (it == null) {
+                            SABMessages.General.none.translate()
+                        } else {
+                            SABMessages.Commands.Check.muteInfo.replaceVariables(it.getVariables().complete()).translate()
+                        }
+                    }
+                    .complete()
                 val muteCount = punishments.count { it.type.isMute() }
                 val banCount = punishments.count { it.type.isBan() }
                 val warningCount = punishments.count { it.type == PunishmentType.WARNING }
@@ -100,6 +129,8 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                             "caution_count" to (if (cautionCount == 0) ChatColor.GREEN else ChatColor.RED) + cautionCount.toString(),
                             "kick_count" to kickCount.toString(),
                             "note_count" to noteCount.toString(),
+                            "ban_info" to banInfo,
+                            "mute_info" to muteInfo,
                         )
                         .translate()
                 )
@@ -114,21 +145,40 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                 }
                 val punishments = if (arguments.contains("only") || arguments.contains("-o")) {
                     SpicyAzisaBan.instance.connection.punishmentHistory
-                        .findAll(FindOptions.Builder().addWhere("target", pd.uniqueId.toString()).build())
+                        .findAll(FindOptions.Builder().addWhere("target", pd.uniqueId.toString()).apply { if (specifiedServer) addWhere("server", server) }.build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }
                         .complete()
                 } else {
-                    val sql = "SELECT * FROM `punishmentHistory` WHERE `target` = ? OR `target` = ?"
+                    val sql = "SELECT * FROM `punishmentHistory` WHERE `target` = ? OR `target` = ?$whereServer"
                     SQLConnection.logSql(sql)
                     val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-                    st.setObject(1, pd.uniqueId.toString())
-                    st.setObject(2, pd.ip ?: pd.uniqueId.toString())
+                    st.setString(1, pd.uniqueId.toString())
+                    st.setString(2, pd.ip ?: pd.uniqueId.toString())
+                    if (specifiedServer) st.setString(3, server)
                     val ps = mutableListOf<Punishment>()
                     val rs = st.executeQuery()
                     while (rs.next()) ps.add(Punishment.fromResultSet(rs))
                     st.close()
                     ps
                 }
+                val banInfo = Punishment.canJoinServer(pd.uniqueId, if (only) null else pd.ip, server, true)
+                    .then {
+                        if (it == null) {
+                            SABMessages.General.none.translate()
+                        } else {
+                            SABMessages.Commands.Check.muteInfo.replaceVariables(it.getVariables().complete()).translate()
+                        }
+                    }
+                    .complete()
+                val muteInfo = Punishment.canSpeak(pd.uniqueId, if (only) null else pd.ip, server, true)
+                    .then {
+                        if (it == null) {
+                            SABMessages.General.none.translate()
+                        } else {
+                            SABMessages.Commands.Check.muteInfo.replaceVariables(it.getVariables().complete()).translate()
+                        }
+                    }
+                    .complete()
                 val muteCount = punishments.count { it.type.isMute() }
                 val banCount = punishments.count { it.type.isBan() }
                 val warningCount = punishments.count { it.type == PunishmentType.WARNING }
@@ -148,6 +198,8 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                             "caution_count" to (if (cautionCount == 0) ChatColor.GREEN else ChatColor.RED) + cautionCount.toString(),
                             "kick_count" to kickCount.toString(),
                             "note_count" to noteCount.toString(),
+                            "ban_info" to banInfo,
+                            "mute_info" to muteInfo,
                         )
                         .translate()
                 )
@@ -162,6 +214,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
         if (s.startsWith("target=")) return IPAddressContext.tabComplete(s) // it says IPAddressContext but no
+        if (s.startsWith("server=")) return ServerContext.tabComplete(s)
         return emptyList()
     }
 }

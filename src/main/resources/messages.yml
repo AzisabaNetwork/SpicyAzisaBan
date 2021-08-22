@@ -330,24 +330,29 @@ commands:
   check:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%check <target=Player/IP> [--ip] [--only]"
     searching: "%PREFIX%&eプレイヤーを検索中..."
-    # Available variables: %NAME%, %UUID%, %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
+    # Available variables: %NAME%, %UUID%, %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%,
+    # %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%, %BAN_INFO%, %MUTE_INFO%
     layout:
       - "&cプレイヤー &8> &e%NAME% &8(&e%UUID%&8)"
       - "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)"
-      - "&cMute &8> &7%MUTE_COUNT%"
-      - "&cBan &8> &7%BAN_COUNT%"
+      - "&cMute &8> &7%MUTE_INFO%"
+      - "&cBan &8> &7%BAN_INFO%"
       - "&c警告数 &8> &7%WARNING_COUNT%"
       - "&c注意数 &8> &7%CAUTION_COUNT%"
       - "&cノート &8> &7%NOTE_COUNT%"
       - "&cキック &8> &7%KICK_COUNT%"
-    # Available variables: %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%, %KICK_COUNT%
+    # Available variables: %IP%, %HOSTNAME%, %MUTE_COUNT%, %BAN_COUNT%, %WARNING_COUNT%, %CAUTION_COUNT%, %NOTE_COUNT%,
+    # %KICK_COUNT%, %BAN_INFO%, %MUTE_INFO%
     layoutIP:
       - "&cIPアドレス &8> &e%IP% &8(&e%HOSTNAME%&8)"
-      - "&cMute &8> &7%MUTE_COUNT%"
-      - "&cBan &8> &7%BAN_COUNT%"
+      - "&cMute &8> &7%MUTE_INFO%"
+      - "&cBan &8> &7%BAN_INFO%"
       - "&c警告数 &8> &7%WARNING_COUNT%"
       - "&c注意数 &8> &7%CAUTION_COUNT%"
       - "&cノート &8> &7%NOTE_COUNT%"
+    # Available variables for banInfo and muteInfo: default, punishment
+    banInfo: "&c%DURATION% &8(&7ID: &e#%ID%&7, &7理由: &e&o%REASON%&8)"
+    muteInfo: "&c%DURATION% &8(&7ID: &e#%ID%&7, &7理由: &e&o%REASON%&8)"
   proofs:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%proofs <ID>"
     # Available variables: punishment + %PID% (punishment id)

@@ -307,6 +307,8 @@ object SABMessages {
             val searching get() = obj.getMessage("searching", defObj.getMessage("searching"))
             val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
             val layoutIP get() = obj.getMessage("layoutIP", defObj.getMessage("layoutIP"))
+            val banInfo get() = obj.getMessage("banInfo", defObj.getMessage("banInfo"))
+            val muteInfo get() = obj.getMessage("muteInfo", defObj.getMessage("muteInfo"))
         }
 
         object History {
