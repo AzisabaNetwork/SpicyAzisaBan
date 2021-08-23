@@ -368,4 +368,15 @@ object Util {
      * Extension method to allow `ChatColor.XXXX + string`.
      */
     operator fun ChatColor.plus(s: String) = "$this$s"
+
+    fun String.getCurrentColor(char: Char = '§'): ChatColor {
+        val reader = StringReader(this.reversed())
+        while (!reader.isEOF()) {
+            val first = reader.readFirst()
+            if (reader.peek() == char) {
+                ChatColor.getByChar(first)?.let { return it }
+            }
+        }
+        return ChatColor.WHITE
+    }
 }

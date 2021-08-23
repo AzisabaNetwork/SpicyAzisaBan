@@ -12,6 +12,7 @@ import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.plugin.Command
@@ -66,7 +67,13 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                 }
                 val ipd = pd.ip?.let { PlayerData.getAllByIP(it).catch { e -> sender.sendErrorMessage(e) }.complete() }
                     ?.filter { pd2 -> pd2.uniqueId != pd.uniqueId }
-                val iPlayers = ipd?.joinToString(", ") { if (it.ip != pd.ip) "${it.name}*" else it.name }.toString()
+                val iPlayers = ipd?.joinToString("${ChatColor.WHITE}, ${ChatColor.GOLD}") {
+                    var prefix = ""
+                    if (ProxyServer.getInstance().getPlayer(it.uniqueId)?.isConnected == true) prefix += "${ChatColor.GREEN}"
+                    var suffix = "${ChatColor.GOLD}"
+                    if (it.ip != pd.ip) suffix += "*"
+                    "$prefix${it.name}$suffix"
+                }.toString()
                 sender.send(
                     SABMessages.Commands.Seen.layout
                         .replaceVariables(

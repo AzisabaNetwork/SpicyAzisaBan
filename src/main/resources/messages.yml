@@ -290,6 +290,7 @@ commands:
       - "&7同じIPで接続しているプレイヤー &8> &6%SAME_IP_PLAYERS%"
     # Available variables: %PLAYERS_COUNT%, %PLAYERS%, %HOSTNAME%, %IP_ADDRESS%
     # * = they have different ip now
+    # green player name = currently online
     layoutIP:
       - "%PREFIX%&c&o%IP_ADDRESS% &8(&e&o%HOSTNAME%&8)&eは過去に%PLAYERS_COUNT%個のアカウントで接続しています:"
       - "&6%PLAYERS%"

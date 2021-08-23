@@ -1,11 +1,11 @@
 package net.azisaba.spicyAzisaBan.test
 
-import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
-import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
+import net.azisaba.spicyAzisaBan.util.Util.getCurrentColor
+import net.md_5.bungee.api.ChatColor
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class UtilTest {
+    /*
     @Test
     fun testPunishableIP() {
         assertThrows<IllegalArgumentException> { !"I am not an IP address".isPunishableIP() }
@@ -14,5 +14,11 @@ class UtilTest {
         assert(!"0.0.0.0".isPunishableIP())
         assert("1.1.1.1".isPunishableIP())
         assert("1.1.1.1" == "001.001.01.1".reconstructIPAddress()) { "001.001.01.1".reconstructIPAddress() }
+    }
+    */
+
+    @Test
+    fun testCurrentColor() {
+        assert("&atest&bCurrent&cColor&dhi".getCurrentColor('&') == ChatColor.LIGHT_PURPLE)
     }
 }
