@@ -62,8 +62,8 @@ class SpicyAzisaBan: Plugin() {
         private val startTime = System.currentTimeMillis()
         @JvmField
         val GROUP_PATTERN = "^[a-zA-Z0-9+_\\-]{1,32}$".toRegex()
-        @JvmField
-        val PREFIX = SABMessages.General.prefix.translate()
+        @JvmStatic
+        lateinit var PREFIX: String
         @JvmStatic
         lateinit var instance: SpicyAzisaBan
 
@@ -93,6 +93,7 @@ class SpicyAzisaBan: Plugin() {
 
     init {
         instance = this
+        PREFIX = SABMessages.General.prefix.translate()
     }
 
     override fun onEnable() {
