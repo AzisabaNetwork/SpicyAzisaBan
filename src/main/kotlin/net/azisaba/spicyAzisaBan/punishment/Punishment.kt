@@ -222,8 +222,8 @@ data class Punishment(
         title.fadeIn(0)
         title.fadeOut(0)
         title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
-        title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.translate()))
-        title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.translate()))
+        title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.replaceVariables().translate()))
+        title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.replaceVariables().translate()))
         player.sendTitle(title)
     }
 
