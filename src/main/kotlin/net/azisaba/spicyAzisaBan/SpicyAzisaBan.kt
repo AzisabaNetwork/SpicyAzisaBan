@@ -138,6 +138,7 @@ class SpicyAzisaBan: Plugin() {
                     connection.punishments
                         .findAll(FindOptions.Builder().addWhere("type", PunishmentType.WARNING.name).build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }
+                        .then { list -> list.distinctBy { it.target } }
                         .thenDo { punishments -> punishments.forEach { p -> p.sendTitle() } }
                 } catch (e: SQLException) {
                     logger.severe("Could not fetch punishments")
