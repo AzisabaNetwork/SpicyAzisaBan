@@ -34,6 +34,7 @@ commands:
     invalidTime: "%PREFIX%&c時間(&etime=&c)の形式が正しくありません。"
     invalidIPAddress: "%PREFIX%&cIPアドレスの形式が正しくないか、処罰不可なIPアドレスです。"
     invalidPunishmentType: "%PREFIX%&c無効な処罰タイプです。"
+    invalidNumber: "%PREFIX%&c無効な数値です。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
     samePunishmentAppliedToSameIPAddress: "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。"
     alreadyPunished: "%PREFIX%&cこのアカウントはすでに(同じサーバー、同じ種類で)処罰されています!"
@@ -49,6 +50,8 @@ commands:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
     reloadedConfiguration: "%PREFIX%&a設定を再読み込みしました。"
     deleteGroupUnpunishReason: "グループ'%GROUP%'の削除" # Available variables: default, %GROUP% (group name being removed)
+    removedFromPunishmentHistory: "%PREFIX%&a処罰&8<&7punishmentHistory&8>&a#%ID%を削除しました。" # Available variables: default, punishment
+    removedFromPunishment: "%PREFIX%&a処罰&8<&7punishments&8>&a#%ID%を削除しました。" # Available variables: default, punishment
 
   # Available variables (punishment):
   # %DATE%

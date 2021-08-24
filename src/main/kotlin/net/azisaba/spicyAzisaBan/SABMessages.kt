@@ -115,6 +115,7 @@ object SABMessages {
             val invalidTime get() = obj.getMessage("invalidTime", defObj.getMessage("invalidTime"))
             val invalidIPAddress get() = obj.getMessage("invalidIPAddress", defObj.getMessage("invalidIPAddress"))
             val invalidPunishmentType get() = obj.getMessage("invalidPunishmentType", defObj.getMessage("invalidPunishmentType"))
+            val invalidNumber get() = obj.getMessage("invalidNumber", defObj.getMessage("invalidNumber"))
             val timeNotSpecified get() = obj.getMessage("timeNotSpecified", defObj.getMessage("timeNotSpecified"))
             val samePunishmentAppliedToSameIPAddress get() = obj.getMessage("samePunishmentAppliedToSameIPAddress", defObj.getMessage("samePunishmentAppliedToSameIPAddress"))
             val alreadyPunished get() = obj.getMessage("alreadyPunished", defObj.getMessage("alreadyPunished"))
@@ -133,6 +134,8 @@ object SABMessages {
             val setDebugLevel get() = obj.getMessage("setDebugLevel", defObj.getMessage("setDebugLevel"))
             val reloadedConfiguration get() = obj.getMessage("reloadedConfiguration", defObj.getMessage("reloadedConfiguration"))
             val deleteGroupUnpunishReason get() = obj.getMessage("deleteGroupUnpunishReason", defObj.getMessage("deleteGroupUnpunishReason"))
+            val removedFromPunishmentHistory get() = obj.getMessage("removedFromPunishmentHistory", defObj.getMessage("removedFromPunishmentHistory"))
+            val removedFromPunishments get() = obj.getMessage("removedFromPunishments", defObj.getMessage("removedFromPunishments"))
         }
 
         object Ban {

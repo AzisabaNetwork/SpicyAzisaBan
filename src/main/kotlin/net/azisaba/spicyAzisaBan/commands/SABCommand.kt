@@ -30,7 +30,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), TabExecutor {
-    private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug", "reload")
+    private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug", "reload", "deletePunishmentHistory", "deletePunishment")
     private val groupCommands = listOf("add", "remove", "info")
 
     private val groupRemoveConfirmation = mutableMapOf<UUID, String>()
@@ -41,6 +41,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab info")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab creategroup <group>")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletegroup <group>")
+        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletehistory <id>")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab debug [debugLevel = 0-99999]")
         send("${ChatColor.RED}> ${ChatColor.AQUA}/sab reload")
     }
@@ -217,6 +218,36 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     sender.send("$PREFIX- ${ChatColor.AQUA}Uptime: ${ChatColor.GREEN}${SpicyAzisaBan.getUptime()}")
                     context.resolve()
                 }
+            }
+            "deletePunishmentHistory" -> {
+                if (args.size <= 1) return sender.sendHelp()
+                val id = try {
+                    max(args[1].toLong(), 0)
+                } catch (e: NumberFormatException) {
+                    return sender.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
+                }
+                SpicyAzisaBan.instance.connection.punishmentHistory
+                    .delete(FindOptions.Builder().addWhere("id", id).build())
+                    .then { list ->
+                        if (list.isEmpty()) return@then sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate().format(id))
+                        val v = Punishment.fromTableData(list[0]).getVariables().complete()
+                        sender.send(SABMessages.Commands.Sab.removedFromPunishmentHistory.replaceVariables(v).translate())
+                    }
+            }
+            "deletePunishment" -> {
+                if (args.size <= 1) return sender.sendHelp()
+                val id = try {
+                    max(args[1].toLong(), 0)
+                } catch (e: NumberFormatException) {
+                    return sender.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
+                }
+                SpicyAzisaBan.instance.connection.punishments
+                    .delete(FindOptions.Builder().addWhere("id", id).build())
+                    .then { list ->
+                        if (list.isEmpty()) return@then sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate().format(id))
+                        val v = Punishment.fromTableData(list[0]).getVariables().complete()
+                        sender.send(SABMessages.Commands.Sab.removedFromPunishments.replaceVariables(v).translate())
+                    }
             }
             "debug" -> {
                 if (args.size <= 1) {
