@@ -11,6 +11,8 @@ import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.config.ServerInfo
+import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.event.ServerConnectEvent
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.event.EventHandler
@@ -41,10 +43,11 @@ object CheckBanListener: Listener {
                 }, 1, TimeUnit.SECONDS)
                 val p = Punishment.canJoinServer(e.player.uniqueId, ipAddress, e.target.name.lowercase()).complete()
                 if (p != null) {
+                    e.isCancelled = true
                     if (currentServer == null || e.player.server == null) {
                         e.player.kick(p.getBannedMessage().complete())
                     } else if (e.player.server?.info == currentServer) {
-                        e.player.connect(currentServer)
+                        e.player.plsConnect(currentServer, e.target)
                         e.player.send(p.getBannedMessage().complete())
                     }
                 }
@@ -54,10 +57,11 @@ object CheckBanListener: Listener {
             if (!res) {
                 SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.player.uniqueId} (Timed out)")
                 if (SABConfig.database.failsafe) {
+                    e.isCancelled = true
                     if (currentServer == null || e.player.server == null) {
                         e.player.kick(SABMessages.General.error.replaceVariables().translate())
                     } else if (e.player.server?.info == currentServer) {
-                        e.player.connect(currentServer)
+                        e.player.plsConnect(currentServer, e.target)
                         e.player.send(SABMessages.General.error.replaceVariables().translate())
                     }
                 }
@@ -66,13 +70,25 @@ object CheckBanListener: Listener {
             SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.player.uniqueId}")
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
+                e.isCancelled = true
                 if (currentServer == null || e.player.server == null) {
                     e.player.kick(SABMessages.General.error.replaceVariables().translate())
                 } else if (e.player.server?.info == currentServer) {
-                    e.player.connect(currentServer)
+                    e.player.plsConnect(currentServer, e.target)
                     e.player.send(SABMessages.General.error.replaceVariables().translate())
                 }
             }
+        }
+    }
+
+    private fun ProxiedPlayer.plsConnect(server: ServerInfo, tryAgainIf: ServerInfo? = null) {
+        connect(server)
+        if (tryAgainIf != null) {
+            ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+                if (this.server.info == tryAgainIf) {
+                    connect(server)
+                }
+            }, 1, TimeUnit.SECONDS)
         }
     }
 
