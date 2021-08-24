@@ -19,4 +19,3 @@ data class ReasonContext(val text: String): Context {
         }
     }
 }
-
