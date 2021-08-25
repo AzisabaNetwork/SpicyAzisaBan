@@ -41,6 +41,7 @@ object Util {
      * Prints stacktrace to console and sends "error" message to sender.
      */
     fun CommandSender.sendErrorMessage(throwable: Throwable) {
+        if (throwable::class.java.canonicalName.endsWith("Cancel")) return
         throwable.printStackTrace()
         send(SABMessages.General.error.replaceVariables().translate())
     }
@@ -378,5 +379,11 @@ object Util {
             }
         }
         return ChatColor.WHITE
+    }
+
+    fun String.toUUID() = try {
+        UUID.fromString(this)!!
+    } catch (e: IllegalArgumentException) {
+        null
     }
 }

@@ -54,7 +54,7 @@ data class PlayerData(
             val sql = "SELECT * FROM `players` WHERE LOWER(`name`) LIKE LOWER(?) ORDER BY `last_seen` DESC LIMIT 1"
             SQLConnection.logSql(sql)
             val ps = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-            ps.setString(1, "%$name%")
+            ps.setString(1, name)
             val rs = ps.executeQuery()
             if (!rs.next()) {
                 MojangAPI.getUniqueId(name)

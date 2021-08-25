@@ -11,6 +11,7 @@ import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
+import net.azisaba.spicyAzisaBan.util.Util.toUUID
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
@@ -52,7 +53,7 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                 )
             } else {
                 var pd = PlayerData.getByName(args[0]).catch { sender.sendErrorMessage(it) }.complete()
-                if (pd == null) {
+                if (pd == null && args[0].toUUID() != null) {
                     pd = PlayerData.getByUUID(args[0]).catch { sender.sendErrorMessage(it) }.complete()
                 }
                 if (pd == null) {
