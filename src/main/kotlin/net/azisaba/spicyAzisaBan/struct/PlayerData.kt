@@ -110,11 +110,11 @@ data class PlayerData(
             val addr = player.socketAddress.getIPAddress()
             if (addr != null) {
                 val ip = SpicyAzisaBan.instance.connection.ipAddressHistory
-                    .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).addWhere("ip", addr).build())
+                    .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).setOrderBy("last_seen").setOrder(Sort.DESC).build())
                     .then { td -> td?.getString("ip") }
                     .catch { it.printStackTrace() }
                     .complete()
-                if (ip == null) {
+                if (ip != addr) {
                     SpicyAzisaBan.debug("Updating ipAddressHistory of ${player.name} (${player.uniqueId}) (old: $ip)")
                     insertNoId {
                         SpicyAzisaBan.instance.connection.ipAddressHistory.insert(
