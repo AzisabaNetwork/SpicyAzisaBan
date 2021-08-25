@@ -1,11 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.30"
     id("com.github.johnrengelman.shadow") version "6.0.0"
     `maven-publish`
 }
 
 group = "net.azisaba"
-version = "0.0.34-dev"
+version = "0.0.34"
 
 java {
     withJavadocJar()
