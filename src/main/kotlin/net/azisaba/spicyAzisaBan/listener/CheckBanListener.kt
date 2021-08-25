@@ -28,13 +28,17 @@ object CheckBanListener: Listener {
         val pair = Punishment.canJoinServerCached(e.player.uniqueId, ipAddress, e.target.name.lowercase())
         if (pair.first) { // true = cached, false = not cached
             val p = pair.second ?: return
-            e.isCancelled = true
-            if (e.reason.shouldKick()) {
-                e.player.kick(p.getBannedMessage().complete())
+            if (p.isExpired()) {
+                p.removeIfExpired()
             } else {
-                e.player.send(p.getBannedMessage().complete())
+                e.isCancelled = true
+                if (e.reason.shouldKick()) {
+                    e.player.kick(p.getBannedMessage().complete())
+                } else {
+                    e.player.send(p.getBannedMessage().complete())
+                }
+                return
             }
-            return
         }
         Promise.create<Boolean> { context ->
             Thread {

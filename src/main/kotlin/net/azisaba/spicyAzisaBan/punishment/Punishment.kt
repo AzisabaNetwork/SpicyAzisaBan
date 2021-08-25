@@ -236,7 +236,7 @@ data class Punishment(
                 FindOptions.Builder().addWhere("id", id).build()
             ).thenDo {
                 SpicyAzisaBan.debug("Removed punishment #${id} (reason: expired)")
-            }.complete()
+            }.catch { it.printStackTrace() }.complete()
             clearCache()
             pendingRemoval.remove(id)
         }
