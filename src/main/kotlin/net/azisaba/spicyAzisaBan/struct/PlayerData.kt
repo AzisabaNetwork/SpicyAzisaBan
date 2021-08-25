@@ -33,11 +33,11 @@ data class PlayerData(
         }
 
         fun getByIP(ip: String): Promise<List<PlayerData>> =
-            SpicyAzisaBan.instance.connection.players.findAll(FindOptions.Builder().addWhere("ip", ip).build())
+            SpicyAzisaBan.instance.connection.players.findAll(FindOptions.Builder().addWhere("ip", ip).setOrderBy("last_seen").setOrder(Sort.DESC).build())
                 .then { list -> list.map { td -> fromTableData(td) } }
 
         fun getAllByIP(ip: String): Promise<List<PlayerData>> =
-            SpicyAzisaBan.instance.connection.ipAddressHistory.findAll(FindOptions.Builder().addWhere("ip", ip).build())
+            SpicyAzisaBan.instance.connection.ipAddressHistory.findAll(FindOptions.Builder().addWhere("ip", ip).setOrderBy("last_seen").setOrder(Sort.DESC).build())
                 .then { list -> list.distinctBy { td -> td.getString("uuid") } }
                 .then { list -> list.map { td -> UUID.fromString(td.getString("uuid")) } }
                 .then { list -> list.map { uuid -> getByUUID(uuid).complete() } }
@@ -50,11 +50,11 @@ data class PlayerData(
             SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $uuid") }
 
-        fun getByName(name: String): Promise<PlayerData> = Promise.create { context ->
+        fun getByName(name: String, ambiguousSearch: Boolean = false): Promise<PlayerData> = Promise.create { context ->
             val sql = "SELECT * FROM `players` WHERE LOWER(`name`) LIKE LOWER(?) ORDER BY `last_seen` DESC LIMIT 1"
             SQLConnection.logSql(sql)
             val ps = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-            ps.setString(1, name)
+            ps.setString(1, if (ambiguousSearch) "%$name%" else name)
             val rs = ps.executeQuery()
             if (!rs.next()) {
                 MojangAPI.getUniqueId(name)

@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
@@ -41,7 +42,18 @@ object Util {
      * Prints stacktrace to console and sends "error" message to sender.
      */
     fun CommandSender.sendErrorMessage(throwable: Throwable) {
+        if (throwable::class.java.canonicalName.endsWith("Cancel")) return // intended to block throwable like Promise$Cancel
+        throwable.printStackTrace()
+        send(SABMessages.General.error.replaceVariables().translate())
+    }
+
+    /**
+     * Prints stacktrace to console and sends "error" message to sender.
+     * Ignores the throwable with type T.
+     */
+    inline fun <reified T : Throwable> CommandSender.sendOrSuppressErrorMessage(throwable: Throwable) {
         if (throwable::class.java.canonicalName.endsWith("Cancel")) return
+        if (throwable is T) return
         throwable.printStackTrace()
         send(SABMessages.General.error.replaceVariables().translate())
     }
@@ -386,4 +398,11 @@ object Util {
     } catch (e: IllegalArgumentException) {
         null
     }
+
+    fun getPlayerNamesWithRecentPunishedPlayers() =
+        ProxyServer.getInstance().players
+            .filterIndexed { i, _ -> i < 500 }
+            .map { it.name }
+            .concat(Punishment.recentPunishedPlayers.map { it.name })
+            .distinct()
 }
