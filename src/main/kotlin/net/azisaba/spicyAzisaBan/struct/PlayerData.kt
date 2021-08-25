@@ -59,15 +59,15 @@ data class PlayerData(
             if (!rs.next()) {
                 MojangAPI.getUniqueId(name)
                     .then { uuid ->
-                        val sql2 = "INSERT INTO `players` (`uuid`, `name`, `ip`, `last_seen`) VALUES (?, ?, ?, ?)"
-                        SQLConnection.logSql(sql2)
-                        val ps2 = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql2)
-                        ps2.setString(1, uuid.toString())
-                        ps2.setString(2, name)
-                        ps2.setString(3, "1.1.1.1")
-                        ps2.setLong(4, System.currentTimeMillis())
                         insertNoId {
-                            ps2.executeUpdate()
+                            SpicyAzisaBan.instance.connection.players.insert(
+                                InsertOptions.Builder()
+                                    .addValue("uuid", uuid.toString())
+                                    .addValue("name", name)
+                                    .addValue("ip", "1.1.1.1")
+                                    .addValue("last_seen", System.currentTimeMillis())
+                                    .build()
+                            ).complete()
                         }
                         PlayerData(uuid, name, "1.1.1.1", System.currentTimeMillis())
                     }
