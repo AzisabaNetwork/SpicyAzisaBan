@@ -12,6 +12,7 @@ import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.config.ServerInfo
 import net.md_5.bungee.api.connection.ProxiedPlayer
@@ -405,4 +406,21 @@ object Util {
             .map { it.name }
             .concat(Punishment.recentPunishedPlayers.map { it.name })
             .distinct()
+
+    fun ProxiedPlayer.connectToLobbyOrKick(from: Array<ServerInfo>, reason: Array<BaseComponent>) {
+        if (this.server?.info?.name?.startsWith("lobby") == true) {
+            this.disconnect(*reason)
+            return
+        }
+        if (from.isEmpty() || from.contains(this.server?.info)) {
+            val lobby = ProxyServer.getInstance().servers.values
+                .filter { it.name.startsWith("lobby") }
+                .filterNotNull()
+                .random()
+            this.connect(lobby)
+            ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+                this.sendMessage(*reason)
+            }, 2, TimeUnit.SECONDS)
+        }
+    }
 }

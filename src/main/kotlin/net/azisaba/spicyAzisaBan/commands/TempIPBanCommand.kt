@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.broadcastMessageAfterRandomTime
+import net.azisaba.spicyAzisaBan.util.Util.connectToLobbyOrKick
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
@@ -24,6 +25,7 @@ import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
@@ -74,6 +76,14 @@ object TempIPBanCommand: Command("${SABConfig.prefix}tempipban", null, "${SABCon
                 ProxyServer.getInstance().players
                     .filter { p -> p.getIPAddress() == ip }
                     .apply {
+                        forEach { player ->
+                            val servers = if (server.isGroup) {
+                                SpicyAzisaBan.instance.connection.getServersByGroup(server.name).complete()
+                            } else {
+                                listOf(ProxyServer.getInstance().servers[server.name]!!)
+                            }
+                            player.connectToLobbyOrKick(servers.toTypedArray(), TextComponent.fromLegacyText(it.getBannedMessage().complete()))
+                        }
                         if (isNotEmpty()) {
                             ProxyServer.getInstance().getServerInfo(server.name)?.broadcastMessageAfterRandomTime(server.name)
                         }
