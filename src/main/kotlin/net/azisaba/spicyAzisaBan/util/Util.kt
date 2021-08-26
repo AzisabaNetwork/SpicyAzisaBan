@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
+import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -406,6 +407,15 @@ object Util {
             .map { it.name }
             .concat(Punishment.recentPunishedPlayers.map { it.name })
             .distinct()
+
+    fun ProxiedPlayer.connectToLobbyOrKick(from: ServerContext, reason: Array<BaseComponent>) {
+        val servers = if (from.isGroup) {
+            SpicyAzisaBan.instance.connection.getServersByGroup(from.name).complete()
+        } else {
+            listOf(ProxyServer.getInstance().servers[from.name]!!)
+        }
+        this.connectToLobbyOrKick(servers.toTypedArray(), reason)
+    }
 
     fun ProxiedPlayer.connectToLobbyOrKick(from: Array<ServerInfo>, reason: Array<BaseComponent>) {
         if (this.server?.info?.name?.startsWith("lobby") == true) {

@@ -72,12 +72,7 @@ object TempBanCommand: Command("${SABConfig.prefix}tempban"), TabExecutor {
             .insert()
             .thenDo {
                 ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.apply {
-                    val servers = if (server.isGroup) {
-                        SpicyAzisaBan.instance.connection.getServersByGroup(server.name).complete()
-                    } else {
-                        listOf(ProxyServer.getInstance().servers[server.name]!!)
-                    }
-                    connectToLobbyOrKick(servers.toTypedArray(), TextComponent.fromLegacyText(it.getBannedMessage().complete()))
+                    connectToLobbyOrKick(server, TextComponent.fromLegacyText(it.getBannedMessage().complete()))
                     ProxyServer.getInstance().getServerInfo(server.name)?.broadcastMessageAfterRandomTime(server.name)
                 }
             }

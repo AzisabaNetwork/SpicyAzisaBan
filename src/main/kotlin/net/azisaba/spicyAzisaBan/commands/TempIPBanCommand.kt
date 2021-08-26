@@ -77,12 +77,7 @@ object TempIPBanCommand: Command("${SABConfig.prefix}tempipban", null, "${SABCon
                     .filter { p -> p.getIPAddress() == ip }
                     .apply {
                         forEach { player ->
-                            val servers = if (server.isGroup) {
-                                SpicyAzisaBan.instance.connection.getServersByGroup(server.name).complete()
-                            } else {
-                                listOf(ProxyServer.getInstance().servers[server.name]!!)
-                            }
-                            player.connectToLobbyOrKick(servers.toTypedArray(), TextComponent.fromLegacyText(it.getBannedMessage().complete()))
+                            player.connectToLobbyOrKick(server, TextComponent.fromLegacyText(it.getBannedMessage().complete()))
                         }
                         if (isNotEmpty()) {
                             ProxyServer.getInstance().getServerInfo(server.name)?.broadcastMessageAfterRandomTime(server.name)
