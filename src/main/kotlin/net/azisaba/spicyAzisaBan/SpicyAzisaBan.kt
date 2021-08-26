@@ -44,8 +44,8 @@ import net.azisaba.spicyAzisaBan.listener.PlayerDisconnectListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
-import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
+import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.plugin.Plugin

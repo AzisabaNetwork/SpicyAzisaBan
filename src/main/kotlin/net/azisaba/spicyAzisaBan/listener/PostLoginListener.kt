@@ -2,7 +2,6 @@ package net.azisaba.spicyAzisaBan.listener
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.struct.PlayerData
-import net.azisaba.spicyAzisaBan.util.Util
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.event.PostLoginEvent
