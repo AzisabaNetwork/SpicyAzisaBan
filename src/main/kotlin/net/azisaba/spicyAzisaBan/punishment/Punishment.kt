@@ -222,8 +222,18 @@ data class Punishment(
         title.fadeIn(0)
         title.fadeOut(0)
         title.stay((SABConfig.Warning.titleStayTime / 50L).toInt())
-        title.title(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.title.replaceVariables().translate()))
-        title.subTitle(*TextComponent.fromLegacyText(SABMessages.Commands.Warning.subtitle.replaceVariables().translate()))
+        val rawTitle = if (type == PunishmentType.CAUTION) {
+            SABMessages.Commands.Caution.title
+        } else {
+            SABMessages.Commands.Warning.title
+        }
+        val rawSubTitle = if (type == PunishmentType.CAUTION) {
+            SABMessages.Commands.Caution.subtitle
+        } else {
+            SABMessages.Commands.Warning.subtitle
+        }
+        title.title(*TextComponent.fromLegacyText(rawTitle.replaceVariables().translate()))
+        title.subTitle(*TextComponent.fromLegacyText(rawSubTitle.replaceVariables().translate()))
         player.sendTitle(title)
     }
 

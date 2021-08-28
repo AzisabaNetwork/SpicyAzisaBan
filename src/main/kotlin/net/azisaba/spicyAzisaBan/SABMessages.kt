@@ -242,6 +242,8 @@ object SABMessages {
             val done get() = obj.getMessage("done", defObj.getMessage("done"))
             val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
             val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
+            val title get() = obj.getMessage("title", defObj.getMessage("title"))
+            val subtitle get() = obj.getMessage("subtitle", defObj.getMessage("subtitle"))
         }
 
         object Kick {

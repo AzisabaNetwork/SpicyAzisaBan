@@ -123,8 +123,9 @@ class SpicyAzisaBan: Plugin() {
             override fun run() {
                 try {
                     val statement = connection.connection.createStatement()
-                    SQLConnection.logSql("SELECT 1 (keep-alive)")
-                    statement.execute("SELECT 1")
+                    val sql = "SELECT 1"
+                    SQLConnection.logSql("$sql (keep-alive)")
+                    statement.execute(sql)
                     statement.close()
                 } catch (e: SQLException) {
                     logger.warning("Could not execute keep-alive ping")
@@ -135,11 +136,18 @@ class SpicyAzisaBan: Plugin() {
         timer.scheduleAtFixedRate(object: TimerTask() {
             override fun run() {
                 try {
-                    connection.punishments
-                        .findAll(FindOptions.Builder().addWhere("type", PunishmentType.WARNING.name).build())
-                        .then { list -> list.map { td -> Punishment.fromTableData(td) } }
-                        .then { list -> list.distinctBy { it.target } }
-                        .thenDo { punishments -> punishments.forEach { p -> p.sendTitle() } }
+                    val sql = "SELECT * FROM `punishments` WHERE `type` = ? OR `type` = ?"
+                    SQLConnection.logSql(sql)
+                    val s = connection.connection.prepareStatement(sql)
+                    s.setString(1, "WARNING")
+                    s.setString(2, "CAUTION")
+                    val rs = s.executeQuery()
+                    val ps = mutableListOf<Punishment>()
+                    while (rs.next()) {
+                        ps.add(Punishment.fromResultSet(rs))
+                    }
+                    ps.filter { it.type == PunishmentType.CAUTION }.distinctBy { it.target }.forEach { p -> p.sendTitle() }
+                    ps.filter { it.type == PunishmentType.WARNING }.distinctBy { it.target }.forEach { p -> p.sendTitle() }
                 } catch (e: SQLException) {
                     logger.severe("Could not fetch punishments")
                     e.printStackTrace()

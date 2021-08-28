@@ -235,6 +235,8 @@ commands:
       - "%PREFIX%&c注意を受けました"
       - "&c対象サーバー &8> &7&o%SERVER%"
       - "&c理由 &8> &7&o%REASON%"
+    title: "&cあなたは注意を受けました!"
+    subtitle: "&6/%CMD_PREFIX%warns&eで表示を解除することができます"
   kick:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%kick <player=...> <reason=\"...\"> [server=...]"
     globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gkick <player=...> <reason=\"...\"> [server=...]"
