@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.35-dev"
+version = "0.0.35"
 
 java {
     withJavadocJar()
