@@ -8,7 +8,7 @@ import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
-import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.sendDelayed
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.config.ServerInfo
@@ -35,7 +35,7 @@ object CheckBanListener: Listener {
                 if (e.reason.shouldKick()) {
                     e.player.kick(p.getBannedMessage().complete())
                 } else {
-                    e.player.send(p.getBannedMessage().complete())
+                    e.player.sendDelayed(100, p.getBannedMessage().complete())
                 }
                 return
             }
@@ -52,7 +52,7 @@ object CheckBanListener: Listener {
                         e.player.kick(p.getBannedMessage().complete())
                     } else if (e.player.server?.info == currentServer) {
                         e.player.plsConnect(currentServer, e.target)
-                        e.player.send(p.getBannedMessage().complete())
+                        e.player.sendDelayed(2000, p.getBannedMessage().complete())
                     }
                 }
                 context.resolve(true)
@@ -66,7 +66,7 @@ object CheckBanListener: Listener {
                         e.player.kick(SABMessages.General.error.replaceVariables().translate())
                     } else if (e.player.server?.info == currentServer) {
                         e.player.plsConnect(currentServer, e.target)
-                        e.player.send(SABMessages.General.error.replaceVariables().translate())
+                        e.player.sendDelayed(2000, SABMessages.General.error.replaceVariables().translate())
                     }
                 }
             }
@@ -79,7 +79,7 @@ object CheckBanListener: Listener {
                     e.player.kick(SABMessages.General.error.replaceVariables().translate())
                 } else if (e.player.server?.info == currentServer) {
                     e.player.plsConnect(currentServer, e.target)
-                    e.player.send(SABMessages.General.error.replaceVariables().translate())
+                    e.player.sendDelayed(2000, SABMessages.General.error.replaceVariables().translate())
                 }
             }
         }
