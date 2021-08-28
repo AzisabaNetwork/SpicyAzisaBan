@@ -41,6 +41,13 @@ object Util {
     }
 
     /**
+     * method name says that.
+     */
+    fun CommandSender.sendDelayed(timeInMillis: Long, message: String) {
+        ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, { send(message) }, timeInMillis, TimeUnit.MILLISECONDS)
+    }
+
+    /**
      * Prints stacktrace to console and sends "error" message to sender.
      */
     fun CommandSender.sendErrorMessage(throwable: Throwable) {
