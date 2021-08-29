@@ -416,6 +416,9 @@ object Util {
             .distinct()
 
     fun ProxiedPlayer.connectToLobbyOrKick(from: ServerContext, reason: Array<BaseComponent>) {
+        if (from.name == "global") {
+            return this.disconnect(*reason)
+        }
         val servers = if (from.isGroup) {
             SpicyAzisaBan.instance.connection.getServersByGroup(from.name).complete()
         } else {
