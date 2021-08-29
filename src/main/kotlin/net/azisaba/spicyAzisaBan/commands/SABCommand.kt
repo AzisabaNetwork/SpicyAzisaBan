@@ -60,7 +60,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
         if (args.isEmpty()) {
             sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
             sender.send("$PREFIX${ChatColor.GREEN}Use ${ChatColor.AQUA}/sab help${ChatColor.GREEN} to view commands.")
-            sender.send("$PREFIX${ChatColor.GREEN}For other commands (such as /gban), please see ${ChatColor.AQUA}${ChatColor.UNDERLINE}https://github.com/acrylic-style/SpicyAzisaBan/issues/1${ChatColor.RESET}${ChatColor.GREEN}.")
+            sender.send("$PREFIX${ChatColor.GREEN}For other commands (such as /gban), please see ${ChatColor.AQUA}${ChatColor.UNDERLINE}https://github.com/acrylic-style/SpicyAzisaBan/issues/1")
             return
         }
         when (args[0]) {
