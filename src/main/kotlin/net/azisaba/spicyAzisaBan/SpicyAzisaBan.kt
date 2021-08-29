@@ -97,7 +97,6 @@ class SpicyAzisaBan: Plugin() {
     }
 
     override fun onEnable() {
-        debugLevel = 3
         if (SABConfig.prefix.contains("\\s+".toRegex())) throw IllegalArgumentException("prefix (in config.yml) contains whitespace")
         ReloadableSABConfig.reload()
         logger.info("Connecting to database...")
@@ -155,7 +154,6 @@ class SpicyAzisaBan: Plugin() {
                 }
             }
         }, SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery)
-        debugLevel = 0
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)
@@ -205,7 +203,6 @@ class SpicyAzisaBan: Plugin() {
         timer.cancel()
         logger.info("Closing database connection")
         connection.close()
-        debugLevel = 0
         logger.info("Goodbye, World!")
     }
 

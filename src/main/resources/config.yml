@@ -1,12 +1,6 @@
-# Command prefix
-# ----------
-# You will be able to run command with: /${prefix}command
-# So if you set this to "/", you can run command with //command
+# you can run command with: /${prefix}command
+# so if you set this to "/", you can run command with //command
 prefix: ""
-
-# Database settings
-# ----------
-# MySQL or MySQL-compatible (e.g. MariaDB) database is required to run SpicyAzisaBan.
 database:
   host: localhost
   name: spicyazisaban
@@ -18,21 +12,6 @@ database:
   keepAlive: 300
   # If true, the plugin will prevent players from joining the server if database is inaccessible.
   failsafe: true
-
-warning:
-  # Don't set to 1s because it's terrible because we fetch the punishments from database every time we check for warnings
-  sendTitleEvery: 10s
-  titleStayTime: 5s
-
-# Server ID settings
-# ----------
-# Ignore if you are using only one plugin per network.
-# You *need* to change this if you are using more than 1 BungeeCord instances.
-# The server ID will only be used internally and will not be exposed to any player.
-serverId: bungee
-
-# These settings below are reloadable by doing /sab reload
-
 serverNames:
   # "server" (key) must not contain UPPERCASE character.
   server: FriendlyServerName
@@ -65,6 +44,10 @@ banOnWarning:
   time: "1mo"
   # Available variables: %PREFIX%, %COUNT& (current warnings count)
   reason: "You've got %COUNT% warnings so bye"
+warning:
+  # Don't set to 1s because it's terrible because we fetch the punishments from database every time we check for warnings
+  sendTitleEvery: 10s
+  titleStayTime: 5s
 customBannedMessage:
   # usually configured via messages.yml, but you can set the message per server here
   # key = server

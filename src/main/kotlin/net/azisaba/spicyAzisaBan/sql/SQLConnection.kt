@@ -17,7 +17,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 6
+        const val CURRENT_DATABASE_VERSION = 5
 
         fun logSql(s: String) {
             SpicyAzisaBan.debug("Executing SQL: $s", 3)
@@ -39,7 +39,6 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     lateinit var players: Table
     lateinit var usernameHistory: Table
     lateinit var ipAddressHistory: Table
-    lateinit var events: Table
 
     fun isConnected() =
         try {
@@ -128,15 +127,6 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("uuid", DataType.STRING).setAllowNull(false).build(),
                 TableDefinition.Builder("ip", DataType.STRING).setAllowNull(false).build(),
                 TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).build(),
-            ),
-        ).setupEventListener()
-        events = this.define(
-            "events",
-            arrayOf(
-                TableDefinition.Builder("id", DataType.BIGINT).setPrimaryKey(true).setAutoIncrement(true).build(),
-                TableDefinition.Builder("event_id", DataType.STRING).setAllowNull(false).build(),
-                TableDefinition.Builder("data", DataType.TEXT).setAllowNull(false).build(),
-                TableDefinition.Builder("seen", DataType.TEXT).setAllowNull(false).build(),
             ),
         ).setupEventListener()
         this.sync()

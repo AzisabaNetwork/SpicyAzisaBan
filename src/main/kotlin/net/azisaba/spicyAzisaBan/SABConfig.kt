@@ -42,8 +42,6 @@ object SABConfig {
         val failsafe = obj.getBoolean("failsafe", true)
     }
 
-    val serverId = cfg.getString("serverId") ?: "bungee"
-
     val enableDebugFeatures =
         YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!)
             .asObject()

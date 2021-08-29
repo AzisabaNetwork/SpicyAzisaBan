@@ -7,7 +7,7 @@ import util.promise.rewrite.Promise
 interface DatabaseMigration {
     companion object {
         private val migrations = listOf(
-            V1, V2, V3, V4, V5,
+            V1, V2, V3, V4,
         )
 
         fun run(): Promise<Unit> = Promise.create { context ->
