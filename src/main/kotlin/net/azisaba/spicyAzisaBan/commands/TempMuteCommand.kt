@@ -20,7 +20,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
-import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
@@ -75,7 +74,6 @@ object TempMuteCommand: Command("${SABConfig.prefix}tempmute"), TabExecutor {
         if (arguments.contains("all")) {
             p.applyToSameIPs(player.profile.uniqueId).catch { sender.sendErrorMessage(it) }.complete()
         }
-        ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.send(SABMessages.Commands.TempMute.layout1.replaceVariables(p.getVariables().complete()).translate())
         sender.send(SABMessages.Commands.TempMute.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

@@ -75,7 +75,7 @@ object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
                         .servers
                         .values
                         .filter { it.name.startsWith("lobby") }
-                        .random()
+                        .randomOrNull() ?: return@thenDo
                     proxiedPlayer.connect(lobby)
                     ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                         proxiedPlayer.send(p.getBannedMessage().complete())

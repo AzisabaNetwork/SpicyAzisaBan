@@ -6,8 +6,6 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
-import net.azisaba.spicyAzisaBan.util.Util.broadcastMessageAfterRandomTime
-import net.azisaba.spicyAzisaBan.util.Util.connectToLobbyOrKick
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
@@ -22,8 +20,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
-import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
@@ -69,12 +65,6 @@ object TempBanCommand: Command("${SABConfig.prefix}tempban"), TabExecutor {
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.TEMP_BAN, System.currentTimeMillis() + time.time, server.name)
             .insert()
-            .thenDo {
-                ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.apply {
-                    connectToLobbyOrKick(server, TextComponent.fromLegacyText(it.getBannedMessage().complete()))
-                    ProxyServer.getInstance().getServerInfo(server.name)?.broadcastMessageAfterRandomTime(server.name)
-                }
-            }
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

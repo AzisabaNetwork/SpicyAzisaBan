@@ -6,14 +6,10 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
-import net.azisaba.spicyAzisaBan.util.Util.broadcastMessageAfterRandomTime
-import net.azisaba.spicyAzisaBan.util.Util.connectToLobbyOrKick
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
-import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
-import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -23,8 +19,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
-import net.md_5.bungee.api.ProxyServer
-import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
@@ -65,20 +59,6 @@ object IPBanCommand: Command("${SABConfig.prefix}ipban", null, "${SABConfig.pref
         val p = Punishment
             .createByIPAddress(ip, reason.text, sender.getUniqueId(), PunishmentType.IP_BAN, -1, server.name)
             .insert()
-            .thenDo {
-                val message = it.getBannedMessage().complete()
-                ProxyServer.getInstance().players
-                    .filter { p -> p.getIPAddress() == ip }
-                    .apply {
-                        forEach { player ->
-                            player.connectToLobbyOrKick(server, TextComponent.fromLegacyText(it.getBannedMessage().complete()))
-                        }
-                        if (isNotEmpty()) {
-                            ProxyServer.getInstance().getServerInfo(server.name)?.broadcastMessageAfterRandomTime(server.name)
-                        }
-                    }
-                    .forEach { p -> p.kick(message) }
-            }
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

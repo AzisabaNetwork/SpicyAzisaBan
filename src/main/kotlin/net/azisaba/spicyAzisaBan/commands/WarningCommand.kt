@@ -7,7 +7,6 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
-import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
@@ -63,21 +62,16 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "${SABConfig.
                 sender.sendErrorMessage(it)
             }
             .complete() ?: return
-        p.getBannedMessage().thenDo { msg ->
-            ProxyServer.getInstance().getPlayer(player.profile.uniqueId)?.send(msg)
-        }
         p.notifyToAll().complete()
-        p.sendTitle()
         if (ReloadableSABConfig.BanOnWarning.threshold > 0) {
-            val sql = "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?"
-            SQLConnection.logSql(sql)
-            val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-            st.setString(1, player.profile.uniqueId.toString())
-            st.setString(2, server.name)
-            val rs = st.executeQuery()
+            val rs = SpicyAzisaBan.instance.connection.executeQuery(
+                "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?",
+                player.profile.uniqueId.toString(),
+                server.name,
+            )
             rs.next()
             val count = rs.getInt(1)
-            st.close()
+            rs.statement.close()
             if (count >= ReloadableSABConfig.BanOnWarning.threshold) {
                 ProxyServer.getInstance().pluginManager.dispatchCommand(
                     ProxyServer.getInstance().console,

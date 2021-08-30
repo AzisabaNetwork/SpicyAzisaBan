@@ -1,9 +1,12 @@
 package net.azisaba.spicyAzisaBan.sql
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.struct.EventType
+import net.azisaba.spicyAzisaBan.util.Util
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.config.ServerInfo
 import org.intellij.lang.annotations.Language
+import org.json.JSONObject
 import util.promise.rewrite.Promise
 import util.ref.DataCache
 import xyz.acrylicstyle.sql.DataType
@@ -11,6 +14,8 @@ import xyz.acrylicstyle.sql.Sequelize
 import xyz.acrylicstyle.sql.Table
 import xyz.acrylicstyle.sql.TableDefinition
 import xyz.acrylicstyle.sql.options.FindOptions
+import xyz.acrylicstyle.sql.options.InsertOptions
+import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 import java.util.Properties
@@ -21,6 +26,10 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
 
         fun logSql(s: String) {
             SpicyAzisaBan.debug("Executing SQL: $s", 3)
+        }
+
+        fun logSql(s: String, params: Array<out Any>) {
+            SpicyAzisaBan.debug("Executing SQL: '$s' with params: ${params.toList()}", 3)
         }
 
         fun Statement.executeAndLog(@Language("SQL") sql: String): Boolean {
@@ -140,6 +149,43 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             ),
         ).setupEventListener()
         this.sync()
+    }
+
+    fun execute(@Language("SQL") sql: String, vararg params: Any): Boolean {
+        logSql(sql, params)
+        val statement = connection.prepareStatement(sql)
+        params.forEachIndexed { index, any -> statement.setObject(index + 1, any) }
+        return statement.execute()
+    }
+
+    fun executeQuery(@Language("SQL") sql: String, vararg params: Any): ResultSet {
+        logSql(sql, params)
+        val statement = connection.prepareStatement(sql)
+        params.forEachIndexed { index, any -> statement.setObject(index + 1, any) }
+        return statement.executeQuery()
+    }
+
+    fun sendEvent(eventType: EventType, data: JSONObject): Promise<Unit> = Promise.create {
+        val id = try {
+            Util.insert {
+                events.insert(
+                    InsertOptions.Builder()
+                        .addValue("event_id", eventType.name.lowercase())
+                        .addValue("data", data.toString())
+                        .addValue("seen", "")
+                        .build()
+                ).complete()
+            }
+        } catch (e: Exception) {
+            SpicyAzisaBan.instance.logger.warning("Failed to send event with type $eventType and data $data")
+            e.printStackTrace()
+            it.resolve()
+            return@create
+        }
+        SpicyAzisaBan.instance.logger.info("Sending event with id $id")
+        SpicyAzisaBan.debug("Event type: $eventType")
+        SpicyAzisaBan.debug("Event data: ${data.toString(2)}")
+        it.resolve()
     }
 
     private fun Table.setupEventListener(): Table {

@@ -14,8 +14,6 @@ database:
   password: naetao
   verifyServerCertificate: false
   useSSL: true
-  # Send keep alive every n seconds
-  keepAlive: 300
   # If true, the plugin will prevent players from joining the server if database is inaccessible.
   failsafe: true
 
@@ -29,7 +27,7 @@ warning:
 # Ignore if you are using only one plugin per network.
 # You *need* to change this if you are using more than 1 BungeeCord instances.
 # The server ID will only be used internally and will not be exposed to any player.
-serverId: bungee
+serverId: bungee1
 
 # These settings below are reloadable by doing /sab reload
 

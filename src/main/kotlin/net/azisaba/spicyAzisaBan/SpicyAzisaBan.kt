@@ -46,7 +46,10 @@ import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
+import net.azisaba.spicyAzisaBan.struct.EventType
+import net.azisaba.spicyAzisaBan.struct.Events
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.plugin.Plugin
 import util.promise.rewrite.Promise
@@ -55,7 +58,7 @@ import xyz.acrylicstyle.sql.options.UpsertOptions
 import java.sql.SQLException
 import java.util.Properties
 import java.util.Timer
-import java.util.TimerTask
+import kotlin.concurrent.scheduleAtFixedRate
 
 class SpicyAzisaBan: Plugin() {
     companion object {
@@ -112,6 +115,9 @@ class SpicyAzisaBan: Plugin() {
         props.setProperty("useSSL", SABConfig.database.useSSL.toString())
         connection.connect(props)
         settings = Settings()
+        // dismiss all events for this server
+        val c = "%,${SABConfig.serverId},%"
+        connection.execute("UPDATE `events` SET `seen` = CONCAT(`seen`, ?) WHERE `seen` NOT LIKE ?", ",${SABConfig.serverId},", c)
         logger.info("Connected.")
         val version = settings.getDatabaseVersion().complete()
         if (version > SQLConnection.CURRENT_DATABASE_VERSION) {
@@ -120,41 +126,63 @@ class SpicyAzisaBan: Plugin() {
                     "Version stored in the plugin: ${SQLConnection.CURRENT_DATABASE_VERSION}")
         }
         DatabaseMigration.run().complete()
-        timer.scheduleAtFixedRate(object: TimerTask() {
-            override fun run() {
-                try {
-                    val statement = connection.connection.createStatement()
-                    val sql = "SELECT 1"
-                    SQLConnection.logSql("$sql (keep-alive)")
-                    statement.execute(sql)
-                    statement.close()
-                } catch (e: SQLException) {
-                    logger.warning("Could not execute keep-alive ping")
-                    throw e
-                }
-            }
-        }, SABConfig.database.keepAlive * 1000L, SABConfig.database.keepAlive * 1000L)
-        timer.scheduleAtFixedRate(object: TimerTask() {
-            override fun run() {
-                try {
-                    val sql = "SELECT * FROM `punishments` WHERE `type` = ? OR `type` = ?"
-                    SQLConnection.logSql(sql)
-                    val s = connection.connection.prepareStatement(sql)
-                    s.setString(1, "WARNING")
-                    s.setString(2, "CAUTION")
-                    val rs = s.executeQuery()
-                    val ps = mutableListOf<Punishment>()
-                    while (rs.next()) {
-                        ps.add(Punishment.fromResultSet(rs))
+        logger.info("Supported event types: ${EventType.values().joinToString(", ") { it.name.lowercase() }}")
+        timer.scheduleAtFixedRate(10000, 10000) {
+            try {
+                val rs = connection.executeQuery("SELECT * FROM `events` WHERE `seen` NOT LIKE ?", c)
+                while (rs.next()) {
+                    logger.info("Received event id ${rs.getLong("id")} (${rs.getString("event_id")})")
+                    val e = try {
+                        Events.fromResultSet(rs)
+                    } catch (e: IllegalArgumentException) {
+                        logger.warning("Failed to process event data. You might need a newer version of the plugin.")
+                        e.printStackTrace()
+                        continue
                     }
-                    ps.filter { it.type == PunishmentType.CAUTION }.distinctBy { it.target }.forEach { p -> p.sendTitle() }
-                    ps.filter { it.type == PunishmentType.WARNING }.distinctBy { it.target }.forEach { p -> p.sendTitle() }
-                } catch (e: SQLException) {
-                    logger.severe("Could not fetch punishments")
-                    e.printStackTrace()
+                    if (e.event == EventType.ADD_PUNISHMENT) {
+                        val id = e.data.getLong("id")
+                        val p = Punishment.fetchActivePunishmentById(id).complete()
+                        if (p == null) {
+                            debug("Ignoring event ${e.id} because the punishment #$id is no longer active")
+                            continue
+                        }
+                        p.doSomethingIfOnline()
+                    } else if (e.event == EventType.UPDATED_PUNISHMENT) {
+                        val id = e.data.getLong("id")
+                        if (id <= 0) {
+                            logger.warning("Ignoring invalid event (invalid id): $e")
+                            continue
+                        }
+                        debug("Removing cache of punishment $id (event received)")
+                        Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
+                        Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
+                    }
                 }
+                rs.statement.close()
+                connection.execute("UPDATE `events` SET `seen` = concat(`seen`, ?) WHERE `seen` NOT LIKE ?", ",${SABConfig.serverId},", c)
+            } catch (e: SQLException) {
+                logger.severe("Could not check for new events")
+                e.printStackTrace()
             }
-        }, SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery)
+        }
+        timer.scheduleAtFixedRate(SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery) {
+            try {
+                val rs = connection.executeQuery(
+                    "SELECT * FROM `punishments` WHERE `type` = ? OR `type` = ?",
+                    "WARNING",
+                    "CAUTION",
+                )
+                val ps = mutableListOf<Punishment>()
+                while (rs.next()) {
+                    ps.add(Punishment.fromResultSet(rs))
+                }
+                ps.filter { it.type == PunishmentType.CAUTION }.distinctBy { it.target }.forEach { p -> p.sendTitle() }
+                ps.filter { it.type == PunishmentType.WARNING }.distinctBy { it.target }.forEach { p -> p.sendTitle() }
+            } catch (e: SQLException) {
+                logger.severe("Could not fetch punishments")
+                e.printStackTrace()
+            }
+        }
         debugLevel = 0
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)

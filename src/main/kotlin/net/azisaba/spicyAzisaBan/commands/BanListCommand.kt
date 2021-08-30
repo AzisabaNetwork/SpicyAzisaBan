@@ -5,7 +5,6 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
-import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -68,20 +67,19 @@ object BanListCommand: Command("${SABConfig.prefix}banlist"), TabExecutor {
             }
             if (server != null) whereList.add("`server` = ?" to listOf(server))
             val where = if (whereList.isEmpty()) "" else " WHERE ${whereList.joinToString(" AND ") { it.first }} "
-            var sql = "SELECT $tableName.* FROM `$tableName` $left $where ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"
-            SQLConnection.logSql(sql)
-            var st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-            var i = 0
-            whereList.forEach { (_, list) -> list.forEach { value -> st.setObject(++i, value) } }
-            val punishments = Punishment.readAllFromResultSet(st.executeQuery()).also { st.close() }
-            sql = "SELECT COUNT(*) FROM `$tableName` $left $where"
-            SQLConnection.logSql(sql)
-            st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
-            i = 0
-            whereList.forEach { (_, list) -> list.forEach { value -> st.setObject(++i, value) } }
-            val rs = st.executeQuery()
+            var rs = SpicyAzisaBan.instance.connection.executeQuery(
+                "SELECT $tableName.* FROM `$tableName` $left $where ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2",
+                *whereList.flatMap { (_, list) -> list }.toTypedArray(),
+            )
+            val punishments = Punishment.readAllFromResultSet(rs)
+            rs.statement.close()
+            rs = SpicyAzisaBan.instance.connection.executeQuery(
+                "SELECT COUNT(*) FROM `$tableName` $left $where",
+                *whereList.flatMap { (_, list) -> list }.toTypedArray(),
+            )
             rs.next()
             val count = rs.getInt(1)
+            rs.statement.close()
             val maxPage = ceil(count / 2.0).toInt()
             page = min(page, maxPage)
             val header = SABMessages.Commands.BanList.header.replaceVariables().translate()

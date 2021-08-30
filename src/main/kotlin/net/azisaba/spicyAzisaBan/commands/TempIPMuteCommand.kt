@@ -8,7 +8,6 @@ import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
-import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -21,7 +20,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
-import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
@@ -73,8 +71,6 @@ object TempIPMuteCommand: Command("${SABConfig.prefix}tempipmute"), TabExecutor 
             }
             .complete() ?: return
         p.notifyToAll().complete()
-        val message = SABMessages.Commands.TempIPMute.layout1.replaceVariables(p.getVariables().complete()).translate()
-        ProxyServer.getInstance().players.filter { it.getIPAddress() == ip }.forEach { it.send(message) }
         sender.send(SABMessages.Commands.TempIPMute.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

@@ -7,17 +7,23 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment.Flags.Companion.toDatabase
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
+import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.broadcastMessageAfterRandomTime
+import net.azisaba.spicyAzisaBan.util.Util.connectToLobbyOrKick
+import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getProfile
 import net.azisaba.spicyAzisaBan.util.Util.hasNotifyPermissionOf
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.kick
+import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import org.json.JSONObject
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import util.ref.DataCache
@@ -145,11 +151,11 @@ data class Punishment(
             context.resolve(punishment)
         }
 
-        private val canJoinServerCachedData = mutableMapOf<Triple<UUID?, String?, String>, DataCache<Punishment>>()
+        internal val canJoinServerCachedData = mutableMapOf<Triple<UUID?, String?, String>, DataCache<Punishment>>()
         fun canJoinServerCached(uuid: UUID?, address: String?, server: String): Pair<Boolean, Punishment?> =
             canJoinServerCachedData[Triple(uuid, address, server)]?.let { Pair(true, it.get()) } ?: Pair(false, null)
 
-        private val muteCache = mutableMapOf<String, DataCache<Punishment>>()
+        internal val muteCache = mutableMapOf<String, DataCache<Punishment>>()
 
         fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
             if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
@@ -253,20 +259,17 @@ data class Punishment(
         context.resolve()
     }
 
-    fun clearCache() {
+    fun clearCache(id: Long = this.id) {
+        if (type.isBan() || type.isMute()) {
+            SpicyAzisaBan.instance.connection.sendEvent(EventType.UPDATED_PUNISHMENT, JSONObject().put("id", id))
+        }
         if (type.isBan()) {
-            val toRemove = mutableListOf<Triple<UUID?, String?, String>>()
-            canJoinServerCachedData.keys.forEach { triple ->
-                if (triple.first.toString() == target || triple.second == target) {
-                    toRemove.add(triple)
-                }
-            }
-            toRemove.forEach { canJoinServerCachedData.remove(it) }
+            SpicyAzisaBan.debug("Removing cache of $id (data was updated)")
+            canJoinServerCachedData.removeIf { k, _ -> k.first.toString() == target || k.second == target }
         }
         if (type.isMute()) {
-            muteCache.toList().forEach { (s) ->
-                if (s.contains(target)) muteCache.remove(s)
-            }
+            SpicyAzisaBan.debug("Removing cache of $id (data was updated)")
+            muteCache.removeIf { s, _ -> s.contains(target) }
         }
     }
 
@@ -352,6 +355,44 @@ data class Punishment(
             }
         }.then {}
 
+    fun doSomethingIfOnline() = Promise.create<Unit> {
+        // kick and notes are ignored entirely
+        if (type == PunishmentType.KICK || type == PunishmentType.NOTE) return@create it.resolve()
+        if (!type.isIPBased()) {
+            val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return@create it.resolve()
+            if (type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN || type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
+                player.connectToLobbyOrKick(server, TextComponent.fromLegacyText(getBannedMessage().complete())).complete()
+                if (type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
+                    sendTitle()
+                } else {
+                    ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
+                }
+            } else if (type == PunishmentType.MUTE || type == PunishmentType.TEMP_MUTE) {
+                player.send(SABMessages.Commands.Mute.layout1.replaceVariables(getVariables().complete()).translate())
+            }
+        } else {
+            val players = ProxyServer.getInstance().players.filter { p -> p.getIPAddress() == target }
+            if (type == PunishmentType.IP_BAN || type == PunishmentType.TEMP_IP_BAN) {
+                val message = TextComponent.fromLegacyText(getBannedMessage().complete())
+                players.apply {
+                    forEach { player ->
+                        player.connectToLobbyOrKick(server, message)
+                    }
+                    if (isNotEmpty()) {
+                        ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
+                    }
+                }
+            } else if (type == PunishmentType.IP_MUTE || type == PunishmentType.TEMP_IP_MUTE) {
+                val message = SABMessages.Commands.IPMute.layout1.replaceVariables(getVariables().complete()).translate()
+                players.forEach { p -> p.send(message) }
+            }
+        }
+        it.resolve()
+    }.catch {
+        SpicyAzisaBan.instance.logger.severe("Failed to do something to $target")
+        it.printStackTrace()
+    }
+
     fun isExpired() = (end != -1L && end < System.currentTimeMillis()) || pendingRemoval.contains(id)
 
     fun updateFlags(): Promise<Unit> =
@@ -388,7 +429,9 @@ data class Punishment(
                 .complete() == null
         }
         if (cancel) return@create
-        clearCache()
+        SpicyAzisaBan.instance.connection.sendEvent(EventType.ADD_PUNISHMENT, JSONObject().put("id", id)).complete()
+        clearCache(id)
+        doSomethingIfOnline().complete()
         return@create context.resolve(
             Punishment(
                 id,

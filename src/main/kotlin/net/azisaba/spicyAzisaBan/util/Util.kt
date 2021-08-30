@@ -415,7 +415,14 @@ object Util {
             .concat(Punishment.recentPunishedPlayers.map { it.name })
             .distinct()
 
+    fun ProxiedPlayer.connectToLobbyOrKick(from: String, reason: Array<BaseComponent>) =
+        SpicyAzisaBan.instance.connection.isGroupExists(from).thenDo { isGroup ->
+            val context = ServerContext(true, from, isGroup)
+            connectToLobbyOrKick(context, reason)
+        }.then {}
+
     fun ProxiedPlayer.connectToLobbyOrKick(from: ServerContext, reason: Array<BaseComponent>) {
+        if (!from.isSuccess) return
         if (from.name == "global") {
             return this.disconnect(*reason)
         }
@@ -436,11 +443,23 @@ object Util {
             val lobby = ProxyServer.getInstance().servers.values
                 .filter { it.name.startsWith("lobby") }
                 .filterNotNull()
-                .random()
+                .randomOrNull()
+            if (lobby == null) {
+                this.disconnect(*reason)
+                return
+            }
             this.connect(lobby)
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                 this.sendMessage(*reason)
             }, 2, TimeUnit.SECONDS)
         }
+    }
+
+    fun <K, V> MutableMap<K, V>.removeIf(predicate: (K, V) -> Boolean) {
+        val toRemove = mutableListOf<K>()
+        this.forEach { (k, v) ->
+            if (predicate(k, v)) toRemove.add(k)
+        }
+        toRemove.forEach { this.remove(it) }
     }
 }
