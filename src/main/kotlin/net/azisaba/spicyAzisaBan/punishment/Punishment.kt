@@ -14,6 +14,7 @@ import net.azisaba.spicyAzisaBan.util.Util.broadcastMessageAfterRandomTime
 import net.azisaba.spicyAzisaBan.util.Util.connectToLobbyOrKick
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getProfile
+import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.hasNotifyPermissionOf
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.kick
@@ -34,6 +35,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import java.sql.ResultSet
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 data class Punishment(
     val id: Long,
@@ -356,8 +358,8 @@ data class Punishment(
         }.then {}
 
     fun doSomethingIfOnline() = Promise.create<Unit> {
-        // kick and notes are ignored entirely
-        if (type == PunishmentType.KICK || type == PunishmentType.NOTE) return@create it.resolve()
+        // notes are ignored entirely
+        if (type == PunishmentType.NOTE) return@create it.resolve()
         if (!type.isIPBased()) {
             val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return@create it.resolve()
             if (type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN || type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
@@ -369,6 +371,30 @@ data class Punishment(
                 }
             } else if (type == PunishmentType.MUTE || type == PunishmentType.TEMP_MUTE) {
                 player.send(SABMessages.Commands.Mute.layout1.replaceVariables(getVariables().complete()).translate())
+            } else if (type == PunishmentType.KICK) {
+                if (server == "global") {
+                    player.kick(getBannedMessage().complete())
+                } else {
+                    val list = SpicyAzisaBan.instance.connection.getServersByGroup(server).complete()
+                    if (list.isEmpty()) {
+                        if (player.getServerName() != server) return@create it.resolve()
+                    } else {
+                        if (!list.map { s -> s.name.lowercase() }.contains(player.getServerName().lowercase())) return@create it.resolve()
+                    }
+                    val lobby = ProxyServer.getInstance()
+                        .servers
+                        .values
+                        .filter { s -> s.name.startsWith("lobby") }
+                        .randomOrNull()
+                    if (lobby == null) {
+                        player.kick(getBannedMessage().complete())
+                        return@create it.resolve()
+                    }
+                    player.connect(lobby)
+                    ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+                        player.send(getBannedMessage().complete())
+                    }, 2, TimeUnit.SECONDS)
+                }
             }
         } else {
             val players = ProxyServer.getInstance().players.filter { p -> p.getIPAddress() == target }

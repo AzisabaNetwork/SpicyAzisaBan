@@ -10,7 +10,6 @@ import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
-import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -20,14 +19,12 @@ import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.md_5.bungee.api.CommandSender
-import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
-import java.util.concurrent.TimeUnit
 
 object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
@@ -55,33 +52,9 @@ object KickCommand: Command("${SABConfig.prefix}kick"), TabExecutor {
         val player = arguments.get(Contexts.PLAYER, sender).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, sender).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, sender).complete()
-        val proxiedPlayer = ProxyServer.getInstance().getPlayer(player.profile.uniqueId)
-        if (proxiedPlayer == null) {
-            sender.send(SABMessages.Commands.General.offlinePlayer.replaceVariables().translate())
-            return
-        }
-        if (!proxiedPlayer.getServerName().equals(server.name, true)) {
-            sender.send(SABMessages.Commands.General.offlinePlayer.replaceVariables().translate())
-            return
-        }
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.KICK, -1, server.name)
             .insert()
-            .thenDo { p ->
-                if (server.name == "global") {
-                    proxiedPlayer.kick(p.getBannedMessage().complete())
-                } else {
-                    val lobby = ProxyServer.getInstance()
-                        .servers
-                        .values
-                        .filter { it.name.startsWith("lobby") }
-                        .randomOrNull() ?: return@thenDo
-                    proxiedPlayer.connect(lobby)
-                    ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
-                        proxiedPlayer.send(p.getBannedMessage().complete())
-                    }, 2, TimeUnit.SECONDS)
-                }
-            }
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)
