@@ -427,19 +427,20 @@ object Util {
             return this.disconnect(*reason)
         }
         val servers = if (from.isGroup) {
-            SpicyAzisaBan.instance.connection.getServersByGroup(from.name).complete()
+            SpicyAzisaBan.instance.connection.getServersByGroup(from.name).complete().map { it.name }
         } else {
-            listOf(ProxyServer.getInstance().servers[from.name]!!)
+            val server = ProxyServer.getInstance().servers[from.name] ?: return
+            listOf(server.name)
         }
         this.connectToLobbyOrKick(servers.toTypedArray(), reason)
     }
 
-    fun ProxiedPlayer.connectToLobbyOrKick(from: Array<ServerInfo>, reason: Array<BaseComponent>) {
+    fun ProxiedPlayer.connectToLobbyOrKick(from: Array<String>, reason: Array<BaseComponent>) {
         if (this.server?.info?.name?.startsWith("lobby") == true) {
             this.disconnect(*reason)
             return
         }
-        if (from.isEmpty() || from.contains(this.server?.info)) {
+        if (from.isEmpty() || from.contains(this.server?.info?.name)) {
             val lobby = ProxyServer.getInstance().servers.values
                 .filter { it.name.startsWith("lobby") }
                 .filterNotNull()
