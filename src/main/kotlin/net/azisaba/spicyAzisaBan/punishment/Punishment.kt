@@ -362,13 +362,11 @@ data class Punishment(
         if (type == PunishmentType.NOTE) return@create it.resolve()
         if (!type.isIPBased()) {
             val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return@create it.resolve()
-            if (type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN || type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
+            if (type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN) {
                 player.connectToLobbyOrKick(server, TextComponent.fromLegacyText(getBannedMessage().complete())).complete()
-                if (type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
-                    sendTitle()
-                } else {
-                    ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
-                }
+                ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
+            } else if (type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
+                sendTitle()
             } else if (type == PunishmentType.MUTE) {
                 player.send(SABMessages.Commands.Mute.layout1.replaceVariables(getVariables().complete()).translate())
             } else if (type == PunishmentType.TEMP_MUTE) {
