@@ -183,7 +183,7 @@ class SpicyAzisaBan: Plugin() {
                 e.printStackTrace()
             }
         }
-        debugLevel = 0
+        if (!SABConfig.debugBuild) debugLevel = 0
         proxy.pluginManager.registerListener(this, CheckGlobalBanListener)
         proxy.pluginManager.registerListener(this, CheckBanListener)
         proxy.pluginManager.registerListener(this, PostLoginListener)

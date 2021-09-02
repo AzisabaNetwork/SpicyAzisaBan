@@ -23,6 +23,15 @@ fun getGitHash(): String {
     return stdout.toString().trim()
 }
 
+fun hasUncommittedChanges(): Boolean {
+    val stdout = ByteArrayOutputStream()
+    exec {
+        commandLine("git", "status", "--porcelain")
+        standardOutput = stdout
+    }
+    return stdout.toString().trim().isNotBlank()
+}
+
 val javaComponent = components["java"] as AdhocComponentWithVariants
 javaComponent.withVariantsFromConfiguration(configurations["sourcesElements"]) {
     skip()
@@ -70,6 +79,8 @@ tasks {
             val tokenReplacementMap = mapOf(
                 "version" to project.version,
                 "name" to project.rootProject.name,
+                "debugBuild" to hasUncommittedChanges().toString(),
+                "devBuild" to project.version.toString().contains("-dev").toString(),
             )
 
             filter<org.apache.tools.ant.filters.ReplaceTokens>("tokens" to tokenReplacementMap)
@@ -97,3 +108,6 @@ println("Deleting cached bungee.yml")
 file("./build/resources/main/bungee.yml").apply {
     if (exists()) delete()
 }
+println("Version: ${project.version}")
+println("Debug build: ${hasUncommittedChanges()}")
+println("Dev build: ${project.version.toString().contains("-dev")}")

@@ -3,6 +3,9 @@ main: net.azisaba.spicyAzisaBan.SpicyAzisaBan
 version: @version@
 author: acrylic-style
 
-# setting to true will enable debug features:
+debugBuild: @debugBuild@
+devBuild: @devBuild@
+
+# these features will be enabled if true:
 # - allow ip banning for some local addresses (127.0.0.1 and 192.168.0.0/16)
-enableDebugFeatures: false
+enableDebugFeatures: @debugBuild@

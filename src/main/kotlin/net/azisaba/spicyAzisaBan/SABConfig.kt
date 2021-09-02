@@ -10,6 +10,8 @@ import java.io.File
 
 object SABConfig {
     private val cfg: YamlObject
+    private val bungee = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!)
+        .asObject()
 
     init {
         val dir = File("./plugins/SpicyAzisaBan")
@@ -38,16 +40,15 @@ object SABConfig {
         val password = obj.getString("password", "naetao")!!
         val verifyServerCertificate = obj.getBoolean("verifyServerCertificate", false)
         val useSSL = obj.getBoolean("useSSL", true)
-        val keepAlive = obj.getInt("keepAlive", 300) // in seconds
         val failsafe = obj.getBoolean("failsafe", true)
     }
 
     val serverId = cfg.getString("serverId") ?: "bungee"
 
-    val enableDebugFeatures =
-        YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!)
-            .asObject()
-            .getBoolean("enableDebugFeatures", false)
+    val version = bungee.getString("version", "undefined")!!
+    val debugBuild = bungee.getBoolean("debugBuild", false)
+    val devBuild = bungee.getBoolean("devBuild", false)
+    val enableDebugFeatures = bungee.getBoolean("enableDebugFeatures", false)
 
     object Warning {
         private val obj

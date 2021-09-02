@@ -58,7 +58,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) {
-            sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SpicyAzisaBan.instance.description.version}${ChatColor.GREEN}.")
+            sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SABConfig.version}${ChatColor.GREEN}.")
             sender.send("$PREFIX${ChatColor.GREEN}Use ${ChatColor.AQUA}/sab help${ChatColor.GREEN} to view commands.")
             sender.send("$PREFIX${ChatColor.GREEN}For other commands (such as /gban), please see ${ChatColor.AQUA}${ChatColor.UNDERLINE}https://github.com/acrylic-style/SpicyAzisaBan/issues/1")
             return
@@ -209,13 +209,17 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                         .getDatabaseVersion()
                         .onCatch {}
                         .complete() ?: -1
-                    sender.send("$PREFIX- ${ChatColor.AQUA}サーバーバージョン:")
-                    sender.send("$PREFIX    ${ProxyServer.getInstance().version}")
-                    sender.send("$PREFIX- ${ChatColor.AQUA}データベース:")
-                    sender.send("$PREFIX    ${ChatColor.GOLD}接続済み: ${SpicyAzisaBan.instance.connection.isConnected().toMinecraft()}")
-                    sender.send("$PREFIX    ${ChatColor.GOLD}バージョン: ${ChatColor.GREEN}$dbVersion")
-                    sender.send("$PREFIX    ${ChatColor.GOLD}Failsafe: ${ChatColor.GREEN}${SABConfig.database.failsafe}")
-                    sender.send("$PREFIX- ${ChatColor.AQUA}Uptime: ${ChatColor.GREEN}${SpicyAzisaBan.getUptime()}")
+                    sender.send(SABMessages.Commands.Sab.info.replaceVariables(
+                        "server_version" to ProxyServer.getInstance().version,
+                        "db_connected" to SpicyAzisaBan.instance.connection.isConnected().toMinecraft(),
+                        "db_version" to dbVersion.toString(),
+                        "db_failsafe" to SABConfig.database.failsafe.toMinecraft(),
+                        "uptime" to SpicyAzisaBan.getUptime(),
+                        "version" to SABConfig.version,
+                        "is_devbuild" to SABConfig.devBuild.toMinecraft(),
+                        "is_debugbuild" to SABConfig.debugBuild.toMinecraft(),
+                        "server_id" to SABConfig.serverId,
+                    ).translate())
                     context.resolve()
                 }
             }
