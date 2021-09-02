@@ -15,21 +15,30 @@ java {
 }
 
 fun getGitHash(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "--short", "HEAD")
-        standardOutput = stdout
+    return try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = stdout
+        }
+        stdout.toString().trim()
+    } catch (e: Exception) {
+        val ref = file("./.git/HEAD").readText().replace("^.*: (.*)$".toRegex(), "$1")
+        file("./.git/$ref").readText().substring(0..7)
     }
-    return stdout.toString().trim()
 }
 
 fun hasUncommittedChanges(): Boolean {
-    val stdout = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "status", "--porcelain")
-        standardOutput = stdout
+    return try {
+        val stdout = ByteArrayOutputStream()
+        exec {
+            commandLine("git", "status", "--porcelain")
+            standardOutput = stdout
+        }
+        stdout.toString().trim().isNotBlank()
+    } catch (e: Exception) {
+        false
     }
-    return stdout.toString().trim().isNotBlank()
 }
 
 val javaComponent = components["java"] as AdhocComponentWithVariants
