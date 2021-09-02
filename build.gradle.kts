@@ -23,8 +23,9 @@ fun getGitHash(): String {
         }
         stdout.toString().trim()
     } catch (e: Exception) {
-        val ref = file("./.git/HEAD").readText().replace("^.*: (.*)$".toRegex(), "$1")
-        file("./.git/$ref").readText().substring(0..7)
+        val ref = file("./.git/HEAD").readText().replace("^.*: (.*)$".toRegex(), "$1").trim(' ', '\n')
+        println("Reading file ${file("./.git/$ref").absolutePath}")
+        file("./.git/$ref").readText().trim(' ', '\n').substring(0..7)
     }
 }
 
