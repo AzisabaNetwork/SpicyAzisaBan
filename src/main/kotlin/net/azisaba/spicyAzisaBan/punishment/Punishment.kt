@@ -369,8 +369,10 @@ data class Punishment(
                 } else {
                     ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
                 }
-            } else if (type == PunishmentType.MUTE || type == PunishmentType.TEMP_MUTE) {
+            } else if (type == PunishmentType.MUTE) {
                 player.send(SABMessages.Commands.Mute.layout1.replaceVariables(getVariables().complete()).translate())
+            } else if (type == PunishmentType.TEMP_MUTE) {
+                player.send(SABMessages.Commands.TempMute.layout1.replaceVariables(getVariables().complete()).translate())
             } else if (type == PunishmentType.KICK) {
                 if (server == "global") {
                     player.kick(getBannedMessage().complete())
@@ -408,8 +410,11 @@ data class Punishment(
                         ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
                     }
                 }
-            } else if (type == PunishmentType.IP_MUTE || type == PunishmentType.TEMP_IP_MUTE) {
+            } else if (type == PunishmentType.IP_MUTE) {
                 val message = SABMessages.Commands.IPMute.layout1.replaceVariables(getVariables().complete()).translate()
+                players.forEach { p -> p.send(message) }
+            } else if (type == PunishmentType.TEMP_IP_MUTE) {
+                val message = SABMessages.Commands.TempIPMute.layout1.replaceVariables(getVariables().complete()).translate()
                 players.forEach { p -> p.send(message) }
             }
         }

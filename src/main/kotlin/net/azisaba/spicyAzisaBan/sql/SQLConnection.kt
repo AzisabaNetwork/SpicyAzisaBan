@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.sql
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.util.Util
@@ -172,7 +173,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                     InsertOptions.Builder()
                         .addValue("event_id", eventType.name.lowercase())
                         .addValue("data", data.toString())
-                        .addValue("seen", "")
+                        .addValue("seen", ",${SABConfig.serverId},") // mark sender server as "seen"
                         .build()
                 ).complete()
             }
