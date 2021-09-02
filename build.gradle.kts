@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     kotlin("jvm") version "1.5.30"
     id("com.github.johnrengelman.shadow") version "6.0.0"
@@ -5,11 +7,20 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.36-dev"
+version = "0.0.36-dev-${getGitHash()}"
 
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+fun getGitHash(): String {
+    val stdout = ByteArrayOutputStream()
+    exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
 }
 
 val javaComponent = components["java"] as AdhocComponentWithVariants
@@ -33,7 +44,7 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.30")
     implementation("xyz.acrylicstyle:java-util-kotlin:0.15.4")
     implementation("xyz.acrylicstyle:sequelize4j:0.5.3")
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
@@ -51,6 +62,24 @@ tasks {
         useJUnitPlatform()
     }
 
+    withType<ProcessResources> {
+        filteringCharset = "UTF-8"
+        from(sourceSets.main.get().resources.srcDirs) {
+            include("**")
+
+            val tokenReplacementMap = mapOf(
+                "version" to project.version,
+                "name" to project.rootProject.name,
+            )
+
+            filter<org.apache.tools.ant.filters.ReplaceTokens>("tokens" to tokenReplacementMap)
+        }
+
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+        from(projectDir) { include("LICENSE") }
+    }
+
     shadowJar {
         relocate("kotlin", "net.azisaba.spicyAzisaBan.libs.kotlin")
         relocate("util", "net.azisaba.spicyAzisaBan.libs.util")
@@ -62,4 +91,9 @@ tasks {
         minimize()
         archiveFileName.set("SpicyAzisaBan-${project.version}.jar")
     }
+}
+
+println("Deleting cached bungee.yml")
+file("./build/resources/main/bungee.yml").apply {
+    if (exists()) delete()
 }
