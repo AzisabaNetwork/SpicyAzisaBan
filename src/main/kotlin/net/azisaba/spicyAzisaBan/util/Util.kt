@@ -116,7 +116,7 @@ object Util {
         val reader = StringReader(s)
         while (!reader.isEOF()) {
             val c = reader.readFirst()
-            if (c.isDigit()) {
+            if (c.isDigit() || c == '.') {
                 rawNumber += c
             } else {
                 if (rawNumber.isEmpty()) throw IllegalArgumentException("Unexpected non-digit character: '$c' at index ${reader.index}")
@@ -129,12 +129,12 @@ object Util {
                 }
                 // y(ear), d(ay), h(our), m(inute), s(econd)
                 time += when (c) {
-                    'y' -> year * rawNumber.toLong()
+                    'y' -> (year * rawNumber.toDouble()).toLong()
                     // mo is not here
-                    'd' -> day * rawNumber.toLong()
-                    'h' -> hour * rawNumber.toLong()
-                    'm' -> minute * rawNumber.toLong()
-                    's' -> second * rawNumber.toLong()
+                    'd' -> (day * rawNumber.toDouble()).toLong()
+                    'h' -> (hour * rawNumber.toDouble()).toLong()
+                    'm' -> (minute * rawNumber.toDouble()).toLong()
+                    's' -> (second * rawNumber.toDouble()).toLong()
                     else -> throw IllegalArgumentException("Unexpected character: '$c' at index ${reader.index}")
                 }
                 rawNumber = ""
