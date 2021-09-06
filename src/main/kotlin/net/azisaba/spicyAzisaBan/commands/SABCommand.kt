@@ -250,7 +250,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     .then { list ->
                         if (list.isEmpty()) return@then sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate().format(id))
                         val v = Punishment.fromTableData(list[0]).getVariables().complete()
-                        sender.send(SABMessages.Commands.Sab.removedFromPunishments.replaceVariables(v).translate())
+                        sender.send(SABMessages.Commands.Sab.removedFromPunishment.replaceVariables(v).translate())
                     }
             }
             "debug" -> {

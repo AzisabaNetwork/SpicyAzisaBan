@@ -135,7 +135,7 @@ object SABMessages {
             val reloadedConfiguration get() = obj.getMessage("reloadedConfiguration", defObj.getMessage("reloadedConfiguration"))
             val deleteGroupUnpunishReason get() = obj.getMessage("deleteGroupUnpunishReason", defObj.getMessage("deleteGroupUnpunishReason"))
             val removedFromPunishmentHistory get() = obj.getMessage("removedFromPunishmentHistory", defObj.getMessage("removedFromPunishmentHistory"))
-            val removedFromPunishments get() = obj.getMessage("removedFromPunishments", defObj.getMessage("removedFromPunishments"))
+            val removedFromPunishment get() = obj.getMessage("removedFromPunishment", defObj.getMessage("removedFromPunishment"))
             val info get() = obj.getMessage("info", defObj.getMessage("info"))
         }
 
