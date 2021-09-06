@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -98,9 +99,16 @@ private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddres
         sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
         return@create context.resolve(IPAddressContext(false, ""))
     }
-    if (target.isPunishableIP()) return@create context.resolve(IPAddressContext(true, target.reconstructIPAddress()))
+    try {
+        if (target.isPunishableIP()) return@create context.resolve(
+            IPAddressContext(
+                true,
+                target.reconstructIPAddress()
+            )
+        )
+    } catch (ignored: IllegalArgumentException) {}
     val data = PlayerData.getByName(target)
-        .catch { if (it is SQLException) it.printStackTrace() }
+        .catch { sender.sendErrorMessage(it) }
         .complete()
     if (data?.ip != null) {
         return@create context.resolve(IPAddressContext(true, data.ip))
