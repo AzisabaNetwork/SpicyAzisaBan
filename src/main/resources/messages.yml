@@ -88,6 +88,7 @@ commands:
   # %SERVER% - Target server or group that the punishment applies to ("global" if applies to an entire network)
   # %DURATION% - Times left until the punishment expires
   # %TIME% - Duration of punishment
+  # %IS_EXPIRED% - &cfalse if expired, &atrue otherwise
   ban:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%ban <player=...> <reason=\"...\"> [server=...]"
     globalUsage: "%PREFIX%&a使用法: /%CMD_PREFIX%gban <player=...> <reason=\"...\"> [server=...]"
@@ -336,12 +337,13 @@ commands:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%history <target=Player/IP> [page=...] [--all] [--active]"
     # Available variables: %TARGET%
     header: "%PREFIX%&c&o%TARGET%&7の履歴:"
-    # Available variables: variables of punishment + %DATE%, %STRIKETHROUGH_IF_UNPUNISHED%, %UNPUNISH_REASON%, %UNPUNISH_ID%, %UNPUNISH_OPERATOR%
+    # Available variables: variables of punishment + %DATE%, %STRIKETHROUGH_IF_UNPUNISHED%, %UNPUNISH_REASON%,
+    # %UNPUNISH_ID%, %UNPUNISH_OPERATOR%
     layout:
       - "&8[&e%DATE%&8] &8(&e/%CMD_PREFIX%proofs %ID%&7で証拠を表示&8)"
       - "&c名前/IP &8> &7&o%PLAYER%"
       - "&cタイプ &8> &7&o%TYPE%"
-      - "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME%"
+      - "&c期間 &8> &7&o%STRIKETHROUGH_IF_UNPUNISHED%%TIME% &7(&e期限切れ: %IS_EXPIRED%&7)"
       - "&c理由 &8> &7&o%REASON% %UNPUNISH_REASON%"
       - "&cID &8> &7&o#%ID% %UNPUNISH_ID%"
       - "&cサーバー &8> &7&o%SERVER%"
@@ -382,6 +384,7 @@ commands:
     # Available variables for banInfo and muteInfo: default, punishment
     banInfo: "&c%DURATION% &8(&7ID: &e#%ID%&7, &7理由: &e&o%REASON%&8)"
     muteInfo: "&c%DURATION% &8(&7ID: &e#%ID%&7, &7理由: &e&o%REASON%&8)"
+    cannotUseTargetAndID: "%PREFIX%&c&etarget=&cと&eid=&cを併用することはできません。"
   proofs:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%proofs <ID>"
     # Available variables: punishment + %PID% (punishment id)

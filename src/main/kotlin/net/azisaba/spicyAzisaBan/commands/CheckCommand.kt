@@ -30,7 +30,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import java.net.InetAddress
 
 object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
-    private val availableArguments = listOf(listOf("target="), listOf("--ip", "-i"), listOf("--only", "-o"), listOf("server="))
+    private val availableArguments = listOf(listOf("target=", "id="), listOf("--ip", "-i"), listOf("--only", "-o"), listOf("server="))
 
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (!sender.hasPermission("sab.check")) {
@@ -41,8 +41,21 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
         }
         val arguments = ArgumentParser(args.joinToString(" "))
         val target = arguments.getString("target")
-        if (target.isNullOrBlank()) {
+        val pid = arguments.getString("id")?.toLongOrNull()
+        if (target.isNullOrBlank() && pid == null) {
             return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
+        }
+        if (!target.isNullOrBlank() && pid != null) {
+            return sender.send(SABMessages.Commands.Check.cannotUseTargetAndID.replaceVariables().translate())
+        }
+        if (pid != null) {
+            Punishment.fetchPunishmentById(pid).thenDo { p ->
+                if (p == null) {
+                    return@thenDo sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate().format(pid))
+                }
+                sender.send(p.getHistoryMessage().complete())
+            }
+            return
         }
         val only = arguments.contains("only") || arguments.contains("-o")
         val specifiedServer = arguments.containsKey("server")

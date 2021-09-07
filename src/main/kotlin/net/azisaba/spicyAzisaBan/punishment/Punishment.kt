@@ -20,6 +20,7 @@ import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import net.azisaba.spicyAzisaBan.util.Util.send
+import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ProxyServer
@@ -299,7 +300,8 @@ data class Punishment(
                 "duration" to Util.unProcessTime(end - System.currentTimeMillis()),
                 "time" to Util.unProcessTime(end - start),
                 "date" to SABMessages.formatDate(start),
-                "end_date" to if (end == -1L) "N/A" else SABMessages.formatDate(end)
+                "end_date" to if (end == -1L) "N/A" else SABMessages.formatDate(end),
+                "is_expired" to isExpired().toMinecraft(),
             )
         }
 

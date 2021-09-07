@@ -315,6 +315,7 @@ object SABMessages {
             val layoutIP get() = obj.getMessage("layoutIP", defObj.getMessage("layoutIP"))
             val banInfo get() = obj.getMessage("banInfo", defObj.getMessage("banInfo"))
             val muteInfo get() = obj.getMessage("muteInfo", defObj.getMessage("muteInfo"))
+            val cannotUseTargetAndID get() = obj.getMessage("cannotUseTargetAndID", defObj.getMessage("cannotUseTargetAndID"))
         }
 
         object History {
