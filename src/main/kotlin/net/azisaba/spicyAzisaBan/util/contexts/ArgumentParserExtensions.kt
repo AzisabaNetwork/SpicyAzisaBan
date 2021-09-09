@@ -33,7 +33,7 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender
 }
 
 private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerContext> = Promise.create { context ->
-    val rawName = getString("player")
+    val rawName = parsedRawOptions["player"]
     if (rawName == null) {
         sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
@@ -50,7 +50,7 @@ private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerConte
 
 private fun ArgumentParser.getServer(sender: CommandSender, checkPermission: Boolean): Promise<ServerContext> = Promise.create { context ->
     var isGroup = false
-    val server = getString("server") ?: "global"
+    val server = parsedRawOptions["server"] ?: "global"
     if (server == "global") {
         if (checkPermission && !sender.hasPermission("sab.punish.global")) {
             sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
@@ -78,7 +78,7 @@ private fun ArgumentParser.getServer(sender: CommandSender, checkPermission: Boo
 }
 
 private fun ArgumentParser.getReason(): Promise<ReasonContext> = Promise.create { context ->
-    val reason = getString("reason")
+    val reason = parsedRawOptions["reason"]
     return@create context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
 }
 
@@ -94,7 +94,7 @@ private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> 
 }
 
 private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddressContext> = Promise.create { context ->
-    val target = getString("target")
+    val target = parsedRawOptions["target"]
     if (target == null) {
         sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
         return@create context.resolve(IPAddressContext(false, ""))
