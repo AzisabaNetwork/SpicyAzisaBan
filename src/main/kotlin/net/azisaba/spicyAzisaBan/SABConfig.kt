@@ -14,6 +14,7 @@ object SABConfig {
         .asObject()
 
     init {
+        println("Loaded bungee.yml: ${bungee.rawData}")
         val dir = File("./plugins/SpicyAzisaBan")
         dir.mkdir()
         val file = File(dir, "config.yml")
