@@ -10,16 +10,16 @@ import java.io.File
 
 object SABConfig {
     private val cfg: YamlObject
-    private val bungee = YamlConfiguration(ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/bungee.yml")!!)
+    private val bungee = YamlConfiguration(ResourceLocator.getInstance(SpicyAzisaBan::class.java).getResourceAsStream("/spicyazisaban/version.yml")!!)
         .asObject()
 
     init {
-        println("Loaded bungee.yml: ${bungee.rawData}")
+        println("Loaded version.yml: ${bungee.rawData}")
         val dir = File("./plugins/SpicyAzisaBan")
         dir.mkdir()
         val file = File(dir, "config.yml")
         if (!file.exists()) {
-            val input = ResourceLocator.getInstance(SABConfig::class.java).getResourceAsStream("/config.yml")
+            val input = ResourceLocator.getInstance(SpicyAzisaBan::class.java).getResourceAsStream("/spicyazisaban/config.yml")
             if (input == null) {
                 SpicyAzisaBan.instance.logger.severe("Could not find config.yml in jar file!")
             } else {

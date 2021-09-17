@@ -49,7 +49,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
             return sender.send(SABMessages.Commands.History.usage.replaceVariables().translate())
         }
         val arguments = ArgumentParser(args.joinToString(" "))
-        val target = arguments.getString("target")
+        val target = arguments.parsedRawOptions["target"]
         if (target.isNullOrBlank()) {
             return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
@@ -58,7 +58,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
         val ipOpt = arguments.contains("ip") || arguments.contains("-i")
         val only = arguments.contains("only") || arguments.contains("-o")
         if (active && all) return sender.send(SABMessages.Commands.History.invalidArguments.replaceVariables().translate())
-        var page = max(1, arguments.getString("page")?.toIntOr(1) ?: 1)
+        var page = max(1, arguments.parsedRawOptions["page"]?.toIntOr(1) ?: 1)
         val tableName = if (active) "punishments" else "punishmentHistory"
         val left = if (!all) "LEFT OUTER JOIN unpunish ON ($tableName.id = unpunish.punish_id)" else ""
         val extraWhere = if (!all) "AND unpunish.punish_id IS NULL" else ""

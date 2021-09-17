@@ -22,7 +22,7 @@ object SABMessages {
         val dir = File("./plugins/SpicyAzisaBan")
         dir.mkdir()
         val file = File(dir, "messages.yml")
-        val input = ResourceLocator.getInstance(SABMessages::class.java).getResourceAsStream("/messages.yml")
+        val input = ResourceLocator.getInstance(SABMessages::class.java).getResourceAsStream("/spicyazisaban/messages.yml")
             ?: error("Could not find messages.yml in jar file!")
         if (!file.exists()) {
             Bytes.copy(input, file)

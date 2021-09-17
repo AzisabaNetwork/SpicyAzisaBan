@@ -10,7 +10,7 @@ data class ReasonContext(val text: String): Context {
     companion object {
         fun tabComplete(type: PunishmentType, args: Array<String>, defaultServer: String = "global"): List<String> {
             val arguments = ArgumentParser(args.joinToString(" "))
-            val server: String? = arguments.getString("server")
+            val server: String? = arguments.parsedRawOptions["server"]
             if (server.isNullOrEmpty() && defaultServer.isEmpty()) return emptyList()
             // don't look for a group if specified explicitly by server parameter
             val groupOrServer = server

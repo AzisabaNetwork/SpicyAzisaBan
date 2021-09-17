@@ -40,8 +40,8 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
             return sender.send(SABMessages.Commands.Check.usage.replaceVariables().translate())
         }
         val arguments = ArgumentParser(args.joinToString(" "))
-        val target = arguments.getString("target")
-        val pid = arguments.getString("id")?.toLongOrNull()
+        val target = arguments.parsedRawOptions["target"]
+        val pid = arguments.parsedRawOptions["id"]?.toLongOrNull()
         if (target.isNullOrBlank() && pid == null) {
             return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
@@ -56,6 +56,9 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                 sender.send(p.getHistoryMessage().complete())
             }
             return
+        }
+        if (target.isNullOrBlank()) {
+            return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
         val only = arguments.contains("only") || arguments.contains("-o")
         val specifiedServer = arguments.containsKey("server")

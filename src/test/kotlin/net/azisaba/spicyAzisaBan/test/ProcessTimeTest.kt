@@ -1,7 +1,12 @@
 package net.azisaba.spicyAzisaBan.test
 
 import net.azisaba.spicyAzisaBan.util.Util
-import net.azisaba.spicyAzisaBan.util.*
+import net.azisaba.spicyAzisaBan.util.day
+import net.azisaba.spicyAzisaBan.util.hour
+import net.azisaba.spicyAzisaBan.util.minute
+import net.azisaba.spicyAzisaBan.util.month
+import net.azisaba.spicyAzisaBan.util.second
+import net.azisaba.spicyAzisaBan.util.year
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -22,6 +27,9 @@ class ProcessTimeTest {
         }
         assert(Util.processTime("27.d") == 27 * day) {
             "${Util.processTime("27.d")} != ${27 * day}"
+        }
+        assert(Util.processTime("27.0d") == 27 * day) {
+            "${Util.processTime("27.0d")} != ${27 * day}"
         }
     }
 

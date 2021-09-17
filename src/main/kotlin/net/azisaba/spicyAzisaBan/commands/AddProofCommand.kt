@@ -41,7 +41,7 @@ object AddProofCommand: Command("${SABConfig.prefix}addproof"), TabExecutor {
 
     private fun execute(sender: CommandSender, arguments: ArgumentParser) {
         val id = try {
-            arguments.getString("id")?.toLong() ?: -1
+            arguments.parsedRawOptions["id"]?.toLong() ?: -1
         } catch (e: NumberFormatException) {
             sender.send(SABMessages.Commands.General.notPunished.replaceVariables().translate())
             return

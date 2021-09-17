@@ -83,7 +83,7 @@ private fun ArgumentParser.getReason(): Promise<ReasonContext> = Promise.create 
 }
 
 private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> = Promise.create { context ->
-    val time = getString("time")
+    val time = parsedRawOptions["time"]
     if (time.isNullOrBlank()) return@create context.resolve(TimeContext(true, -1L))
     try {
         return@create context.resolve(TimeContext(true, Util.processTime(time)))
@@ -118,7 +118,7 @@ private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddres
 }
 
 private fun ArgumentParser.getPunishmentType(sender: CommandSender): PunishmentTypeContext {
-    val type = getString("type") ?: return PunishmentTypeContext(true, null)
+    val type = parsedRawOptions["type"] ?: return PunishmentTypeContext(true, null)
     return try {
         val pType = PunishmentType.valueOf(type)
         PunishmentTypeContext(true, pType)

@@ -53,7 +53,7 @@ object BanListCommand: Command("${SABConfig.prefix}banlist"), TabExecutor {
         val active = arguments.contains("active")
         val all = arguments.contains("all")
         if (active && all) return sender.send(SABMessages.Commands.BanList.invalidArguments.replaceVariables().translate())
-        var page = max(1, arguments.getString("page")?.toIntOr(1) ?: 1)
+        var page = max(1, arguments.parsedRawOptions["page"]?.toIntOr(1) ?: 1)
         val tableName = if (active) "punishments" else "punishmentHistory"
         val left = if (!all) "LEFT OUTER JOIN unpunish ON ($tableName.id = unpunish.punish_id)" else ""
         val whereList = mutableListOf<Pair<String, List<Any>>>()

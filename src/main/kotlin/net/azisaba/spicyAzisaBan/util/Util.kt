@@ -17,6 +17,7 @@ import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.config.ServerInfo
 import net.md_5.bungee.api.connection.ProxiedPlayer
+import util.ArgumentParser
 import util.UUIDUtil
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
@@ -462,5 +463,9 @@ object Util {
             if (predicate(k, v)) toRemove.add(k)
         }
         toRemove.forEach { this.remove(it) }
+    }
+
+    fun ArgumentParser.getStr(key: String): String? {
+        return this.parsedRawOptions[key]
     }
 }
