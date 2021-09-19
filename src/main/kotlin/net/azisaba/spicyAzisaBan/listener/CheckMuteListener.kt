@@ -26,7 +26,7 @@ object CheckMuteListener: Listener {
         if (e.sender !is ProxiedPlayer) return
         val player = e.sender as ProxiedPlayer
         if (e.message.startsWith("/") && !ReloadableSABConfig.getBlockedCommandsWhenMuted(player.getServerName()).any { s ->
-                e.message.matches("^/(.*:)?tell(\$|\\s+.*)".toRegex())
+                e.message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex())
         }) return
         val res = Promise.create<Boolean> { context ->
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
