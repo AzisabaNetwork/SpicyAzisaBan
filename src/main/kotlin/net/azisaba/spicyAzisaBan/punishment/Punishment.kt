@@ -502,7 +502,12 @@ data class Punishment(
             ?: return@create
         context.resolve(punishments)
     }.thenDo { list ->
-        val message = SABMessages.Commands.General.samePunishmentAppliedToSameIPAddress.replaceVariables().format(list.size).translate()
+        val message = SABMessages.Commands.General.samePunishmentAppliedToSameIPAddress
+            .replaceVariables(
+                "players" to "${ChatColor.RED}${list.joinToString("${ChatColor.YELLOW}, ${ChatColor.RED}") { it.name }}",
+                "players_count" to list.size.toString(),
+            )
+            .translate()
         ProxyServer.getInstance().console.send(message)
         ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
             player.send(message)

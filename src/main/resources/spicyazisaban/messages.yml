@@ -36,7 +36,8 @@ commands:
     invalidPunishmentType: "%PREFIX%&c無効な処罰タイプです。"
     invalidNumber: "%PREFIX%&c無効な数値です。"
     timeNotSpecified: "%PREFIX%&c時間が指定されていません。"
-    samePunishmentAppliedToSameIPAddress: "&7%d人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました。"
+    # Available variables: default, %PLAYERS% - banned player names, %PLAYERS_COUNT%
+    samePunishmentAppliedToSameIPAddress: "&7%PLAYERS_COUNT%人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました: %PLAYERS%"
     alreadyPunished: "%PREFIX%&cこのアカウントはすでに(同じサーバー、同じ種類で)処罰されています!"
     removedFromServer:
       - "&cとあるプレイヤーがこの世界から抹消された。"
