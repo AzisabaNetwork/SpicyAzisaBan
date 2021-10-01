@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.36-${getBranch()}-${getGitHash()}"
+version = "0.0.37-${getBranch()}-${getGitHash()}"
 
 java {
     withJavadocJar()
