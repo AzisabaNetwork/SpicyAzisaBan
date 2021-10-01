@@ -207,6 +207,12 @@ object Util {
      */
     fun List<String>.filtr(s: String): List<String> = distinct().filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
 
+    /**
+     * Returns list that matches/starts with specified string. This method also checks the permission with `prefix`.
+     */
+    fun List<String>.filtrPermission(sender: CommandSender, prefix: String, s: String): List<String> =
+        distinct().filter { sender.hasPermission("$prefix$it") }.filter { s1 -> s1.lowercase().startsWith(s.lowercase()) }
+
     private val insertLock = Object()
 
     /**

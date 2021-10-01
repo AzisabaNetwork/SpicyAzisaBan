@@ -53,6 +53,12 @@ commands:
     deleteGroupUnpunishReason: "グループ'%GROUP%'の削除" # Available variables: default, %GROUP% (group name being removed)
     removedFromPunishmentHistory: "%PREFIX%&a処罰&8<&7punishmentHistory&8>&a#%ID%を削除しました。" # Available variables: default, punishment
     removedFromPunishment: "%PREFIX%&a処罰&8<&7punishments&8>&a#%ID%を削除しました。" # Available variables: default, punishment
+    apiTableNotFound: "%PREFIX%&cSpicyAzisaBan-APIのテーブルが存在しません。"
+    accountNoLinkCode: "%PREFIX%&cコードが一致しません。"
+    accountLinking: "%PREFIX%&aアカウントをリンク中..."
+    # Available variables: default, %USERNAME% (username of linked web account)
+    accountLinkComplete: "%PREFIX%&aアカウント[%USERNAME%]のリンクが完了しました。"
+    accountUnlinked: "%PREFIX%&aアカウントの連携をすべて解除しました。"
     # Available variables (all boolean values are colored automatically): default +
     # %SERVER_VERSION% - BungeeCord version
     # %DB_CONNECTED% - true if connection between database is active, false otherwise

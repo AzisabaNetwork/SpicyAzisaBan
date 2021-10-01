@@ -8,6 +8,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.filtr
+import net.azisaba.spicyAzisaBan.util.Util.filtrPermission
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
 import net.azisaba.spicyAzisaBan.util.Util.insert
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -17,6 +18,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
+import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.kt.promise.rewrite.catch
@@ -30,20 +32,34 @@ import kotlin.math.max
 import kotlin.math.min
 
 object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), TabExecutor {
-    private val commands = listOf("creategroup", "deletegroup", "group", "info", "debug", "reload", "deletePunishmentHistory", "deletePunishment")
+    private val commands = listOf(
+        "creategroup",
+        "deletegroup",
+        "group",
+        "info",
+        "debug",
+        "reload",
+        "deletepunishmenthistory",
+        "deletepunishment",
+        "link",
+        "unlink",
+    )
     private val groupCommands = listOf("add", "remove", "info")
 
     private val groupRemoveConfirmation = mutableMapOf<UUID, String>()
 
     private fun CommandSender.sendHelp() {
         send("$PREFIX${ChatColor.GREEN}SpicyAzisaBan commands")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab group <group>")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab info")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab creategroup <group>")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletegroup <group>")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletehistory <id>")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab debug [debugLevel = 0-99999]")
-        send("${ChatColor.RED}> ${ChatColor.AQUA}/sab reload")
+        if (hasPermission("sab.command.spicyazisaban.group")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab group <group>")
+        if (hasPermission("sab.command.spicyazisaban.info")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab info")
+        if (hasPermission("sab.command.spicyazisaban.creategroup")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab creategroup <group>")
+        if (hasPermission("sab.command.spicyazisaban.deletegroup")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletegroup <group>")
+        if (hasPermission("sab.command.spicyazisaban.debug")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab debug [debugLevel = 0-99999]")
+        if (hasPermission("sab.command.spicyazisaban.reload")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab reload")
+        if (hasPermission("sab.command.spicyazisaban.deletepunishmenthistory")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletepunishmenthistory <id>")
+        if (hasPermission("sab.command.spicyazisaban.deletepunishment")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab deletepunishment <id>")
+        if (hasPermission("sab.command.spicyazisaban.link")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab link <code>")
+        if (hasPermission("sab.command.spicyazisaban.unlink")) send("${ChatColor.RED}> ${ChatColor.AQUA}/sab unlink")
     }
 
     private fun CommandSender.sendGroupHelp() {
@@ -57,13 +73,21 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
         if (!sender.hasPermission("sab.command.spicyazisaban")) {
             return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
+        if (!commands.any { sender.hasPermission("sab.command.spicyazisaban.$it") }) {
+            sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SABConfig.version}${ChatColor.GREEN}.")
+            sender.send("$PREFIX${ChatColor.AQUA}You do not have permission to run any subcommand.")
+            return
+        }
         if (args.isEmpty()) {
             sender.send("$PREFIX${ChatColor.GREEN}Running ${ChatColor.RED}${ChatColor.BOLD}${SpicyAzisaBan.instance.description.name}${ChatColor.RESET}${ChatColor.AQUA} v${SABConfig.version}${ChatColor.GREEN}.")
             sender.send("$PREFIX${ChatColor.GREEN}Use ${ChatColor.AQUA}/sab help${ChatColor.GREEN} to view commands.")
-            sender.send("$PREFIX${ChatColor.GREEN}For other commands (such as /gban), please see ${ChatColor.AQUA}${ChatColor.UNDERLINE}https://github.com/acrylic-style/SpicyAzisaBan/issues/1")
+            sender.send("$PREFIX${ChatColor.GREEN}For other commands (such as /gban), please see ${ChatColor.AQUA}${ChatColor.UNDERLINE}https://github.com/AzisabaNetwork/SpicyAzisaBan/issues/1")
             return
         }
-        when (args[0]) {
+        if (!sender.hasPermission("sab.command.spicyazisaban.${args[0].lowercase()}")) {
+            return sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
+        }
+        when (args[0].lowercase()) {
             "creategroup" -> {
                 if (args.size <= 1) return sender.sendHelp()
                 val groupName = args[1]
@@ -223,7 +247,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     context.resolve()
                 }
             }
-            "deletePunishmentHistory" -> {
+            "deletepunishmenthistory" -> {
                 if (args.size <= 1) return sender.sendHelp()
                 val id = try {
                     max(args[1].toLong(), 0)
@@ -238,7 +262,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                         sender.send(SABMessages.Commands.Sab.removedFromPunishmentHistory.replaceVariables(v).translate())
                     }
             }
-            "deletePunishment" -> {
+            "deletepunishment" -> {
                 if (args.size <= 1) return sender.sendHelp()
                 val id = try {
                     max(args[1].toLong(), 0)
@@ -275,6 +299,52 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                 }
                 sender.send(SABMessages.Commands.Sab.reloadedConfiguration.replaceVariables().translate())
             }
+            "link" -> {
+                if (sender !is ProxiedPlayer) {
+                    return sender.send("${ChatColor.RED}NO ${ChatColor.AQUA}CONSOLE ${ChatColor.GOLD}ZONE")
+                }
+                if (args.size <= 1) return
+                SpicyAzisaBan.instance.connection
+                    .isTableExists("users_linked_accounts")
+                    .thenDo { exists ->
+                        if (!exists) {
+                            return@thenDo sender.send(SABMessages.Commands.Sab.apiTableNotFound.replaceVariables().translate())
+                        }
+                        sender.send(SABMessages.Commands.Sab.accountLinking.replaceVariables().translate())
+                        val rs = SpicyAzisaBan.instance.connection.executeQuery("SELECT `user_id` FROM `users_linked_accounts` WHERE `link_code` = ?", args[1])
+                        if (!rs.next()) {
+                            rs.statement.close()
+                            return@thenDo sender.send(SABMessages.Commands.Sab.accountNoLinkCode.replaceVariables().translate())
+                        }
+                        val userId = rs.getInt("user_id")
+                        rs.statement.close()
+                        val usernameResult = SpicyAzisaBan.instance.connection.executeQuery("SELECT `username` FROM `users` WHERE `id` = ?", userId)
+                        if (!usernameResult.next()) {
+                            usernameResult.statement.close()
+                            throw AssertionError("Could not find user for id = $userId")
+                        }
+                        val username = usernameResult.getString("username")
+                        usernameResult.statement.close()
+                        SpicyAzisaBan.instance.connection.execute("UPDATE `users_linked_accounts` SET `link_code` = NULL, `expire` = 0, `linked_uuid` = ? WHERE `user_id` = ?", sender.uniqueId.toString(), userId)
+                        sender.send(SABMessages.Commands.Sab.accountLinkComplete.replaceVariables("username" to username).translate())
+                    }
+                    .catch { sender.sendErrorMessage(it) }
+            }
+            "unlink" -> {
+                if (sender !is ProxiedPlayer) {
+                    return sender.send("${ChatColor.RED}NO ${ChatColor.AQUA}CONSOLE ${ChatColor.GOLD}ZONE")
+                }
+                SpicyAzisaBan.instance.connection
+                    .isTableExists("users_linked_accounts")
+                    .thenDo { exists ->
+                        if (!exists) {
+                            return@thenDo sender.send(SABMessages.Commands.Sab.apiTableNotFound.replaceVariables().translate())
+                        }
+                        SpicyAzisaBan.instance.connection.execute("DELETE FROM `users_linked_accounts` WHERE `linked_uuid` = ?", sender.uniqueId.toString())
+                        sender.send(SABMessages.Commands.Sab.accountUnlinked.replaceVariables().translate())
+                    }
+                    .catch { sender.sendErrorMessage(it) }
+            }
             else -> sender.sendHelp()
         }
     }
@@ -282,11 +352,11 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
     override fun onTabComplete(sender: CommandSender, args: Array<String>): Iterable<String> {
         if (!sender.hasPermission("sab.command.spicyazisaban")) return emptyList()
         if (args.isEmpty()) return emptyList()
-        if (args.size == 1) return commands.filtr(args[0])
-        if (args[0] == "deletegroup" && args.size == 2) {
+        if (args.size == 1) return commands.filtrPermission(sender, "sab.command.spicyazisaban.", args[0])
+        if (sender.hasPermission("sab.command.spicyazisaban.deletegroup") && args[0] == "deletegroup" && args.size == 2) {
             SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
         }
-        if (args[0] == "group") {
+        if (sender.hasPermission("sab.command.spicyazisaban.group") && args[0] == "group") {
             if (args.size == 2) SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
             if (args.size == 3) return groupCommands.filtr(args[2])
             if (args.size == 4 && (args[2] == "add" || args[2] == "remove"))

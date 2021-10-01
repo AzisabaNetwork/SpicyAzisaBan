@@ -261,4 +261,11 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
 
     fun getAllGroups(): Promise<List<String>> =
         groups.findAll(FindOptions.ALL).then { it.map { td -> td.getString("id") } }
+
+    fun isTableExists(table: String): Promise<Boolean> = Promise.create {
+        val rs = executeQuery("SHOW TABLES LIKE ?", table)
+        val exists = rs.next()
+        rs.statement.close()
+        it.resolve(exists)
+    }
 }

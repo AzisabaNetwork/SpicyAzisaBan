@@ -137,6 +137,11 @@ object SABMessages {
             val removedFromPunishmentHistory get() = obj.getMessage("removedFromPunishmentHistory", defObj.getMessage("removedFromPunishmentHistory"))
             val removedFromPunishment get() = obj.getMessage("removedFromPunishment", defObj.getMessage("removedFromPunishment"))
             val info get() = obj.getMessage("info", defObj.getMessage("info"))
+            val apiTableNotFound get() = obj.getMessage("apiTableNotFound", defObj.getMessage("apiTableNotFound"))
+            val accountNoLinkCode get() = obj.getMessage("accountNoLinkCode", defObj.getMessage("accountNoLinkCode"))
+            val accountLinking get() = obj.getMessage("accountLinking", defObj.getMessage("accountLinking"))
+            val accountLinkComplete get() = obj.getMessage("accountLinkComplete", defObj.getMessage("accountLinkComplete"))
+            val accountUnlinked get() = obj.getMessage("accountUnlinked", defObj.getMessage("accountUnlinked"))
         }
 
         object Ban {

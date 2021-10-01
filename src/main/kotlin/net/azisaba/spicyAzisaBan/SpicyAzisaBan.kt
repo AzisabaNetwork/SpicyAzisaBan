@@ -156,6 +156,8 @@ class SpicyAzisaBan: Plugin() {
                         debug("Removing cache of punishment $id (event received)")
                         Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
                         Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
+                    } else {
+                        logger.warning("Unknown event: $e")
                     }
                 }
                 rs.statement.close()

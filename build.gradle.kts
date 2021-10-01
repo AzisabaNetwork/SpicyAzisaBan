@@ -7,12 +7,20 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.36-dev-${getGitHash()}"
+version = "0.0.36-${getBranch()}-${getGitHash()}"
 
 java {
     withJavadocJar()
     withSourcesJar()
 }
+
+fun getBranch(): String =
+    file("./.git/HEAD")
+        .readText()
+        .replace("^.*: (.*)$".toRegex(), "$1")
+        .trim(' ', '\n')
+        .split('/')
+        .last()
 
 fun getGitHash(): String {
     return try {
@@ -70,7 +78,7 @@ dependencies {
     implementation("xyz.acrylicstyle:minecraft-util:0.5.3")
     compileOnly("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
     testImplementation("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 
 tasks {
@@ -90,7 +98,7 @@ tasks {
                 "version" to project.version,
                 "name" to project.rootProject.name,
                 "debugBuild" to hasUncommittedChanges().toString(),
-                "devBuild" to project.version.toString().contains("-dev").toString(),
+                "devBuild" to (getBranch() != "main").toString(),
             )
 
             filter<org.apache.tools.ant.filters.ReplaceTokens>("tokens" to tokenReplacementMap)
