@@ -147,6 +147,7 @@ class SpicyAzisaBan: Plugin() {
                             continue
                         }
                         p.doSomethingIfOnline()
+                        p.notifyToAll()
                     } else if (e.event == EventType.UPDATED_PUNISHMENT) {
                         val id = e.data.getLong("id")
                         if (id <= 0) {
