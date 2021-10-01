@@ -9,6 +9,16 @@
 
 ## Permissions
 - `sab.command.spicyazisaban`
+- `sab.command.spicyazisaban.creategroup`
+- `sab.command.spicyazisaban.deletegroup`
+- `sab.command.spicyazisaban.group`
+- `sab.command.spicyazisaban.info`
+- `sab.command.spicyazisaban.debug`
+- `sab.command.spicyazisaban.reload`
+- `sab.command.spicyazisaban.deletepunishmenthistory`
+- `sab.command.spicyazisaban.deletepunishment`
+- `sab.command.spicyazisaban.link`
+- `sab.command.spicyazisaban.unlink`
 - `sab.check`
 - `sab.history`
 - `sab.seen`
