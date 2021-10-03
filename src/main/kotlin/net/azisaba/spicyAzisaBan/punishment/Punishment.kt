@@ -454,7 +454,7 @@ data class Punishment(
                 .complete() == null
         }
         if (cancel) return@create
-        Util.insert u@{
+        Util.insert {
             cancel = SpicyAzisaBan.instance.connection.punishments.insert(insertOptions.addValue("id", id).build())
                 .catch { it.printStackTrace();context.reject(it) }
                 .complete() == null

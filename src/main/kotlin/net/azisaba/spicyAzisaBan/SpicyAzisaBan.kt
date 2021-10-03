@@ -44,6 +44,7 @@ import net.azisaba.spicyAzisaBan.listener.PlayerDisconnectListener
 import net.azisaba.spicyAzisaBan.listener.PostLoginListener
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.punishment.UnPunish
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.sql.migrations.DatabaseMigration
 import net.azisaba.spicyAzisaBan.struct.EventType
@@ -139,26 +140,52 @@ class SpicyAzisaBan: Plugin() {
                         e.printStackTrace()
                         continue
                     }
-                    if (e.event == EventType.ADD_PUNISHMENT) {
-                        val id = e.data.getLong("id")
-                        val p = Punishment.fetchActivePunishmentById(id).complete()
-                        if (p == null) {
-                            debug("Ignoring event ${e.id} because the punishment #$id is no longer active")
-                            continue
+                    try {
+                        if (e.event == EventType.ADD_PUNISHMENT) {
+                            val id = e.data.getLong("id")
+                            val p = Punishment.fetchActivePunishmentById(id).complete()
+                            if (p == null) {
+                                debug("Ignoring event ${e.id} because the punishment #$id is no longer active")
+                                continue
+                            }
+                            p.doSomethingIfOnline()
+                            p.notifyToAll()
+                        } else if (e.event == EventType.UPDATED_PUNISHMENT) {
+                            val id = e.data.getLong("id")
+                            if (id <= 0) {
+                                logger.warning("Ignoring invalid event (invalid id): $e")
+                                continue
+                            }
+                            debug("Removing cache of punishment $id (event received)")
+                            Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
+                            Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
+                        } else if (e.event == EventType.REMOVED_PUNISHMENT) {
+                            val id = e.data.getLong("punish_id")
+                            if (id <= 0) {
+                                logger.warning("Ignoring invalid event (invalid punish_id): $e")
+                                continue
+                            }
+                            debug("Removing cache of punishment $id (event received)")
+                            Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
+                            Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
+                            val punishment = Punishment.fetchPunishmentById(id).complete()
+                            if (punishment == null) {
+                                debug("Punishment #$id was removed entirely, skipping")
+                                continue
+                            }
+                            val td = connection.unpunish.findOne(FindOptions.Builder().addWhere("punish_id", id).build()).complete()
+                            if (td == null) {
+                                logger.warning("Received removed_punishment event but there was no unpunish record")
+                                continue
+                            }
+                            val unpunishRecord = UnPunish.fromTableData(punishment, td)
+                            unpunishRecord.notifyToAll()
+                        } else {
+                            logger.warning("Unknown event: $e")
                         }
-                        p.doSomethingIfOnline()
-                        p.notifyToAll()
-                    } else if (e.event == EventType.UPDATED_PUNISHMENT) {
-                        val id = e.data.getLong("id")
-                        if (id <= 0) {
-                            logger.warning("Ignoring invalid event (invalid id): $e")
-                            continue
-                        }
-                        debug("Removing cache of punishment $id (event received)")
-                        Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
-                        Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
-                    } else {
-                        logger.warning("Unknown event: $e")
+                    } catch (e: Exception) {
+                        logger.warning("Received unprocessable event data")
+                        e.printStackTrace()
                     }
                 }
                 rs.statement.close()
