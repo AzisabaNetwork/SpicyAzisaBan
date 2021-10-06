@@ -4,6 +4,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.insertNoId
+import net.md_5.bungee.api.connection.PendingConnection
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
@@ -22,6 +23,10 @@ data class PlayerData(
     val name: String,
     val ip: String?,
     val lastSeen: Long,
+    val firstLogin: Long?,
+    val firstLoginAttempt: Long?,
+    val lastLogin: Long?,
+    val lastLoginAttempt: Long?,
 ): PlayerProfile {
     companion object {
         fun fromTableData(td: TableData): PlayerData {
@@ -29,7 +34,11 @@ data class PlayerData(
             val name = td.getString("name")!!
             val ip = td.getString("ip")!!
             val lastSeen = td.getLong("last_seen")!!
-            return PlayerData(uuid, name, ip, lastSeen)
+            val firstLogin = td.getLong("first_login")!!
+            val firstLoginAttempt = td.getLong("first_login_attempt")!!
+            val lastLogin = td.getLong("last_login")!!
+            val lastLoginAttempt = td.getLong("last_login_attempt")!!
+            return PlayerData(uuid, name, ip, lastSeen, firstLogin, firstLoginAttempt, lastLogin, lastLoginAttempt)
         }
 
         fun getByIP(ip: String): Promise<List<PlayerData>> =
@@ -69,7 +78,7 @@ data class PlayerData(
                                     .build()
                             ).complete()
                         }
-                        PlayerData(uuid, name, "1.1.1.1", System.currentTimeMillis())
+                        PlayerData(uuid, name, "1.1.1.1", System.currentTimeMillis(), -1, -1, -1, -1)
                     }
                     .catch { context.reject(IllegalArgumentException("no player data found for $name")) }
                     .complete()
@@ -80,7 +89,11 @@ data class PlayerData(
             val theName = rs.getString("name")
             val ip = rs.getString("ip")
             val lastSeen = rs.getLong("last_seen")
-            return@create context.resolve(PlayerData(uuid, theName, ip, lastSeen))
+            val firstLogin = rs.getLong("first_login")
+            val firstLoginAttempt = rs.getLong("first_login_attempt")
+            val lastLogin = rs.getLong("last_login")
+            val lastLoginAttempt = rs.getLong("last_login_attempt")
+            return@create context.resolve(PlayerData(uuid, theName, ip, lastSeen, firstLogin, firstLoginAttempt, lastLogin, lastLoginAttempt))
         }
 
         /*
@@ -89,7 +102,40 @@ data class PlayerData(
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $name") }
         */
 
-        fun createOrUpdate(player: ProxiedPlayer): Promise<PlayerData> = Promise.create { context ->
+        fun createOrUpdate(connection: PendingConnection): Promise<PlayerData> = Promise.create { context ->
+            val time = System.currentTimeMillis()
+            val rs = SpicyAzisaBan.instance.connection.executeQuery(
+                "SELECT `uuid`, `first_login_attempt` FROM `players` WHERE `uuid` = ?",
+                connection.uniqueId.toString(),
+            )
+            if (rs.next() && rs.getLong("first_login_attempt") > 0) {
+                SpicyAzisaBan.instance.connection.players.update(
+                    UpsertOptions.Builder()
+                        .addWhere("uuid", connection.uniqueId.toString())
+                        .addValue("uuid", connection.uniqueId.toString())
+                        .addValue("name", connection.name ?: connection.uniqueId.toString())
+                        .addValue("ip", connection.socketAddress.getIPAddress())
+                        .addValue("last_login_attempt", time)
+                        .build()
+                ).catch { it.printStackTrace() }.complete()
+            } else {
+                insertNoId {
+                    SpicyAzisaBan.instance.connection.players.upsert(
+                        UpsertOptions.Builder()
+                            .addWhere("uuid", connection.uniqueId.toString())
+                            .addValue("uuid", connection.uniqueId.toString())
+                            .addValue("name", connection.name ?: connection.uniqueId.toString())
+                            .addValue("ip", connection.socketAddress.getIPAddress())
+                            .addValue("first_login_attempt", time)
+                            .addValue("last_login_attempt", time)
+                            .build()
+                    ).catch { it.printStackTrace() }.complete()
+                }
+            }
+            context.resolve()
+        }
+
+        fun createOrUpdate(player: ProxiedPlayer, login: Boolean): Promise<PlayerData> = Promise.create { context ->
             val time = System.currentTimeMillis()
             val name = SpicyAzisaBan.instance.connection.usernameHistory
                 .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).setOrderBy("last_seen").setOrder(Sort.DESC).setLimit(1).build())
@@ -127,17 +173,24 @@ data class PlayerData(
                     }
                 }
             }
+            val exists = SpicyAzisaBan.instance.connection.players
+                .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).build())
+                .complete()
+                .let { it != null && it.getLong("first_login") > 0 }
             insertNoId {
-                SpicyAzisaBan.instance.connection.players.upsert(
-                    UpsertOptions.Builder()
-                        .addWhere("uuid", player.uniqueId.toString())
-                        .addValue("uuid", player.uniqueId.toString())
-                        .addValue("name", player.name)
-                        .addValue("ip", addr)
-                        .addValue("last_seen", time)
-                        .build()
-                ).catch { it.printStackTrace() }.complete()
-                context.resolve(PlayerData(player.uniqueId, player.name, addr, time))
+                val builder = UpsertOptions.Builder()
+                    .addWhere("uuid", player.uniqueId.toString())
+                    .addValue("uuid", player.uniqueId.toString())
+                    .addValue("name", player.name)
+                    .addValue("ip", addr)
+                    .addValue("last_seen", time)
+                if (!exists) builder.addValue("first_login", time)
+                if (login) builder.addValue("last_login", time)
+                SpicyAzisaBan.instance.connection.players
+                    .upsert(builder.build())
+                    .catch { it.printStackTrace() }
+                    .complete()
+                context.resolve(PlayerData(player.uniqueId, player.name, addr, time, -1, -1, -1, -1))
             }
         }
 

@@ -18,10 +18,11 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.config.ServerInfo
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import util.ArgumentParser
+import util.StringReader
 import util.UUIDUtil
-import util.kt.promise.rewrite.catch
+import util.concurrent.ref.DataCache
 import util.promise.rewrite.Promise
-import util.ref.DataCache
+import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import java.net.InetAddress
@@ -115,15 +116,15 @@ object Util {
         var time = 0L
         var rawNumber = ""
         val reader = StringReader(s)
-        while (!reader.isEOF()) {
-            val c = reader.readFirst()
+        while (!reader.isEOF) {
+            val c = reader.readFirst().first()
             if (c.isDigit() || c == '.') {
                 rawNumber += c
             } else {
                 if (rawNumber.isEmpty()) throw IllegalArgumentException("Unexpected non-digit character: '$c' at index ${reader.index}")
                 // mo
-                if (c == 'm' && !reader.isEOF() && reader.peek() == 'o') {
-                    reader.skip()
+                if (c == 'm' && !reader.isEOF && reader.peek() == 'o') {
+                    reader.skip(1)
                     time += month * rawNumber.toLong()
                     rawNumber = ""
                     continue
@@ -253,7 +254,15 @@ object Util {
     /**
      * Checks if sender has "notify" permission for a punishment type.
      */
-    fun CommandSender.hasNotifyPermissionOf(type: PunishmentType) = hasPermission("sab.notify.${type.id}")
+    fun CommandSender.hasNotifyPermissionOf(type: PunishmentType, server: String? = null): Boolean {
+        if (!hasPermission("sab.notify.${type.id}")) return false
+        if (server == "global") {
+            if (!hasPermission("sab.punish.global")) return false
+        } else {
+            if (!hasPermission("sab.punish.server.$server") && !hasPermission("sab.punish.group.$server")) return false
+        }
+        return true
+    }
 
     private val profileCache = mutableMapOf<UUID, DataCache<PlayerProfile>>()
 
@@ -400,8 +409,8 @@ object Util {
 
     fun String.getCurrentColor(char: Char = '§'): ChatColor {
         val reader = StringReader(this.reversed())
-        while (!reader.isEOF()) {
-            val first = reader.readFirst()
+        while (!reader.isEOF) {
+            val first = reader.readFirst().first()
             if (reader.peek() == char) {
                 ChatColor.getByChar(first)?.let { return it }
             }
@@ -471,7 +480,7 @@ object Util {
         toRemove.forEach { this.remove(it) }
     }
 
-    fun ArgumentParser.getStr(key: String): String? {
-        return this.parsedRawOptions[key]
+    fun ArgumentParser.getNonParamStringAt(index: Int): String? {
+        return this.arguments.filter { s: String -> !s.contains("=") && !s.contains("-") }.getOrNull(index)
     }
 }

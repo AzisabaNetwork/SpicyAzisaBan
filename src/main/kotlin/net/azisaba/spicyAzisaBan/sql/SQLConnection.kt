@@ -9,7 +9,7 @@ import net.md_5.bungee.api.config.ServerInfo
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import util.promise.rewrite.Promise
-import util.ref.DataCache
+import util.concurrent.ref.DataCache
 import xyz.acrylicstyle.sql.DataType
 import xyz.acrylicstyle.sql.Sequelize
 import xyz.acrylicstyle.sql.Table
@@ -23,7 +23,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 6
+        const val CURRENT_DATABASE_VERSION = 7
 
         fun logSql(s: String) {
             SpicyAzisaBan.debug("Executing SQL: $s", 3)
@@ -120,8 +120,12 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             arrayOf(
                 TableDefinition.Builder("uuid", DataType.STRING).setPrimaryKey(true).build(),
                 TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(),
-                TableDefinition.Builder("ip", DataType.STRING).setAllowNull(true).build(), // could be unix socket
+                TableDefinition.Builder("ip", DataType.STRING).setAllowNull(true).build(),
                 TableDefinition.Builder("last_seen", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
+                TableDefinition.Builder("first_login", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
+                TableDefinition.Builder("first_login_attempt", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
+                TableDefinition.Builder("last_login", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
+                TableDefinition.Builder("last_login_attempt", DataType.BIGINT).setAllowNull(false).setDefaultValue(0L).build(),
             ),
         ).setupEventListener()
         usernameHistory = this.define(

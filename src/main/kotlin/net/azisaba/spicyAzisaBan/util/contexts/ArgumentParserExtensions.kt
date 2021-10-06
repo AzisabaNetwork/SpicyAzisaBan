@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -33,7 +34,7 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender
 }
 
 private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerContext> = Promise.create { context ->
-    val rawName = parsedRawOptions["player"]
+    val rawName = parsedRawOptions["player"] ?: getNonParamStringAt(0)
     if (rawName == null) {
         sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
@@ -78,12 +79,12 @@ private fun ArgumentParser.getServer(sender: CommandSender, checkPermission: Boo
 }
 
 private fun ArgumentParser.getReason(): Promise<ReasonContext> = Promise.create { context ->
-    val reason = parsedRawOptions["reason"]
+    val reason = parsedRawOptions["reason"] ?: getNonParamStringAt(1)
     return@create context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
 }
 
 private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> = Promise.create { context ->
-    val time = parsedRawOptions["time"]
+    val time = parsedRawOptions["time"] ?: getNonParamStringAt(2)
     if (time.isNullOrBlank()) return@create context.resolve(TimeContext(true, -1L))
     try {
         return@create context.resolve(TimeContext(true, Util.processTime(time)))
@@ -94,7 +95,7 @@ private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> 
 }
 
 private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddressContext> = Promise.create { context ->
-    val target = parsedRawOptions["target"]
+    val target = parsedRawOptions["target"] ?: getNonParamStringAt(0)
     if (target == null) {
         sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
         return@create context.resolve(IPAddressContext(false, ""))

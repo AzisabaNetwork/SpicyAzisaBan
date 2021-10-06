@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.sql.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.sql.SQLConnection.Companion.executeAndLog
 
 /**
@@ -10,8 +11,8 @@ object V1: DatabaseMigration {
     override val targetDatabaseVersion = 1
     override val name = "Add NOT NULL to 'server' in punishments and punishmentHistory table"
 
-    override fun execute() {
-        val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
+    override fun execute(sql: SQLConnection) {
+        val statement = sql.connection.createStatement()
         listOf("punishments", "punishmentHistory").forEach { table ->
             statement.executeAndLog("UPDATE `$table` SET `server` = \"global\" WHERE `server` IS NULL")
             statement.executeAndLog("ALTER TABLE `$table` MODIFY `server` VARCHAR(255) NOT NULL")

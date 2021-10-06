@@ -10,6 +10,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
+import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.plus
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -40,7 +41,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
             return sender.send(SABMessages.Commands.Check.usage.replaceVariables().translate())
         }
         val arguments = ArgumentParser(args.joinToString(" "))
-        val target = arguments.parsedRawOptions["target"]
+        val target = arguments.parsedRawOptions["target"] ?: arguments.getNonParamStringAt(0)
         val pid = arguments.parsedRawOptions["id"]?.toLongOrNull()
         if (target.isNullOrBlank() && pid == null) {
             return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())

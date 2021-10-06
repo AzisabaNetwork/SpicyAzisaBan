@@ -1,7 +1,7 @@
 import java.io.ByteArrayOutputStream
 
 plugins {
-    kotlin("jvm") version "1.5.30"
+    kotlin("jvm") version "1.5.31"
     id("com.github.johnrengelman.shadow") version "6.0.0"
     `maven-publish`
 }
@@ -71,11 +71,15 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.30")
-    implementation("xyz.acrylicstyle:java-util-kotlin:0.15.4")
-    implementation("xyz.acrylicstyle:sequelize4j:0.5.3")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
+    implementation("xyz.acrylicstyle.util:all:0.16.2")
+    implementation("xyz.acrylicstyle.util:kotlin:0.16.2")
+    implementation("xyz.acrylicstyle.util:yaml:0.16.2")
+    implementation("xyz.acrylicstyle:sequelize4j:0.6.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
-    implementation("xyz.acrylicstyle:minecraft-util:0.5.3")
+    implementation("xyz.acrylicstyle:minecraft-util:0.5.4") {
+        exclude("xyz.acrylicstyle", "java-util-all")
+    }
     compileOnly("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
     testImplementation("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")

@@ -28,7 +28,7 @@ import net.md_5.bungee.api.chat.TextComponent
 import org.json.JSONObject
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
-import util.ref.DataCache
+import util.concurrent.ref.DataCache
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import xyz.acrylicstyle.sql.TableData
@@ -354,7 +354,7 @@ data class Punishment(
     fun notifyToAll() =
         getMessage().thenDo { message ->
             ProxyServer.getInstance().console.send(message)
-            ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
+            ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type, server) }.forEach { player ->
                 player.send(message)
             }
         }.then {}

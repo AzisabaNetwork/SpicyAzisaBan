@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.sql.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
+import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.sql.SQLConnection.Companion.executeAndLog
 
 /**
@@ -10,7 +11,7 @@ object V2: DatabaseMigration {
     override val targetDatabaseVersion = 2
     override val name = "Add `extra` column to punishments and punishmentHistory table"
 
-    override fun execute() {
+    override fun execute(sql: SQLConnection) {
         val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
         listOf("punishments", "punishmentHistory").forEach { table ->
             statement.executeAndLog("ALTER TABLE `$table` ADD `extra` VARCHAR(255) NOT NULL DEFAULT \"\"")

@@ -94,6 +94,10 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                             "ip_history" to pd.getIPAddressHistory().complete().distinct().joinToString(", "),
                             "same_ip_players" to iPlayers,
                             "same_ip_players_count" to ipd?.size.toString(),
+                            "first_login" to (pd.firstLogin?.let { SABMessages.formatDate(it) } ?: "null"),
+                            "first_login_attempt" to (pd.firstLoginAttempt?.let { SABMessages.formatDate(it) } ?: "null"),
+                            "last_login" to (pd.lastLogin?.let { SABMessages.formatDate(it) } ?: "null"),
+                            "last_login_attempt" to (pd.lastLoginAttempt?.let { SABMessages.formatDate(it) } ?: "null"),
                         )
                         .translate()
                 )

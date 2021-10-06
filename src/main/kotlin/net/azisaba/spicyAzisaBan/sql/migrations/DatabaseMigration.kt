@@ -7,7 +7,7 @@ import util.promise.rewrite.Promise
 interface DatabaseMigration {
     companion object {
         private val migrations = listOf(
-            V1, V2, V3, V4, V5,
+            V1, V2, V3, V4, V5, V6,
         )
 
         fun run(): Promise<Unit> = Promise.create { context ->
@@ -21,7 +21,7 @@ interface DatabaseMigration {
                     SpicyAzisaBan.instance.logger.info("Migrating '${migration.name}' (database version $version)")
                     val sectionStart = System.currentTimeMillis()
                     try {
-                        migration.execute()
+                        migration.execute(SpicyAzisaBan.instance.connection)
                     } catch (e: Throwable) {
                         SpicyAzisaBan.instance.logger.severe("Error migrating '${migration.name}' (database version $version)")
                         throw e
@@ -45,5 +45,5 @@ interface DatabaseMigration {
         get() = "Migration for database version $targetDatabaseVersion"
     val targetDatabaseVersion: Int
 
-    fun execute()
+    fun execute(sql: SQLConnection)
 }
