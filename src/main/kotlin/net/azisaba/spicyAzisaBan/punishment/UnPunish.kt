@@ -62,7 +62,7 @@ data class UnPunish(
     fun notifyToAll() =
         getMessage().thenDo { message ->
             ProxyServer.getInstance().console.send(message)
-            ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(punishment.type) }.forEach { player ->
+            ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(punishment.type, punishment.server) }.forEach { player ->
                 player.send(message)
             }
         }.then {}

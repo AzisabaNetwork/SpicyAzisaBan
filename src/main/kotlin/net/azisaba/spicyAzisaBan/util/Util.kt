@@ -256,7 +256,7 @@ object Util {
      */
     fun CommandSender.hasNotifyPermissionOf(type: PunishmentType, server: String? = null): Boolean {
         if (!hasPermission("sab.notify.${type.id}")) return false
-        if (server == "global") {
+        if (server == null || server == "global") {
             if (!hasPermission("sab.punish.global")) return false
         } else {
             if (!hasPermission("sab.punish.server.$server") && !hasPermission("sab.punish.group.$server")) return false

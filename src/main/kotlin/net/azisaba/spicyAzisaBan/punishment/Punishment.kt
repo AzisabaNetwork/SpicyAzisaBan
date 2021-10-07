@@ -509,7 +509,7 @@ data class Punishment(
             )
             .translate()
         ProxyServer.getInstance().console.send(message)
-        ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type) }.forEach { player ->
+        ProxyServer.getInstance().players.filter { it.hasNotifyPermissionOf(type, server) }.forEach { player ->
             player.send(message)
         }
     }
