@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
+import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
@@ -49,7 +50,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
             return sender.send(SABMessages.Commands.History.usage.replaceVariables().translate())
         }
         val arguments = ArgumentParser(args.joinToString(" "))
-        val target = arguments.parsedRawOptions["target"]
+        val target = arguments.parsedRawOptions["target"] ?: arguments.getNonParamStringAt(0)
         if (target.isNullOrBlank()) {
             return sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
