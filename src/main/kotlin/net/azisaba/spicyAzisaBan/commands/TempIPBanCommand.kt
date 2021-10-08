@@ -37,10 +37,10 @@ object TempIPBanCommand: Command("${SABConfig.prefix}tempipban", null, "${SABCon
         if (args.isEmpty()) return sender.send(SABMessages.Commands.TempIPBan.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         Promise.create<Unit> { context ->
-            if (!arguments.containsKey("server") && sender is ProxiedPlayer) {
+            if (!arguments.parsedRawOptions.containsKey("server") && sender is ProxiedPlayer) {
                 val serverName = sender.server.info.name
                 val group = SpicyAzisaBan.instance.connection.getGroupByServer(serverName).complete()
-                arguments.parsedOptions["server"] = group ?: serverName
+                arguments.parsedRawOptions["server"] = group ?: serverName
             }
             doTempIPBan(sender, arguments)
             context.resolve()

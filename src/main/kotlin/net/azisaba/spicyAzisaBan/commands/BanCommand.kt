@@ -38,10 +38,10 @@ object BanCommand: Command("${SABConfig.prefix}ban"), TabExecutor {
         if (args.isEmpty()) return sender.send(SABMessages.Commands.Ban.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
         Promise.create<Unit> { context ->
-            if (!arguments.containsKey("server")) {
+            if (!arguments.parsedRawOptions.containsKey("server")) {
                 val serverName = sender.server.info.name
                 val group = SpicyAzisaBan.instance.connection.getGroupByServer(serverName).complete()
-                arguments.parsedOptions["server"] = group ?: serverName
+                arguments.parsedRawOptions["server"] = group ?: serverName
             }
             doBan(sender, arguments)
             context.resolve()
