@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.azisaba"
-version = "0.0.37-${getBranch()}-${getGitHash()}"
+version = "0.0.37-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
 
 java {
     withJavadocJar()
@@ -72,10 +72,12 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation("xyz.acrylicstyle.util:all:0.16.2")
-    implementation("xyz.acrylicstyle.util:kotlin:0.16.2")
-    implementation("xyz.acrylicstyle.util:yaml:0.16.2")
-    implementation("xyz.acrylicstyle:sequelize4j:0.6.0")
+    implementation("xyz.acrylicstyle.util:all:0.16.3")
+    implementation("xyz.acrylicstyle.util:kotlin:0.16.3")
+    implementation("xyz.acrylicstyle.util:yaml:0.16.3")
+    implementation("xyz.acrylicstyle:sequelize4j:0.6.0") {
+        exclude("xyz.acrylicstyle", "java-util-all")
+    }
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
     implementation("xyz.acrylicstyle:minecraft-util:0.5.4") {
         exclude("xyz.acrylicstyle", "java-util-all")
