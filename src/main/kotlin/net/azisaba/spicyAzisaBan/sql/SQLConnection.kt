@@ -27,7 +27,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         const val CURRENT_DATABASE_VERSION = 7
 
         fun logSql(s: String, time: Long) {
-            SpicyAzisaBan.debug("Executing SQL: $s (took $time ms)", 3)
+            SpicyAzisaBan.debug("Executed SQL: $s (took $time ms)", 3)
         }
 
         fun logSql(s: String, params: Array<out Any>) {
