@@ -4,12 +4,13 @@ import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.config.ServerInfo
 import org.intellij.lang.annotations.Language
 import org.json.JSONObject
-import util.promise.rewrite.Promise
 import util.concurrent.ref.DataCache
+import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.DataType
 import xyz.acrylicstyle.sql.Sequelize
 import xyz.acrylicstyle.sql.Table
@@ -170,7 +171,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         return statement.executeQuery()
     }
 
-    fun sendEvent(eventType: EventType, data: JSONObject): Promise<Unit> = Promise.create {
+    fun sendEvent(eventType: EventType, data: JSONObject): Promise<Unit> = async {
         val id = try {
             Util.insert {
                 events.insert(
@@ -185,7 +186,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             SpicyAzisaBan.instance.logger.warning("Failed to send event with type $eventType and data $data")
             e.printStackTrace()
             it.resolve()
-            return@create
+            return@async
         }
         SpicyAzisaBan.instance.logger.info("Sending event with id $id")
         SpicyAzisaBan.debug("Event type: $eventType")
@@ -266,7 +267,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     fun getAllGroups(): Promise<List<String>> =
         groups.findAll(FindOptions.ALL).then { it.map { td -> td.getString("id") } }
 
-    fun isTableExists(table: String): Promise<Boolean> = Promise.create {
+    fun isTableExists(table: String): Promise<Boolean> = async {
         val rs = executeQuery("SHOW TABLES LIKE ?", table)
         val exists = rs.next()
         rs.statement.close()

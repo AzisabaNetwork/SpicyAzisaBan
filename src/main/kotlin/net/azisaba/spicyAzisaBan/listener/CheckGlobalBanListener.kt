@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -14,13 +15,12 @@ import net.md_5.bungee.api.event.LoginEvent
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.event.EventHandler
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import java.util.concurrent.TimeUnit
 
 object CheckGlobalBanListener: Listener {
     @EventHandler
     fun onLogin(e: LoginEvent) {
-        Promise.create<Boolean> { context ->
+        async<Boolean> { context ->
             Thread {
                 ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                     context.resolve(false)

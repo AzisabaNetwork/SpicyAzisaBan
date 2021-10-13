@@ -4,6 +4,7 @@ import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.punishment.Punishment
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -12,7 +13,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 
 object ProofsCommand: Command("${SABConfig.prefix}proofs"), TabExecutor {
     override fun execute(sender: CommandSender, args: Array<String>) {
@@ -27,11 +27,11 @@ object ProofsCommand: Command("${SABConfig.prefix}proofs"), TabExecutor {
             sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate())
             return
         }
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             val p = Punishment.fetchPunishmentById(id).complete()
             if (p == null) {
                 sender.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().format(id).translate())
-                return@create context.resolve()
+                return@async context.resolve()
             }
             val proofs = p.getProofs().complete()
             sender.send(

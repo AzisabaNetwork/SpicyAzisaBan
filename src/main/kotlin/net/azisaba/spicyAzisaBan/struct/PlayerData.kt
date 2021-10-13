@@ -2,6 +2,7 @@ package net.azisaba.spicyAzisaBan.struct
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.insertNoId
 import net.md_5.bungee.api.connection.PendingConnection
@@ -59,7 +60,7 @@ data class PlayerData(
             SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $uuid") }
 
-        fun getByName(name: String, ambiguousSearch: Boolean = false): Promise<PlayerData> = Promise.create { context ->
+        fun getByName(name: String, ambiguousSearch: Boolean = false): Promise<PlayerData> = async { context ->
             val sql = "SELECT * FROM `players` WHERE LOWER(`name`) LIKE LOWER(?) ORDER BY `last_seen` DESC LIMIT 1"
             SQLConnection.logSql(sql)
             val ps = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
@@ -82,8 +83,8 @@ data class PlayerData(
                     }
                     .catch { context.reject(IllegalArgumentException("no player data found for $name")) }
                     .complete()
-                    ?.let { return@create context.resolve(it) }
-                return@create
+                    ?.let { return@async context.resolve(it) }
+                return@async
             }
             val uuid = UUID.fromString(rs.getString("uuid"))
             val theName = rs.getString("name")
@@ -93,7 +94,7 @@ data class PlayerData(
             val firstLoginAttempt = rs.getLong("first_login_attempt")
             val lastLogin = rs.getLong("last_login")
             val lastLoginAttempt = rs.getLong("last_login_attempt")
-            return@create context.resolve(PlayerData(uuid, theName, ip, lastSeen, firstLogin, firstLoginAttempt, lastLogin, lastLoginAttempt))
+            return@async context.resolve(PlayerData(uuid, theName, ip, lastSeen, firstLogin, firstLoginAttempt, lastLogin, lastLoginAttempt))
         }
 
         /*
@@ -102,7 +103,7 @@ data class PlayerData(
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $name") }
         */
 
-        fun createOrUpdate(connection: PendingConnection): Promise<PlayerData> = Promise.create { context ->
+        fun createOrUpdate(connection: PendingConnection): Promise<PlayerData> = async { context ->
             val time = System.currentTimeMillis()
             val rs = SpicyAzisaBan.instance.connection.executeQuery(
                 "SELECT `uuid`, `first_login_attempt` FROM `players` WHERE `uuid` = ?",
@@ -135,7 +136,7 @@ data class PlayerData(
             context.resolve()
         }
 
-        fun createOrUpdate(player: ProxiedPlayer, login: Boolean): Promise<PlayerData> = Promise.create { context ->
+        fun createOrUpdate(player: ProxiedPlayer, login: Boolean): Promise<PlayerData> = async { context ->
             val time = System.currentTimeMillis()
             val name = SpicyAzisaBan.instance.connection.usernameHistory
                 .findOne(FindOptions.Builder().addWhere("uuid", player.uniqueId.toString()).setOrderBy("last_seen").setOrder(Sort.DESC).setLimit(1).build())

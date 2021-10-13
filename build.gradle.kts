@@ -72,9 +72,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation("xyz.acrylicstyle.util:all:0.16.3")
-    implementation("xyz.acrylicstyle.util:kotlin:0.16.3")
-    implementation("xyz.acrylicstyle.util:yaml:0.16.3")
+    implementation("xyz.acrylicstyle.util:all:0.16.4")
+    implementation("xyz.acrylicstyle.util:promise:0.16.4")
+    implementation("xyz.acrylicstyle.util:kotlin:0.16.4")
+    implementation("xyz.acrylicstyle.util:yaml:0.16.4")
     implementation("xyz.acrylicstyle:sequelize4j:0.6.0") {
         exclude("xyz.acrylicstyle", "java-util-all")
     }

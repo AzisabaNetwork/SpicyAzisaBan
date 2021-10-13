@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
 import net.azisaba.spicyAzisaBan.punishment.Punishment
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.filtrPermission
 import net.azisaba.spicyAzisaBan.util.Util.getUniqueId
@@ -22,7 +23,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
@@ -227,7 +227,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     }
             }
             "info" -> {
-                Promise.create<Unit> { context ->
+                async<Unit> { context ->
                     val dbVersion = SpicyAzisaBan.instance
                         .settings
                         .getDatabaseVersion()

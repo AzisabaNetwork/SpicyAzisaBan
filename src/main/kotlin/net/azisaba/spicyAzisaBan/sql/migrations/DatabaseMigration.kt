@@ -2,6 +2,7 @@ package net.azisaba.spicyAzisaBan.sql.migrations
 
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
+import net.azisaba.spicyAzisaBan.util.Util.async
 import util.promise.rewrite.Promise
 
 interface DatabaseMigration {
@@ -10,7 +11,7 @@ interface DatabaseMigration {
             V1, V2, V3, V4, V5, V6,
         )
 
-        fun run(): Promise<Unit> = Promise.create { context ->
+        fun run(): Promise<Unit> = async { context ->
             val start = System.currentTimeMillis()
             val initialVersion = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
             SpicyAzisaBan.instance.logger.info("Running database migrations (current database version: $initialVersion)")

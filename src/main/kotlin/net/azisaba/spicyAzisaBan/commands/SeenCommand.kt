@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.concat
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
@@ -20,7 +21,6 @@ import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import java.net.InetAddress
 
 object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
@@ -36,13 +36,13 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
         val list = args.toMutableList()
         val ambiguous = list.remove("--ambiguous")
         val target = list[0]
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             sender.send(SABMessages.Commands.Seen.searching.replaceVariables().translate())
             if (target.isValidIPAddress()) {
                 val pd = PlayerData.getAllByIP(target).catch { sender.sendErrorMessage(it) }.complete()
                 if (pd == null || pd.isEmpty()) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 val hostname = InetAddress.getByName(target).hostName
                 // * = the player has different ip currently
@@ -64,7 +64,7 @@ object SeenCommand: Command("${SABConfig.prefix}seen"), TabExecutor {
                 }
                 if (pd == null) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 val since = Util.unProcessTime(System.currentTimeMillis() - pd.lastSeen)
                 val status = if (ProxyServer.getInstance().getPlayer(pd.uniqueId) == null) {

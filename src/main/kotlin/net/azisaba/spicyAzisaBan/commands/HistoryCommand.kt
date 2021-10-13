@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
@@ -26,7 +27,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -63,7 +63,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
         val tableName = if (active) "punishments" else "punishmentHistory"
         val left = if (!all) "LEFT OUTER JOIN unpunish ON ($tableName.id = unpunish.punish_id)" else ""
         val extraWhere = if (!all) "AND unpunish.punish_id IS NULL" else ""
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             val punishments = if (ipOpt || target.isValidIPAddress()) {
                 val ip = if (target.isValidIPAddress()) {
                     target
@@ -76,12 +76,12 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
                 }
                 if (ip == null) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 val pd = PlayerData.getByIP(ip).catch { sender.sendErrorMessage(it) }.complete()
                 if (pd == null || pd.isEmpty()) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 if (only) {
                     var sql = "SELECT $tableName.* FROM `$tableName` $left WHERE `target` = ? $extraWhere ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"
@@ -123,7 +123,7 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
                 }
                 if (pd == null) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 if (only) {
                     var sql = "SELECT $tableName.* FROM `$tableName` $left WHERE `target` = ? $extraWhere ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"

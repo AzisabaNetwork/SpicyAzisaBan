@@ -4,6 +4,7 @@ import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -17,7 +18,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 
 object GlobalKickCommand: Command("${SABConfig.prefix}gkick"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
@@ -28,7 +28,7 @@ object GlobalKickCommand: Command("${SABConfig.prefix}gkick"), TabExecutor {
         }
         if (args.isEmpty()) return sender.send(SABMessages.Commands.Kick.globalUsage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             KickCommand.doKick(sender, arguments)
             context.resolve()
         }.catch {

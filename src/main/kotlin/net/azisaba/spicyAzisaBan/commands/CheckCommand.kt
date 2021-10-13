@@ -8,6 +8,7 @@ import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
@@ -26,7 +27,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import java.net.InetAddress
 
@@ -64,11 +64,11 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
         val only = arguments.contains("only") || arguments.contains("-o")
         val specifiedServer = arguments.containsKey("server")
         val whereServer = if (specifiedServer) " AND `server` = ?" else ""
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             sender.send(SABMessages.Commands.Check.searching.replaceVariables().translate())
             val server = arguments.get(Contexts.SERVER_NO_PERM_CHECK, sender)
                 .complete()
-                .apply { if (!isSuccess) return@create }
+                .apply { if (!isSuccess) return@async }
                 .name
             if (arguments.contains("ip") || arguments.contains("-i") || target.isValidIPAddress()) {
                 val ip = if (target.isValidIPAddress()) {
@@ -82,12 +82,12 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                 }
                 if (ip == null) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 val pd = PlayerData.getByIP(ip).catch { sender.sendErrorMessage(it) }.complete()
                 if (pd == null || pd.isEmpty()) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 val punishments = if (only) {
                     SpicyAzisaBan.instance.connection.punishmentHistory
@@ -158,7 +158,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                 }
                 if (pd == null) {
                     sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-                    return@create context.resolve()
+                    return@async context.resolve()
                 }
                 val punishments = if (arguments.contains("only") || arguments.contains("-o")) {
                     SpicyAzisaBan.instance.connection.punishmentHistory

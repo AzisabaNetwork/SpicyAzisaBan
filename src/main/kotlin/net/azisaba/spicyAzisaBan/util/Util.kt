@@ -21,8 +21,10 @@ import util.ArgumentParser
 import util.StringReader
 import util.UUIDUtil
 import util.concurrent.ref.DataCache
-import util.promise.rewrite.Promise
+import util.function.ThrowableConsumer
 import util.kt.promise.rewrite.catch
+import util.promise.rewrite.Promise
+import util.promise.rewrite.PromiseContext
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import java.net.InetAddress
@@ -270,8 +272,8 @@ object Util {
      * Fetches the PlayerProfile of player's uuid.
      * The result may be cached. and always returns `CONSOLE` for NIL uuid.
      */
-    fun UUID.getProfile(): Promise<PlayerProfile> = Promise.create { context ->
-        if (this == UUIDUtil.NIL) return@create context.resolve(SimplePlayerProfile("CONSOLE", this))
+    fun UUID.getProfile(): Promise<PlayerProfile> = async { context ->
+        if (this == UUIDUtil.NIL) return@async context.resolve(SimplePlayerProfile("CONSOLE", this))
         val cache = profileCache[this]
         val profile = cache?.get()
         if (cache == null || profile == null || cache.ttl - System.currentTimeMillis() <= 10000) {
@@ -483,4 +485,7 @@ object Util {
     fun ArgumentParser.getNonParamStringAt(index: Int): String? {
         return this.arguments.filter { s: String -> !s.contains("=") && !s.contains("-") }.getOrNull(index)
     }
+
+    fun <T> async(throwableConsumer: ThrowableConsumer<PromiseContext<T>>) =
+        Promise.create("SpicyAzisaBan Worker #%d", throwableConsumer)
 }

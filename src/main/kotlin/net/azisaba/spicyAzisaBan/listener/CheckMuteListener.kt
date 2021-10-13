@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
@@ -17,7 +18,6 @@ import net.md_5.bungee.api.event.ChatEvent
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.event.EventHandler
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import java.util.concurrent.TimeUnit
 
 object CheckMuteListener: Listener {
@@ -28,7 +28,7 @@ object CheckMuteListener: Listener {
         if (e.message.startsWith("/") && !ReloadableSABConfig.getBlockedCommandsWhenMuted(player.getServerName()).any { s ->
                 e.message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex())
         }) return
-        val res = Promise.create<Boolean> { context ->
+        val res = async<Boolean> { context ->
             ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                 context.resolve(false)
             }, 3, TimeUnit.SECONDS)

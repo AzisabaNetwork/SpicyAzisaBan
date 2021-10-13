@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -16,13 +17,12 @@ import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 
 object WarnsCommand: Command("${SABConfig.prefix}warns"), TabExecutor {
     override fun execute(sender: CommandSender, args: Array<String>) {
         if (sender !is ProxiedPlayer) return sender.send("e^1")
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             val ps = SpicyAzisaBan.instance.connection.punishments
                 .findAll(FindOptions.Builder().addWhere("target", sender.uniqueId.toString()).build())
                 .then { list -> list.map { td -> Punishment.fromTableData(td) } }
@@ -31,7 +31,7 @@ object WarnsCommand: Command("${SABConfig.prefix}warns"), TabExecutor {
                 .filter { it.type == PunishmentType.WARNING || it.type == PunishmentType.CAUTION }
             if (ps.isEmpty()) {
                 sender.send(SABMessages.Commands.Warns.notWarnedYet.replaceVariables().translate())
-                return@create context.resolve()
+                return@async context.resolve()
             }
             ps.forEach { p ->
                 if (!p.flags.contains(Punishment.Flags.SEEN)) {

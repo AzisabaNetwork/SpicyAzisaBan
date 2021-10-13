@@ -5,6 +5,7 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -25,7 +26,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -59,9 +59,9 @@ object BanListCommand: Command("${SABConfig.prefix}banlist"), TabExecutor {
         val whereList = mutableListOf<Pair<String, List<Any>>>()
         if (punishmentType != null) whereList.add("`type` = ?" to listOf(punishmentType.name))
         if (!all) whereList.add("unpunish.punish_id IS NULL" to emptyList())
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             val server = if (arguments.containsKey("server")) {
-                arguments.get(Contexts.SERVER_NO_PERM_CHECK, sender).complete().apply { if (!isSuccess) return@create context.resolve() }.name
+                arguments.get(Contexts.SERVER_NO_PERM_CHECK, sender).complete().apply { if (!isSuccess) return@async context.resolve() }.name
             } else {
                 null
             }

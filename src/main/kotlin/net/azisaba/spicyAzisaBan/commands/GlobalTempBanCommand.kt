@@ -4,6 +4,7 @@ import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -18,7 +19,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 
 object GlobalTempBanCommand: Command("${SABConfig.prefix}gtempban"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=", "--all")
@@ -29,7 +29,7 @@ object GlobalTempBanCommand: Command("${SABConfig.prefix}gtempban"), TabExecutor
         }
         if (args.isEmpty()) return sender.send(SABMessages.Commands.TempBan.globalUsage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             TempBanCommand.doTempBan(sender, arguments)
             context.resolve()
         }.catch {

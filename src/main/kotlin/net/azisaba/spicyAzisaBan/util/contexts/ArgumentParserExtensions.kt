@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
@@ -33,11 +34,11 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, sender: CommandSender
     return Promise.reject(IllegalArgumentException("Unknown context: " + context.key))
 }
 
-private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerContext> = Promise.create { context ->
+private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerContext> = async { context ->
     val rawName = parsedRawOptions["player"] ?: getNonParamStringAt(0)
     if (rawName == null) {
         sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
-        return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
+        return@async context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
     }
     val profile = PlayerData.getByName(rawName)
         .catch {
@@ -45,63 +46,63 @@ private fun ArgumentParser.getPlayer(sender: CommandSender): Promise<PlayerConte
             sender.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
         .complete()
-        ?: return@create context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
+        ?: return@async context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
     context.resolve(PlayerContext(true, profile))
 }
 
-private fun ArgumentParser.getServer(sender: CommandSender, checkPermission: Boolean): Promise<ServerContext> = Promise.create { context ->
+private fun ArgumentParser.getServer(sender: CommandSender, checkPermission: Boolean): Promise<ServerContext> = async { context ->
     var isGroup = false
     val server = parsedRawOptions["server"] ?: "global"
     if (server == "global") {
         if (checkPermission && !sender.hasPermission("sab.punish.global")) {
             sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
-            return@create context.resolve(ServerContext(false, server, false))
+            return@async context.resolve(ServerContext(false, server, false))
         }
     } else {
         if (SpicyAzisaBan.instance.connection.getAllGroups().complete().contains(server)) {
             if (checkPermission && !sender.hasPermission("sab.punish.group.$server")) {
                 sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
-                return@create context.resolve(ServerContext(false, server, false))
+                return@async context.resolve(ServerContext(false, server, false))
             }
             isGroup = true
         } else {
             if (!ProxyServer.getInstance().servers.containsKey(server)) {
                 sender.send(SABMessages.Commands.General.invalidServer.replaceVariables().translate())
-                return@create context.resolve(ServerContext(false, server, false))
+                return@async context.resolve(ServerContext(false, server, false))
             }
             if (checkPermission && !sender.hasPermission("sab.punish.server.$server")) {
                 sender.send(SABMessages.General.missingPermissions.replaceVariables().translate())
-                return@create context.resolve(ServerContext(false, server, false))
+                return@async context.resolve(ServerContext(false, server, false))
             }
         }
     }
-    return@create context.resolve(ServerContext(true, server, isGroup))
+    return@async context.resolve(ServerContext(true, server, isGroup))
 }
 
-private fun ArgumentParser.getReason(): Promise<ReasonContext> = Promise.create { context ->
+private fun ArgumentParser.getReason(): Promise<ReasonContext> = async { context ->
     val reason = parsedRawOptions["reason"] ?: getNonParamStringAt(1)
-    return@create context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
+    return@async context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
 }
 
-private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> = Promise.create { context ->
+private fun ArgumentParser.getTime(sender: CommandSender): Promise<TimeContext> = async { context ->
     val time = parsedRawOptions["time"] ?: getNonParamStringAt(2)
-    if (time.isNullOrBlank()) return@create context.resolve(TimeContext(true, -1L))
+    if (time.isNullOrBlank()) return@async context.resolve(TimeContext(true, -1L))
     try {
-        return@create context.resolve(TimeContext(true, Util.processTime(time)))
+        return@async context.resolve(TimeContext(true, Util.processTime(time)))
     } catch (e: IllegalArgumentException) {
         sender.send(SABMessages.Commands.General.invalidTime.replaceVariables().translate())
-        return@create context.resolve(TimeContext(false, -1L))
+        return@async context.resolve(TimeContext(false, -1L))
     }
 }
 
-private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddressContext> = Promise.create { context ->
+private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddressContext> = async { context ->
     val target = parsedRawOptions["target"] ?: getNonParamStringAt(0)
     if (target == null) {
         sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
-        return@create context.resolve(IPAddressContext(false, ""))
+        return@async context.resolve(IPAddressContext(false, ""))
     }
     try {
-        if (target.isPunishableIP()) return@create context.resolve(
+        if (target.isPunishableIP()) return@async context.resolve(
             IPAddressContext(
                 true,
                 target.reconstructIPAddress()
@@ -112,7 +113,7 @@ private fun ArgumentParser.getIPAddress(sender: CommandSender): Promise<IPAddres
         .catch { sender.sendErrorMessage(it) }
         .complete()
     if (data?.ip != null) {
-        return@create context.resolve(IPAddressContext(true, data.ip))
+        return@async context.resolve(IPAddressContext(true, data.ip))
     }
     sender.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
     context.resolve(IPAddressContext(false, ""))

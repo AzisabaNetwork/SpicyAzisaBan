@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.punishment
 
+import net.azisaba.spicyAzisaBan.util.Util.async
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.TableData
 
@@ -9,12 +10,12 @@ data class Proof(
     val text: String,
 ) {
     companion object {
-        fun fromTableData(td: TableData): Promise<Proof> = Promise.create { context ->
+        fun fromTableData(td: TableData): Promise<Proof> = async { context ->
             val id = td.getLong("id")!!
             val punishId = td.getLong("punish_id")!!
             val text = td.getString("text")!!
             val p = Punishment.fetchPunishmentById(punishId).complete()
-                ?: return@create context.reject(IllegalArgumentException("Missing punishment $punishId"))
+                ?: return@async context.reject(IllegalArgumentException("Missing punishment $punishId"))
             context.resolve(Proof(id, p, text))
         }
 

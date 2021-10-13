@@ -10,6 +10,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.broadcastMessageAfterRandomTime
 import net.azisaba.spicyAzisaBan.util.Util.connectToLobbyOrKick
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
@@ -26,9 +27,9 @@ import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import org.json.JSONObject
+import util.concurrent.ref.DataCache
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
-import util.concurrent.ref.DataCache
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import xyz.acrylicstyle.sql.TableData
@@ -137,11 +138,11 @@ data class Punishment(
             return list
         }
 
-        fun canJoinServer(uuid: UUID?, address: String?, server: String, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
-            if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
+        fun canJoinServer(uuid: UUID?, address: String?, server: String, noLookupGroup: Boolean = false): Promise<Punishment?> = async { context ->
+            if (uuid == null && address == null) return@async context.reject(IllegalArgumentException("Either uuid or address must not be null"))
             val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
             val ps = fetchActivePunishmentsBy(uuid, address, server, group)
-            if (ps.isEmpty()) return@create context.resolve(null)
+            if (ps.isEmpty()) return@async context.resolve(null)
             var punishment: Punishment? = null
             ps.filter { p -> p.type.isBan() }.forEach { p ->
                 if (p.isExpired()) {
@@ -160,8 +161,8 @@ data class Punishment(
 
         internal val muteCache = mutableMapOf<String, DataCache<Punishment>>()
 
-        fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = Promise.create { context ->
-            if (uuid == null && address == null) return@create context.reject(IllegalArgumentException("Either uuid or address must not be null"))
+        fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = async { context ->
+            if (uuid == null && address == null) return@async context.reject(IllegalArgumentException("Either uuid or address must not be null"))
             val punish = muteCache["$uuid,$address,$server"]
             val punishValue = punish?.get()
             if (noCache || punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
@@ -169,7 +170,7 @@ data class Punishment(
                 muteCache["$uuid,$address,$server"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
                 val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
                 val ps = fetchActivePunishmentsBy(uuid, address, server, group)
-                if (ps.isEmpty()) return@create context.resolve(null)
+                if (ps.isEmpty()) return@async context.resolve(null)
                 var punishment: Punishment? = null
                 ps.filter { p -> p.type.isMute() }.forEach { p ->
                     if (p.isExpired()) {
@@ -179,11 +180,11 @@ data class Punishment(
                     }
                 }
                 muteCache["$uuid,$address,$server"] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 30L)
-                return@create context.resolve(punishment)
+                return@async context.resolve(punishment)
             }
             if (punishValue?.isExpired() == true) {
                 punishValue.removeIfExpired()
-                return@create context.resolve(null)
+                return@async context.resolve(null)
             }
             context.resolve(punishValue)
         }
@@ -246,7 +247,7 @@ data class Punishment(
         player.sendTitle(title)
     }
 
-    fun removeIfExpired(): Promise<Unit> = Promise.create { context ->
+    fun removeIfExpired(): Promise<Unit> = async { context ->
         if (isExpired() && !pendingRemoval.contains(id)) {
             pendingRemoval.add(id)
             SpicyAzisaBan.debug("Removing punishment #${id} (reason: expired)")
@@ -359,11 +360,11 @@ data class Punishment(
             }
         }.then {}
 
-    fun doSomethingIfOnline() = Promise.create<Unit> {
+    fun doSomethingIfOnline() = async<Unit> {
         // notes are ignored entirely
-        if (type == PunishmentType.NOTE) return@create it.resolve()
+        if (type == PunishmentType.NOTE) return@async it.resolve()
         if (!type.isIPBased()) {
-            val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return@create it.resolve()
+            val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return@async it.resolve()
             if (type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN) {
                 player.connectToLobbyOrKick(server, TextComponent.fromLegacyText(getBannedMessage().complete())).complete()
                 ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
@@ -379,9 +380,9 @@ data class Punishment(
                 } else {
                     val list = SpicyAzisaBan.instance.connection.getServersByGroup(server).complete()
                     if (list.isEmpty()) {
-                        if (player.getServerName() != server) return@create it.resolve()
+                        if (player.getServerName() != server) return@async it.resolve()
                     } else {
-                        if (!list.map { s -> s.name.lowercase() }.contains(player.getServerName().lowercase())) return@create it.resolve()
+                        if (!list.map { s -> s.name.lowercase() }.contains(player.getServerName().lowercase())) return@async it.resolve()
                     }
                     val lobby = ProxyServer.getInstance()
                         .servers
@@ -390,7 +391,7 @@ data class Punishment(
                         .randomOrNull()
                     if (lobby == null) {
                         player.kick(getBannedMessage().complete())
-                        return@create it.resolve()
+                        return@async it.resolve()
                     }
                     player.connect(lobby)
                     ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
@@ -435,7 +436,7 @@ data class Punishment(
      * Inserts a new punishment into database.
      * @return new punishment with ID
      */
-    fun insert(): Promise<Punishment> = Promise.create { context ->
+    fun insert(): Promise<Punishment> = async { context ->
         if (id != -1L) throw IllegalArgumentException("cannot insert existing punishment")
         val insertOptions = InsertOptions.Builder()
             .addValue("name", name)
@@ -453,17 +454,17 @@ data class Punishment(
                 .catch { it.printStackTrace();context.reject(it) }
                 .complete() == null
         }
-        if (cancel) return@create
+        if (cancel) return@async
         Util.insert {
             cancel = SpicyAzisaBan.instance.connection.punishments.insert(insertOptions.addValue("id", id).build())
                 .catch { it.printStackTrace();context.reject(it) }
                 .complete() == null
         }
-        if (cancel) return@create
+        if (cancel) return@async
         SpicyAzisaBan.instance.connection.sendEvent(EventType.ADD_PUNISHMENT, JSONObject().put("id", id)).complete()
         clearCache(id)
         doSomethingIfOnline().complete()
-        return@create context.resolve(
+        return@async context.resolve(
             Punishment(
                 id,
                 name,
@@ -482,16 +483,17 @@ data class Punishment(
     private fun alsoApplyToPlayer(profile: PlayerProfile): Promise<Punishment> =
         createByPlayer(profile, reason, operator, type, end, server).insert()
 
-    fun applyToSameIPs(uuid: UUID): Promise<List<Punishment>> = Promise.create<List<Punishment>?> { context ->
-        val data = PlayerData.getByUUID(uuid).catch { context.reject(it) }.complete() ?: return@create
-        if (data.ip == null) return@create context.resolve(emptyList())
+    fun applyToSameIPs(uuid: UUID): Promise<List<Punishment>> = async<List<Punishment>> { context ->
+        val data = PlayerData.getByUUID(uuid).catch { context.reject(it) }.complete()
+            ?: return@async context.resolve(emptyList())
+        if (data.ip == null) return@async context.resolve(emptyList())
         val punishments = mutableListOf<Punishment>()
         PlayerData.getByIP(data.ip)
             .catch { context.reject(it) }
             .complete()
             ?.forEach { pd ->
                 if (pd.uuid == uuid) return@forEach
-                val p = alsoApplyToPlayer(pd).catch { context.reject(it) }.complete() ?: return@create
+                val p = alsoApplyToPlayer(pd).catch { context.reject(it) }.complete() ?: return@async context.resolve(emptyList())
                 punishments.add(p)
                 if (p.type.isBan()) {
                     p.getBannedMessage().thenDo { ProxyServer.getInstance().getPlayer(pd.uuid)?.kick(it) }
@@ -499,7 +501,7 @@ data class Punishment(
                     p.getBannedMessage().thenDo { ProxyServer.getInstance().getPlayer(pd.uuid)?.send(it) }
                 }
             }
-            ?: return@create
+            ?: return@async context.resolve(emptyList())
         context.resolve(punishments)
     }.thenDo { list ->
         val message = SABMessages.Commands.General.samePunishmentAppliedToSameIPAddress
@@ -514,7 +516,7 @@ data class Punishment(
         }
     }
 
-    fun getHistoryMessage(): Promise<String> = Promise.create { context ->
+    fun getHistoryMessage(): Promise<String> = async { context ->
         val unpunish: UnPunish? = SpicyAzisaBan.instance.connection.unpunish
             .findOne(FindOptions.Builder().addWhere("punish_id", this.id).setLimit(1).build())
             .then { it?.let { UnPunish.fromTableData(this, it) } }

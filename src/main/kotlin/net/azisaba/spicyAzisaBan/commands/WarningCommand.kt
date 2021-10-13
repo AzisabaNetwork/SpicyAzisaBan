@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
+import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
@@ -26,7 +27,6 @@ import net.md_5.bungee.api.plugin.Command
 import net.md_5.bungee.api.plugin.TabExecutor
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
-import util.promise.rewrite.Promise
 
 object WarningCommand: Command("${SABConfig.prefix}warning", null, "${SABConfig.prefix}warn"), TabExecutor {
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
@@ -37,7 +37,7 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "${SABConfig.
         }
         if (args.isEmpty()) return sender.send(SABMessages.Commands.Warning.usage.replaceVariables().translate())
         val arguments = ArgumentParser(args.joinToString(" "))
-        Promise.create<Unit> { context ->
+        async<Unit> { context ->
             if (!arguments.parsedRawOptions.containsKey("server") && sender is ProxiedPlayer) {
                 val serverName = sender.server.info.name
                 val group = SpicyAzisaBan.instance.connection.getGroupByServer(serverName).complete()
