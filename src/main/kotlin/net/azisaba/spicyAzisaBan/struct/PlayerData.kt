@@ -62,10 +62,11 @@ data class PlayerData(
 
         fun getByName(name: String, ambiguousSearch: Boolean = false): Promise<PlayerData> = async { context ->
             val sql = "SELECT * FROM `players` WHERE LOWER(`name`) LIKE LOWER(?) ORDER BY `last_seen` DESC LIMIT 1"
-            SQLConnection.logSql(sql)
+            val start = System.currentTimeMillis()
             val ps = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
             ps.setString(1, if (ambiguousSearch) "%$name%" else name)
             val rs = ps.executeQuery()
+            SQLConnection.logSql(sql, System.currentTimeMillis() - start)
             if (!rs.next()) {
                 MojangAPI.getUniqueId(name)
                     .then { uuid ->

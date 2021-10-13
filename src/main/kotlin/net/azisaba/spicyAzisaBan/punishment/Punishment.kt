@@ -192,7 +192,7 @@ data class Punishment(
         private fun fetchActivePunishmentsBy(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
             if (uuid == null && ip == null) throw IllegalArgumentException("Either uuid or ip must not be null")
             val sql = "SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)"
-            SQLConnection.logSql(sql)
+            val start = System.currentTimeMillis()
             val s = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
             s.setString(1, uuid?.toString() ?: ip)
             s.setString(2, ip ?: uuid.toString())
@@ -200,6 +200,7 @@ data class Punishment(
             s.setString(4, group ?: server)
             val ps = mutableListOf<Punishment>()
             val rs = s.executeQuery()
+            SQLConnection.logSql(sql, System.currentTimeMillis() - start)
             while (rs.next()) ps.add(fromResultSet(rs))
             s.close()
             return ps

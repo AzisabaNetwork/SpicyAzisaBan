@@ -226,8 +226,9 @@ object Util {
             fn()
             val statement = SpicyAzisaBan.instance.connection.connection.createStatement()
             val sql = "SELECT LAST_INSERT_ID()"
-            SQLConnection.logSql(sql)
+            val start = System.currentTimeMillis()
             val result = statement.executeQuery(sql)
+            SQLConnection.logSql(sql, System.currentTimeMillis() - start)
             if (!result.next()) return -1L
             val r = result.getObject(1) as Number
             statement.close()

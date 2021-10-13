@@ -26,8 +26,8 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     companion object {
         const val CURRENT_DATABASE_VERSION = 7
 
-        fun logSql(s: String) {
-            SpicyAzisaBan.debug("Executing SQL: $s", 3)
+        fun logSql(s: String, time: Long) {
+            SpicyAzisaBan.debug("Executing SQL: $s (took $time ms)", 3)
         }
 
         fun logSql(s: String, params: Array<out Any>) {
@@ -35,8 +35,10 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         }
 
         fun Statement.executeAndLog(@Language("SQL") sql: String): Boolean {
-            logSql(sql)
-            return this.execute(sql)
+            val start = System.currentTimeMillis()
+            val result = this.execute(sql)
+            logSql(sql, System.currentTimeMillis() - start)
+            return result
         }
     }
 
@@ -195,9 +197,9 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     }
 
     private fun Table.setupEventListener(): Table {
-        eventEmitter.on(Table.Events.EXECUTE) {
+        eventEmitter.on(Table.Events.EXECUTED) {
             val sql = it[0] as String
-            logSql(sql)
+            logSql(sql, it[1] as Long)
         }
         return this
     }

@@ -85,15 +85,17 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
                 }
                 if (only) {
                     var sql = "SELECT $tableName.* FROM `$tableName` $left WHERE `target` = ? $extraWhere ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"
-                    SQLConnection.logSql(sql)
+                    val start = System.currentTimeMillis()
                     var st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, ip)
                     val ps = Punishment.readAllFromResultSet(st.executeQuery()).also { st.close() }
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     sql = "SELECT COUNT(*) FROM `$tableName` $left WHERE `target` = ? $extraWhere"
-                    SQLConnection.logSql(sql)
+                    val start2 = System.currentTimeMillis()
                     st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, ip)
                     val rs = st.executeQuery()
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start2)
                     rs.next()
                     val count = rs.getInt(1)
                     Pair(ps, count)
@@ -101,17 +103,19 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
                     var where = pd.joinToString(" OR ") { "`target` = ?" }
                     if (where.isNotBlank()) where = " OR $where"
                     var sql = "SELECT $tableName.* FROM `$tableName` $left WHERE (`target` = ?$where) $extraWhere ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"
-                    SQLConnection.logSql(sql)
+                    val start = System.currentTimeMillis()
                     var st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, ip)
                     pd.forEachIndexed { i, p -> st.setObject(i + 2, p.uniqueId.toString()) }
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     val ps = Punishment.readAllFromResultSet(st.executeQuery()).also { st.close() }
                     sql = "SELECT COUNT(*) FROM `$tableName` $left WHERE (`target` = ?$where) $extraWhere"
-                    SQLConnection.logSql(sql)
+                    val start2 = System.currentTimeMillis()
                     st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, ip)
                     pd.forEachIndexed { i, p -> st.setObject(i + 2, p.uniqueId.toString()) }
                     val rs = st.executeQuery()
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start2)
                     rs.next()
                     val count = rs.getInt(1)
                     Pair(ps, count)
@@ -127,31 +131,35 @@ object HistoryCommand: Command("${SABConfig.prefix}history"), TabExecutor {
                 }
                 if (only) {
                     var sql = "SELECT $tableName.* FROM `$tableName` $left WHERE `target` = ? $extraWhere ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"
-                    SQLConnection.logSql(sql)
+                    val start = System.currentTimeMillis()
                     var st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, pd.uniqueId.toString())
                     val ps = Punishment.readAllFromResultSet(st.executeQuery()).also { st.close() }
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     sql = "SELECT COUNT(*) FROM `$tableName` $left WHERE `target` = ? $extraWhere"
-                    SQLConnection.logSql(sql)
+                    val start2 = System.currentTimeMillis()
                     st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, pd.uniqueId.toString())
                     val rs = st.executeQuery()
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start2)
                     rs.next()
                     val count = rs.getInt(1)
                     Pair(ps, count)
                 } else {
                     var sql = "SELECT $tableName.* FROM `$tableName` $left WHERE (`target` = ? OR `target` = ?) $extraWhere ORDER BY `start` DESC LIMIT ${(page - 1) * 2}, 2"
-                    SQLConnection.logSql(sql)
+                    val start = System.currentTimeMillis()
                     var st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, pd.uniqueId.toString())
                     st.setObject(2, pd.ip ?: pd.uniqueId.toString())
                     val ps = Punishment.readAllFromResultSet(st.executeQuery()).also { st.close() }
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     sql = "SELECT COUNT(*) FROM `$tableName` $left WHERE (`target` = ? OR `target` = ?) $extraWhere"
-                    SQLConnection.logSql(sql)
+                    val start2 = System.currentTimeMillis()
                     st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setObject(1, pd.uniqueId.toString())
                     st.setObject(2, pd.ip ?: pd.uniqueId.toString())
                     val rs = st.executeQuery()
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start2)
                     rs.next()
                     val count = rs.getInt(1)
                     Pair(ps, count)

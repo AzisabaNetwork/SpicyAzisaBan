@@ -98,7 +98,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                     var where = pd.joinToString(" OR ") { "`target` = ?" }
                     if (where.isNotBlank()) where = " OR $where"
                     val sql = "SELECT * FROM `punishments` WHERE `target` = ?$where$whereServer"
-                    SQLConnection.logSql(sql)
+                    val start = System.currentTimeMillis()
                     val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setString(1, ip)
                     pd.forEachIndexed { index, playerData ->
@@ -109,6 +109,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                     val rs = st.executeQuery()
                     while (rs.next()) ps.add(Punishment.fromResultSet(rs))
                     st.close()
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     ps
                 }
                 val banInfo = Punishment.canJoinServer(null, ip, server, true)
@@ -167,7 +168,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                         .complete()
                 } else {
                     val sql = "SELECT * FROM `punishmentHistory` WHERE `target` = ? OR `target` = ?$whereServer"
-                    SQLConnection.logSql(sql)
+                    val start = System.currentTimeMillis()
                     val st = SpicyAzisaBan.instance.connection.connection.prepareStatement(sql)
                     st.setString(1, pd.uniqueId.toString())
                     st.setString(2, pd.ip ?: pd.uniqueId.toString())
@@ -176,6 +177,7 @@ object CheckCommand: Command("${SABConfig.prefix}check"), TabExecutor {
                     val rs = st.executeQuery()
                     while (rs.next()) ps.add(Punishment.fromResultSet(rs))
                     st.close()
+                    SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     ps
                 }
                 val banInfo = Punishment.canJoinServer(pd.uniqueId, if (only) null else pd.ip, server, true)
