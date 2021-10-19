@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
+import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendDelayed
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ProxyServer
@@ -21,9 +22,21 @@ import util.kt.promise.rewrite.catch
 import java.util.concurrent.TimeUnit
 
 object CheckBanListener: Listener {
+    /**
+     * Checks whether if the player is allowed to join the target server.
+     * - Creates async context and fetch punishments asynchronously
+     * - Reject as "timed out" if punishment could not be fetched in 3 seconds
+     */
     @EventHandler
     fun onLogin(e: ServerConnectEvent) {
+        /**
+         * the server before connecting to target server
+         */
         val currentServer = e.player.server?.info
+
+        /**
+         * formatted ip address
+         */
         val ipAddress = e.player.socketAddress.getIPAddress()?.reconstructIPAddress()
         val pair = Punishment.canJoinServerCached(e.player.uniqueId, ipAddress, e.target.name.lowercase())
         if (pair.first) { // true = cached, false = not cached
@@ -41,22 +54,28 @@ object CheckBanListener: Listener {
             }
         }
         async<Boolean> { context ->
-            Thread {
+            Thread({
                 ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
                     context.resolve(false)
-                }, 1, TimeUnit.SECONDS)
+                }, 3, TimeUnit.SECONDS)
                 val p = Punishment.canJoinServer(e.player.uniqueId, ipAddress, e.target.name.lowercase()).complete()
                 if (p != null) {
+                    SpicyAzisaBan.debug("Kicking ${e.player.name} from ${e.player.server?.info?.name} asynchronously (reason: banned from ${p.server})")
+                    SpicyAzisaBan.debug(p.toString(), 2)
                     e.isCancelled = true
                     if (currentServer == null || e.player.server == null) {
                         e.player.kick(p.getBannedMessage().complete())
-                    } else if (e.player.server?.info == currentServer) {
+                    } else if (e.player.server?.info != currentServer) {
                         e.player.plsConnect(currentServer, e.target)
                         e.player.sendDelayed(2000, p.getBannedMessage().complete())
+                    } else {
+                        SpicyAzisaBan.debug("CheckBanListener - else branch (server: ${e.player.server?.info?.name}, server before check: $currentServer)", 2)
+                        e.player.plsConnect(currentServer, e.target)
+                        e.player.send(p.getBannedMessage().complete())
                     }
                 }
                 context.resolve(true)
-            }.start()
+            }, "SpicyAzisaBan - CheckBanListener Thread").start()
         }.thenDo { res ->
             if (!res) {
                 SpicyAzisaBan.instance.logger.warning("Could not check punishments for ${e.player.uniqueId} (Timed out)")
@@ -64,9 +83,11 @@ object CheckBanListener: Listener {
                     e.isCancelled = true
                     if (currentServer == null || e.player.server == null) {
                         e.player.kick(SABMessages.General.error.replaceVariables().translate())
-                    } else if (e.player.server?.info == currentServer) {
+                    } else if (e.player.server?.info != currentServer) {
                         e.player.plsConnect(currentServer, e.target)
                         e.player.sendDelayed(2000, SABMessages.General.error.replaceVariables().translate())
+                    } else {
+                        e.player.send(SABMessages.General.error.replaceVariables().translate())
                     }
                 }
             }
@@ -77,9 +98,12 @@ object CheckBanListener: Listener {
                 e.isCancelled = true
                 if (currentServer == null || e.player.server == null) {
                     e.player.kick(SABMessages.General.error.replaceVariables().translate())
-                } else if (e.player.server?.info == currentServer) {
+                } else if (e.player.server?.info != currentServer) {
                     e.player.plsConnect(currentServer, e.target)
                     e.player.sendDelayed(2000, SABMessages.General.error.replaceVariables().translate())
+                } else {
+                    SpicyAzisaBan.debug("CheckBanListener - else branch (server: ${e.player.server?.info?.name}, server before check: $currentServer)", 2)
+                    e.player.send(SABMessages.General.error.replaceVariables().translate())
                 }
             }
         }

@@ -76,7 +76,7 @@ dependencies {
     implementation("xyz.acrylicstyle.util:promise:0.16.4")
     implementation("xyz.acrylicstyle.util:kotlin:0.16.4")
     implementation("xyz.acrylicstyle.util:yaml:0.16.4")
-    implementation("xyz.acrylicstyle:sequelize4j:0.6.1") {
+    implementation("xyz.acrylicstyle:sequelize4j:0.6.2") {
         exclude("xyz.acrylicstyle", "java-util-all")
     }
     implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
