@@ -65,9 +65,10 @@ object WarningCommand: Command("${SABConfig.prefix}warning", null, "${SABConfig.
         p.notifyToAll().complete()
         if (ReloadableSABConfig.BanOnWarning.threshold > 0) {
             val rs = SpicyAzisaBan.instance.connection.executeQuery(
-                "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ?",
+                "SELECT COUNT(*) FROM `punishments` WHERE `target` = ? AND `server` = ? AND `type` = ?",
                 player.profile.uniqueId.toString(),
                 server.name,
+                PunishmentType.WARNING.name,
             )
             rs.next()
             val count = rs.getInt(1)
