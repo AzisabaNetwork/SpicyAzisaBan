@@ -40,10 +40,16 @@ object CheckBanListener: Listener {
         val ipAddress = e.player.socketAddress.getIPAddress()?.reconstructIPAddress()
         val pair = Punishment.canJoinServerCached(e.player.uniqueId, ipAddress, e.target.name.lowercase())
         if (pair.first) { // true = cached, false = not cached
-            val p = pair.second ?: return
+            val p = pair.second ?: return // punishment
+            SpicyAzisaBan.debug("Found cached punishment for ${e.player.name} at ${p.server}")
+            SpicyAzisaBan.debug(p.toString(), 2)
             if (p.isExpired()) {
+                SpicyAzisaBan.debug("but it is expired, removing it.")
+                // if expired, remove the punishment and check for new punishments asynchronously
                 p.removeIfExpired()
             } else {
+                // if active, cancel the event and kick the player from the server
+                SpicyAzisaBan.debug("Kicking ${e.player.name} from ${e.player.server?.info?.name} asynchronously (reason: banned from ${p.server}; cached)")
                 e.isCancelled = true
                 if (e.reason.shouldKick()) {
                     e.player.kick(p.getBannedMessage().complete())
@@ -52,6 +58,8 @@ object CheckBanListener: Listener {
                 }
                 return
             }
+        } else {
+            SpicyAzisaBan.debug("Punishment is not cached for ${e.player.name} at ${e.target.name}")
         }
         async<Boolean> { context ->
             Thread({
@@ -69,10 +77,12 @@ object CheckBanListener: Listener {
                         e.player.plsConnect(currentServer, e.target)
                         e.player.sendDelayed(2000, p.getBannedMessage().complete())
                     } else {
-                        SpicyAzisaBan.debug("CheckBanListener - else branch (server: ${e.player.server?.info?.name}, server before check: $currentServer)", 2)
+                        SpicyAzisaBan.debug("CheckBanListener - else branch (server: ${e.player.server?.info?.name}, server before check: $currentServer)")
                         e.player.plsConnect(currentServer, e.target)
                         e.player.send(p.getBannedMessage().complete())
                     }
+                } else {
+                    SpicyAzisaBan.debug("${e.player.name} is not banned on ${e.target.name}")
                 }
                 context.resolve(true)
             }, "SpicyAzisaBan - CheckBanListener Thread").start()
