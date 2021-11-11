@@ -41,6 +41,7 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
         "reload",
         "deletepunishmenthistory",
         "deletepunishment",
+        "clearcache",
         "link",
         "unlink",
     )
@@ -298,6 +299,11 @@ object SABCommand: Command("${SABConfig.prefix}spicyazisaban", null, "sab"), Tab
                     return
                 }
                 sender.send(SABMessages.Commands.Sab.reloadedConfiguration.replaceVariables().translate())
+            }
+            "clearcache" -> {
+                Punishment.canJoinServerCachedData.clear()
+                Punishment.muteCache.clear()
+                sender.send(SABMessages.Commands.Sab.clearedCache.replaceVariables().translate())
             }
             "link" -> {
                 if (sender !is ProxiedPlayer) {

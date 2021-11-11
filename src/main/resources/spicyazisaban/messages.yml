@@ -50,6 +50,7 @@ commands:
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
     reloadedConfiguration: "%PREFIX%&a設定を再読み込みしました。"
+    clearedCache: "%PREFIX%&aキャッシュを消去しました。"
     deleteGroupUnpunishReason: "グループ'%GROUP%'の削除" # Available variables: default, %GROUP% (group name being removed)
     removedFromPunishmentHistory: "%PREFIX%&a処罰&8<&7punishmentHistory&8>&a#%ID%を削除しました。" # Available variables: default, punishment
     removedFromPunishment: "%PREFIX%&a処罰&8<&7punishments&8>&a#%ID%を削除しました。" # Available variables: default, punishment

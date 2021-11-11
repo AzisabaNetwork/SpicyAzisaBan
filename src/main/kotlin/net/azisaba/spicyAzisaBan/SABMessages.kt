@@ -133,6 +133,7 @@ object SABMessages {
             private val obj get() = Commands.obj.getObj("sab")
             val setDebugLevel get() = obj.getMessage("setDebugLevel", defObj.getMessage("setDebugLevel"))
             val reloadedConfiguration get() = obj.getMessage("reloadedConfiguration", defObj.getMessage("reloadedConfiguration"))
+            val clearedCache get() = obj.getMessage("clearedCache", defObj.getMessage("clearedCache"))
             val deleteGroupUnpunishReason get() = obj.getMessage("deleteGroupUnpunishReason", defObj.getMessage("deleteGroupUnpunishReason"))
             val removedFromPunishmentHistory get() = obj.getMessage("removedFromPunishmentHistory", defObj.getMessage("removedFromPunishmentHistory"))
             val removedFromPunishment get() = obj.getMessage("removedFromPunishment", defObj.getMessage("removedFromPunishment"))
