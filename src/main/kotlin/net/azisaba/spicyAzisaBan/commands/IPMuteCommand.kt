@@ -58,7 +58,7 @@ object IPMuteCommand: Command("${SABConfig.prefix}ipmute"), TabExecutor {
         }
         val p = Punishment
             .createByIPAddress(ip, reason.text, sender.getUniqueId(), PunishmentType.IP_MUTE, -1, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

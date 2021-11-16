@@ -58,7 +58,7 @@ object MuteCommand: Command("${SABConfig.prefix}mute"), TabExecutor {
         }
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.MUTE, -1, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

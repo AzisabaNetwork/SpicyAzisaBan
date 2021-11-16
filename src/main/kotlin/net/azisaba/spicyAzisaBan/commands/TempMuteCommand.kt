@@ -64,7 +64,7 @@ object TempMuteCommand: Command("${SABConfig.prefix}tempmute"), TabExecutor {
         }
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.TEMP_MUTE, System.currentTimeMillis() + time, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

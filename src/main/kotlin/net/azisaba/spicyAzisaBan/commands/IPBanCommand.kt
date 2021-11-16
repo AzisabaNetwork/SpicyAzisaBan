@@ -58,7 +58,7 @@ object IPBanCommand: Command("${SABConfig.prefix}ipban", null, "${SABConfig.pref
         }
         val p = Punishment
             .createByIPAddress(ip, reason.text, sender.getUniqueId(), PunishmentType.IP_BAN, -1, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

@@ -60,7 +60,7 @@ object BanCommand: Command("${SABConfig.prefix}ban"), TabExecutor {
         }
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.BAN, -1, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

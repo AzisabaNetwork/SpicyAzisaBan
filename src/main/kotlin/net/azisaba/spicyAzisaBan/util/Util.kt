@@ -384,16 +384,18 @@ object Util {
     /**
      * Sends the message to specified server after 100 + (random time in range 0-300) seconds.
      */
-    fun ServerInfo.broadcastMessageAfterRandomTime(server: String) {
-        val s = SABMessages.getBannedMessage(server).replaceVariables().translate()
-        val random = 100 + (Math.random() * 300).toLong()
-        ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
-            ProxyServer.getInstance().players.forEach { p ->
-                if (p.getServerName() == this.name) {
-                    p.send(s)
+    fun ServerInfo.broadcastMessageAfterRandomTime(server: String = this.name) {
+        SpicyAzisaBan.instance.connection.getGroupByServer(server).then { serverOrGroup ->
+            val s = SABMessages.getBannedMessage(serverOrGroup ?: server).replaceVariables().translate()
+            val random = 100 + (Math.random() * 300).toLong()
+            ProxyServer.getInstance().scheduler.schedule(SpicyAzisaBan.instance, {
+                ProxyServer.getInstance().players.forEach { p ->
+                    if (p.getServerName() == this.name) {
+                        p.send(s)
+                    }
                 }
-            }
-        }, random, TimeUnit.SECONDS)
+            }, random, TimeUnit.SECONDS)
+        }
     }
 
     /**

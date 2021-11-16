@@ -24,8 +24,10 @@ import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.md_5.bungee.api.ChatColor
+import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import net.md_5.bungee.api.connection.ProxiedPlayer
 import org.json.JSONObject
 import util.concurrent.ref.DataCache
 import util.kt.promise.rewrite.catch
@@ -361,14 +363,15 @@ data class Punishment(
             }
         }.then {}
 
-    fun doSomethingIfOnline() = async<Unit> {
+    fun doSomethingIfOnline(sender: CommandSender? = null) = async<Unit> {
+        val notifyTargetServer = (if (server == "global" && sender is ProxiedPlayer) sender.server?.info?.name else server) ?: server
         // notes are ignored entirely
         if (type == PunishmentType.NOTE) return@async it.resolve()
         if (!type.isIPBased()) {
             val player = ProxyServer.getInstance().getPlayer(getTargetUUID()) ?: return@async it.resolve()
             if (type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN) {
                 player.connectToLobbyOrKick(server, TextComponent.fromLegacyText(getBannedMessage().complete())).complete()
-                ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
+                ProxyServer.getInstance().getServerInfo(notifyTargetServer)?.broadcastMessageAfterRandomTime()
             } else if (type == PunishmentType.WARNING || type == PunishmentType.CAUTION) {
                 sendTitle()
             } else if (type == PunishmentType.MUTE) {
@@ -409,7 +412,7 @@ data class Punishment(
                         player.connectToLobbyOrKick(server, message)
                     }
                     if (isNotEmpty()) {
-                        ProxyServer.getInstance().getServerInfo(server)?.broadcastMessageAfterRandomTime(server)
+                        ProxyServer.getInstance().getServerInfo(notifyTargetServer)?.broadcastMessageAfterRandomTime()
                     }
                 }
             } else if (type == PunishmentType.IP_MUTE) {
@@ -437,7 +440,7 @@ data class Punishment(
      * Inserts a new punishment into database.
      * @return new punishment with ID
      */
-    fun insert(): Promise<Punishment> = async { context ->
+    fun insert(sender: CommandSender? = null): Promise<Punishment> = async { context ->
         if (id != -1L) throw IllegalArgumentException("cannot insert existing punishment")
         val insertOptions = InsertOptions.Builder()
             .addValue("name", name)
@@ -464,7 +467,7 @@ data class Punishment(
         if (cancel) return@async
         SpicyAzisaBan.instance.connection.sendEvent(EventType.ADD_PUNISHMENT, JSONObject().put("id", id)).complete()
         clearCache(id)
-        doSomethingIfOnline().complete()
+        doSomethingIfOnline(sender).complete()
         return@async context.resolve(
             Punishment(
                 id,

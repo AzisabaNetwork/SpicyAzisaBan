@@ -64,7 +64,7 @@ object TempBanCommand: Command("${SABConfig.prefix}tempban"), TabExecutor {
         }
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.TEMP_BAN, System.currentTimeMillis() + time.time, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

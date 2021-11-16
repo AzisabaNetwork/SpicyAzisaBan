@@ -54,7 +54,7 @@ object NoteCommand: Command("${SABConfig.prefix}note"), TabExecutor {
         val reason = arguments.get(Contexts.REASON, sender).complete()
         val p = Punishment
             .createByPlayer(player.profile, reason.text, sender.getUniqueId(), PunishmentType.NOTE, -1, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)

@@ -64,7 +64,7 @@ object TempIPBanCommand: Command("${SABConfig.prefix}tempipban", null, "${SABCon
         }
         val p = Punishment
             .createByIPAddress(ip, reason.text, sender.getUniqueId(), PunishmentType.TEMP_IP_BAN, System.currentTimeMillis() + time, server.name)
-            .insert()
+            .insert(sender)
             .catch {
                 SpicyAzisaBan.instance.logger.warning("Something went wrong while handling command from ${sender.name}!")
                 sender.sendErrorMessage(it)
