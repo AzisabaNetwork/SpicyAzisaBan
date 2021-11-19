@@ -1,13 +1,12 @@
 # SpicyAzisaBan
 
-## The code:
-
-![AWEKJRLKJFLKASNFAWIJGAWEFJAWEKFJAKFAASJFKA!](https://cdn.acrylicstyle.xyz/img/upload/local/2021-08/01-19/the-cake.png "AWEKJRLKJFLKASNFAWIJGAWEFJAWEKFJAKFAASJFKA!")
-
 ## Publishing to local maven repository
 `./gradlew publishToMavenLocal`
 
-## Permissions
+## Building (to run the plugin)
+`./gradlew shadowJar`
+
+## Permissions (probably)
 - `sab.command.spicyazisaban`
 - `sab.command.spicyazisaban.creategroup`
 - `sab.command.spicyazisaban.deletegroup`

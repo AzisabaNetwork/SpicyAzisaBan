@@ -1,0 +1,4 @@
+name: @name@
+main: net.azisaba.spicyAzisaBan.bungee.BungeePlugin
+version: @version@
+author: acrylic-style
