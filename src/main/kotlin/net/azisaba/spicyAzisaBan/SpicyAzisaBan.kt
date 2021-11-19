@@ -52,17 +52,64 @@ import net.azisaba.spicyAzisaBan.struct.Events
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.blueberrymc.native_util.NativeUtil
 import net.md_5.bungee.api.plugin.Plugin
+import util.maven.Dependency
+import util.maven.JarUtils
+import util.maven.MavenRepository
+import util.maven.Repository
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
+import java.io.File
+import java.net.URLClassLoader
 import java.sql.SQLException
 import java.util.Properties
 import java.util.Timer
+import java.util.logging.Logger
 import kotlin.concurrent.scheduleAtFixedRate
 
 class SpicyAzisaBan: Plugin() {
     companion object {
+        private val LOGGER = Logger.getLogger("SpicyAzisaBan")
+
+        init {
+            val dataFolder = File("plugins/SpicyAzisaBan")
+            LOGGER.info("Data folder: ${dataFolder.absolutePath}")
+            val maven = MavenRepository()
+            maven.addRepository(Repository.mavenLocal())
+            maven.addRepository(Repository.mavenCentral())
+            maven.addDependency(Dependency.resolve("com.google.guava:guava:31.0.1-jre"))
+            maven.addDependency(Dependency.resolve("org.reflections:reflections:0.10.2"))
+            maven.addDependency(Dependency.resolve("org.json:json:20210307"))
+            maven.addDependency(Dependency.resolve("org.yaml:snakeyaml:1.29"))
+            maven.addDependency(Dependency.resolve('o' + "rg.mariadb.jdbc:mariadb-java-client:2.7.3"))
+            var hasError = false
+            val files = maven.newFetcher(File(dataFolder, "libraries")).withMessageReporter { msg, throwable ->
+                if (throwable == null) {
+                    LOGGER.info(msg)
+                } else {
+                    LOGGER.warning(msg)
+                }
+                throwable?.let {
+                    hasError = true
+                    it.printStackTrace()
+                }
+            }.downloadAllDependencies()
+            if (hasError) LOGGER.warning("Failed to download some dependencies.")
+            val cl = SpicyAzisaBan::class.java.classLoader
+            val urls = files.filterNotNull()
+                .map { file -> JarUtils.remapJarWithClassPrefix(file, "-remapped", "net.azisaba.spicyAzisaBan.libs") }
+                .map { file -> file.toURI().toURL() }
+                .toTypedArray()
+            val libraryLoader = URLClassLoader(urls)
+            NativeUtil.setObject(cl::class.java.getDeclaredField("libraryLoader"), cl, libraryLoader)
+            LOGGER.info("Loaded libraries (" + files.size + "):")
+            urls.forEach { url ->
+                LOGGER.info(" - ${url.path}")
+            }
+        }
+
         private val startTime = System.currentTimeMillis()
         @JvmField
         val GROUP_PATTERN = "^[a-zA-Z0-9+_\\-]{1,32}$".toRegex()

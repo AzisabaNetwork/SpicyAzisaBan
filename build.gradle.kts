@@ -1,8 +1,8 @@
 import java.io.ByteArrayOutputStream
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    id("com.github.johnrengelman.shadow") version "6.0.0"
+    kotlin("jvm") version "1.6.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     `maven-publish`
 }
 
@@ -71,26 +71,31 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-    implementation("xyz.acrylicstyle.util:all:0.16.4")
-    implementation("xyz.acrylicstyle.util:promise:0.16.4")
-    implementation("xyz.acrylicstyle.util:kotlin:0.16.4")
-    implementation("xyz.acrylicstyle.util:yaml:0.16.4")
+    implementation("xyz.acrylicstyle.util:maven:0.16.5")
+    implementation("net.blueberrymc:native-util:1.2.5")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
+    implementation("xyz.acrylicstyle.util:all:0.16.5") {
+        exclude("com.google.guava", "guava")
+        exclude("org.reflections", "reflections")
+        exclude("org.json", "json")
+        exclude("org.yaml", "snakeyaml")
+        exclude("xyz.acrylicstyle.util", "maven")
+    }
     implementation("xyz.acrylicstyle:sequelize4j:0.6.2") {
         exclude("xyz.acrylicstyle", "java-util-all")
     }
-    implementation("org.mariadb.jdbc:mariadb-java-client:2.7.3")
     implementation("xyz.acrylicstyle:minecraft-util:0.5.4") {
         exclude("xyz.acrylicstyle", "java-util-all")
     }
+    compileOnly("org.mariadb.jdbc:mariadb-java-client:2.7.3")
     compileOnly("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
     testImplementation("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 
 tasks {
-    compileKotlin { kotlinOptions.jvmTarget = "1.8" }
-    compileTestKotlin { kotlinOptions.jvmTarget = "1.8" }
+    compileKotlin { kotlinOptions.jvmTarget = "16" }
+    compileTestKotlin { kotlinOptions.jvmTarget = "16" }
 
     test {
         useJUnitPlatform()
@@ -117,14 +122,29 @@ tasks {
     }
 
     shadowJar {
+        dependencies {
+            exclude(dependency("com.google.guava:guava:.*"))
+            exclude(dependency("org.reflections:reflections:.*"))
+            exclude(dependency("org.json:json:.*"))
+            exclude(dependency("org.yaml:snakeyaml:.*"))
+            exclude(dependency("com.google.code.findbugs:jsr305:.*"))
+            exclude(dependency("org.javassist:javassist:.*"))
+            exclude(dependency("org.slf4j:slf4j-api:.*"))
+            exclude(dependency("com.google.guava:failureaccess:.*"))
+            exclude(dependency("com.google.guava:listenablefuture:.*"))
+            exclude(dependency("com.google.code.findbugs:jsr305:.*"))
+            exclude(dependency("org.checkerframework:checker-qual:.*"))
+            exclude(dependency("com.google.errorprone:error_prone_annotations:.*"))
+            exclude(dependency("com.google.j2objc:j2objc-annotations:.*"))
+            exclude(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:.*"))
+            exclude(dependency("org.xerial.snappy:snappy-java:"))
+            exclude(dependency("org.jetbrains:annotations:.*"))
+        }
         relocate("kotlin", "net.azisaba.spicyAzisaBan.libs.kotlin")
         relocate("util", "net.azisaba.spicyAzisaBan.libs.util")
         relocate("xyz.acrylicstyle.sql", "net.azisaba.spicyAzisaBan.libs.xyz.acrylicstyle.sql")
         relocate("xyz.acrylicstyle.mcutil", "net.azisaba.spicyAzisaBan.libs.xyz.acrylicstyle.mcutil")
-        relocate("net.blueberrymc.native_util", "net.azisaba.spicyAzisaBan.libs.net.blueberrymc.native_util")
         relocate("org.mariadb", "net.azisaba.spicyAzisaBan.libs.org.mariadb")
-
-        minimize()
         archiveFileName.set("SpicyAzisaBan-${project.version}.jar")
     }
 }
