@@ -7,7 +7,7 @@ plugins {
     `maven-publish`
 }
 
-group = "net.azisaba"
+group = "net.azisaba.spicyazisaban"
 version = "0.0.37-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
 
 java {
