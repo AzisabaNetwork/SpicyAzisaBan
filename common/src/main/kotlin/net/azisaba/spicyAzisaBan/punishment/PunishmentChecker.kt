@@ -167,14 +167,7 @@ object PunishmentChecker {
                 SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${player.uniqueId} (Timed out, > 1500 ms)")
                 if (SABConfig.database.failsafe) {
                     cancel()
-                    if (currentServer == null || player.getServer() == null) {
-                        player.kick(SABMessages.General.error.replaceVariables().translate())
-                    } else if (player.getServer() != currentServer) {
-                        player.plsConnect(currentServer, target)
-                        player.sendDelayed(2000, SABMessages.General.error.replaceVariables().translate())
-                    } else {
-                        player.send(SABMessages.General.error.replaceVariables().translate())
-                    }
+                    player.kick(SABMessages.General.error.replaceVariables().translate())
                 }
             }
         }.catch {
@@ -182,15 +175,7 @@ object PunishmentChecker {
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
                 cancel()
-                if (currentServer == null || player.getServer() == null) {
-                    player.kick(SABMessages.General.error.replaceVariables().translate())
-                } else if (player.getServer() != currentServer) {
-                    player.plsConnect(currentServer, target)
-                    player.sendDelayed(2000, SABMessages.General.error.replaceVariables().translate())
-                } else {
-                    SpicyAzisaBan.debug("CheckBanListener - else branch (server: ${player.getServer()?.name}, server before check: $currentServer)", 2)
-                    player.send(SABMessages.General.error.replaceVariables().translate())
-                }
+                player.kick(SABMessages.General.error.replaceVariables().translate())
             }
         }
     }
