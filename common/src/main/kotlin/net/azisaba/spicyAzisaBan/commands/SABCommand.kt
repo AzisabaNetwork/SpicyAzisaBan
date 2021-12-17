@@ -189,7 +189,7 @@ object SABCommand: Command() {
                             return@then actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
                         }
                         if (args[2] == "add" || args[2] == "remove") {
-                            if (args.size <= 2) {
+                            if (args.size <= 3) {
                                 return@then actor.sendGroupHelp()
                             } else if (!SpicyAzisaBan.instance.getServers().map { it.value.name }.any { it == args[3] }) {
                                 return@then actor.send(SABMessages.Commands.General.invalidServer.replaceVariables().translate())
@@ -237,6 +237,7 @@ object SABCommand: Command() {
                         .onCatch {}
                         .complete() ?: -1
                     actor.send(SABMessages.Commands.Sab.info.replaceVariables(
+                        "server_name" to SpicyAzisaBan.instance.getServerName(),
                         "server_version" to SpicyAzisaBan.instance.getServerVersion(),
                         "db_connected" to SpicyAzisaBan.instance.connection.isConnected().toMinecraft(),
                         "db_version" to dbVersion.toString(),
@@ -246,6 +247,7 @@ object SABCommand: Command() {
                         "is_devbuild" to SABConfig.devBuild.toMinecraft(),
                         "is_debugbuild" to SABConfig.debugBuild.toMinecraft(),
                         "server_id" to SABConfig.serverId,
+                        "is_lockdown" to SpicyAzisaBan.instance.lockdown.toMinecraft(),
                     ).translate())
                     context.resolve()
                 }
@@ -361,11 +363,15 @@ object SABCommand: Command() {
         if (!actor.hasPermission("sab.command.spicyazisaban")) return emptyList()
         if (args.isEmpty()) return emptyList()
         if (args.size == 1) return commands.filtrPermission(actor, "sab.command.spicyazisaban.", args[0])
-        if (actor.hasPermission("sab.command.spicyazisaban.deletegroup") && args[0] == "deletegroup" && args.size == 2) {
-            SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
+        if (args.size == 2) {
+            if (actor.hasPermission("sab.command.spicyazisaban.deletegroup") && args[0] == "deletegroup") {
+                SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
+            }
+            if (actor.hasPermission("sab.command.spicyazisaban.group") && args[0] == "group") {
+                SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
+            }
         }
         if (actor.hasPermission("sab.command.spicyazisaban.group") && args[0] == "group") {
-            if (args.size == 2) SpicyAzisaBan.instance.connection.getCachedGroups()?.let { return it.filtr(args[1]) }
             if (args.size == 3) return groupCommands.filtr(args[2])
             if (args.size == 4 && (args[2] == "add" || args[2] == "remove"))
                 return SpicyAzisaBan.instance.getServers().values.map { it.name }.filtr(args[3])

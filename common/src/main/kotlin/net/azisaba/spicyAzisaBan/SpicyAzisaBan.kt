@@ -23,6 +23,7 @@ import net.azisaba.spicyAzisaBan.commands.HistoryCommand
 import net.azisaba.spicyAzisaBan.commands.IPBanCommand
 import net.azisaba.spicyAzisaBan.commands.IPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.KickCommand
+import net.azisaba.spicyAzisaBan.commands.LockdownCommand
 import net.azisaba.spicyAzisaBan.commands.MuteCommand
 import net.azisaba.spicyAzisaBan.commands.NoteCommand
 import net.azisaba.spicyAzisaBan.commands.ProofsCommand
@@ -64,6 +65,7 @@ abstract class SpicyAzisaBan {
     private val timer = Timer()
     lateinit var connection: SQLConnection
     lateinit var settings: Settings
+    var lockdown = false
     
     companion object {
         val LOGGER: Logger = Logger.getLogger("SpicyAzisaBan")
@@ -122,6 +124,8 @@ abstract class SpicyAzisaBan {
                     "Version stored in the database: $version\n" +
                     "Version stored in the plugin: ${SQLConnection.CURRENT_DATABASE_VERSION}")
         }
+        lockdown = settings.isLockdown().complete()
+        LOGGER.info("Lockdown is " + if  (lockdown) "enabled" else "disabled")
         LOGGER.info("Connected.")
     }
     
@@ -175,6 +179,7 @@ abstract class SpicyAzisaBan {
         instance.registerCommand(AddProofCommand)
         instance.registerCommand(DelProofCommand)
         instance.registerCommand(ProofsCommand)
+        instance.registerCommand(LockdownCommand)
     }
     
     fun shutdownTimer() {
@@ -196,7 +201,7 @@ abstract class SpicyAzisaBan {
 
     class Settings {
 
-        // Database version: Used to convert old database versions. Do not edit.
+        // Database version: Used when converting old database versions. Do not edit.
 
         fun getDatabaseVersion(): Promise<Int> =
             instance.connection.settings.findOne(FindOptions.Builder().addWhere("key", "database_version").build())
@@ -208,6 +213,21 @@ abstract class SpicyAzisaBan {
                     .addWhere("key", "database_version")
                     .addValue("key", "database_version")
                     .addValue("valueInt", i)
+                    .build()
+            ).then { }
+
+        // Lockdown state: Used when checking whether the lockdown is enabled (on startup)
+
+        fun isLockdown(): Promise<Boolean> =
+            instance.connection.settings.findOne(FindOptions.Builder().addWhere("key", "lockdown").build())
+                .then { it?.getInteger("valueInt") == 1 }
+
+        fun setLockdown(b: Boolean) =
+            instance.connection.settings.upsert(
+                UpsertOptions.Builder()
+                    .addWhere("key", "lockdown")
+                    .addValue("key", "lockdown")
+                    .addValue("valueInt", if (b) 1 else 0)
                     .build()
             ).then { }
     }

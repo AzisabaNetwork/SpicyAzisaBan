@@ -62,7 +62,7 @@ object ChangeReasonCommand: Command() {
             .update("reason", reason.text, findOptions)
             .catch { actor.sendErrorMessage(it) }
             .complete() ?: return
-        p.clearCache()
+        p.clearCache(sendEvent = true)
         actor.send(SABMessages.Commands.ChangeReason.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

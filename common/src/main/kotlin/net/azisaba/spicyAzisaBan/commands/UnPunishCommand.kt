@@ -103,7 +103,7 @@ object UnPunishCommand: Command() {
             throw e
         }
         UnPunish(upid, p, reason.text, time, actor.uniqueId).notifyToAll().complete()
-        p.clearCache()
+        p.clearCache(sendEvent = true)
         actor.send(SABMessages.Commands.Unpunish.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

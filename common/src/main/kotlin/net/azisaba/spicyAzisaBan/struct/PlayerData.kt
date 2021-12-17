@@ -52,6 +52,10 @@ data class PlayerData(
                 .then { list -> list.map { td -> UUID.fromString(td.getString("uuid")) } }
                 .then { list -> list.map { uuid -> getByUUID(uuid).complete() } }
 
+        fun isExists(uuid: UUID) = async<Boolean> { context ->
+            getByUUID(uuid).then { context.resolve(true) }.catch { context.resolve(false) }
+        }
+
         fun getByUUID(uuid: UUID): Promise<PlayerData> =
             SpicyAzisaBan.instance.connection.players.findOne(FindOptions.Builder().addWhere("uuid", uuid.toString()).setLimit(1).build())
                 .then { td -> td?.let { fromTableData(it) } ?: error("no player data found for $uuid") }
@@ -137,13 +141,15 @@ data class PlayerData(
             context.resolve()
         }
 
-        fun updatePlayerDataAsync(player: PlayerActor, login: Boolean) {
-            SpicyAzisaBan.debug("Updating player data of ${player.uniqueId} (${player.name})")
-            createOrUpdate(player, login).thenDo {
-                SpicyAzisaBan.debug("Updated player data of ${player.uniqueId} (${player.name})")
-                SpicyAzisaBan.debug(it.toString(), 2)
-            }.catch { it.printStackTrace() }
-        }
+        fun updatePlayerDataAsync(player: PlayerActor, login: Boolean) =
+            isExists(player.uniqueId).then { exists ->
+                if (!exists) return@then
+                SpicyAzisaBan.debug("Updating player data of ${player.uniqueId} (${player.name})")
+                createOrUpdate(player, login).thenDo {
+                    SpicyAzisaBan.debug("Updated player data of ${player.uniqueId} (${player.name})")
+                    SpicyAzisaBan.debug(it.toString(), 2)
+                }.catch { it.printStackTrace() }
+            }
 
         fun createOrUpdate(player: PlayerActor, login: Boolean): Promise<PlayerData> = async { context ->
             val time = System.currentTimeMillis()

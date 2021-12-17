@@ -361,5 +361,15 @@ object SABMessages {
             val footer get() = obj.getMessage("footer", defObj.getMessage("footer"))
             val invalidArguments get() = obj.getMessage("invalidArguments", defObj.getMessage("invalidArguments"))
         }
+
+        object Lockdown {
+            private val defObj get() = Commands.defObj.getObj("lockdown")
+            private val obj get() = Commands.obj.getObj("lockdown")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val enabledLockdown get() = obj.getMessage("enabledLockdown", defObj.getMessage("enabledLockdown"))
+            val disabledLockdown get() = obj.getMessage("disabledLockdown", defObj.getMessage("disabledLockdown"))
+            val lockdown get() = obj.getMessage("lockdown", defObj.getMessage("lockdown"))
+            val lockdownJoinAttempt get() = obj.getMessage("lockdownJoinAttempt", defObj.getMessage("lockdownJoinAttempt"))
+        }
     }
 }

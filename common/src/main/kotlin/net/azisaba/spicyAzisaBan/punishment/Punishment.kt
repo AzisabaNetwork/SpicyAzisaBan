@@ -261,14 +261,14 @@ data class Punishment(
             ).thenDo {
                 SpicyAzisaBan.debug("Removed punishment #${id} (reason: expired)")
             }.catch { it.printStackTrace() }.complete()
-            clearCache()
+            clearCache(sendEvent = true)
             pendingRemoval.remove(id)
         }
         context.resolve()
     }
 
-    fun clearCache(id: Long = this.id) {
-        if (type.isBan() || type.isMute()) {
+    fun clearCache(id: Long = this.id, sendEvent: Boolean = false) {
+        if (sendEvent && (type.isBan() || type.isMute())) {
             SpicyAzisaBan.instance.connection.sendEvent(EventType.UPDATED_PUNISHMENT, JSONObject().put("id", id))
         }
         if (type.isBan()) {
@@ -465,7 +465,7 @@ data class Punishment(
         }
         if (cancel) return@async
         SpicyAzisaBan.instance.connection.sendEvent(EventType.ADD_PUNISHMENT, JSONObject().put("id", id)).complete()
-        clearCache(id)
+        clearCache(id, sendEvent = true)
         doSomethingIfOnline(actor).complete()
         return@async context.resolve(
             Punishment(

@@ -76,8 +76,9 @@ commands:
       - "%PREFIX%    &6Debugビルド: %IS_DEBUGBUILD%"
       - "%PREFIX%    &6Devビルド: %IS_DEVBUILD%"
       - "%PREFIX%    &6サーバーID: &f%SERVER_ID%"
+      - "%PREFIX%    &6ロックダウン: %IS_LOCKDOWN%"
       - "%PREFIX%- &bサーバーバージョン"
-      - "%PREFIX%    %SERVER_VERSION%"
+      - "%PREFIX%    %SERVER_NAME% %SERVER_VERSION%"
       - "%PREFIX%- &bデータベース"
       - "%PREFIX%    &6接続済み: %DB_CONNECTED%"
       - "%PREFIX%    &6バージョン: %DB_VERSION%"
@@ -411,3 +412,13 @@ commands:
     footer: "&7ページ &e&o%CURRENT_PAGE%&7/&e&o%MAX_PAGE% &8| &7処罰件数: &e&o%COUNT%"
     # Available variables: default
     invalidArguments: "%PREFIX%&e--all&cと&e--active&cを同時に使用することはできません。"
+  lockdown:
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%lockdown <true/false>"
+    lockdown:
+      - "%PREFIX%&c現在新規参加者を受け付けていません。"
+      - "&cしばらく時間が経った後に再参加してください。"
+    # Available variables: default, %PLAYER%, %IP_ADDRESS%
+    lockdownJoinAttempt: "&e[Lockdown] &7新規プレイヤー'&e&o%PLAYER%&r&7'が参加しようとしました。IPアドレス: %IP_ADDRESS%"
+    # Available variables for (enabled|disabled)Lockdown: default, %ACTOR% (actor who toggled the lockdown)
+    enabledLockdown: "%PREFIX%&e&o%ACTOR%&r&7がサーバーロックダウンを&e有効&7にしました。"
+    disabledLockdown: "%PREFIX%&e&o%ACTOR%&r&7がサーバーロックダウンを&e無効&7にしました。"

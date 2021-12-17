@@ -57,9 +57,10 @@ javaComponent.withVariantsFromConfiguration(configurations["sourcesElements"]) {
 }
 
 repositories {
-    mavenLocal()
+    // mavenLocal()
     mavenCentral()
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+    maven { url = uri("https://repo.blueberrymc.net") }
     maven { url = uri("https://repo2.acrylicstyle.xyz") }
 }
 
@@ -68,9 +69,10 @@ subprojects {
     version = parent!!.version
 
     repositories {
-        mavenLocal()
+        // mavenLocal()
         mavenCentral()
         maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+        maven { url = uri("https://repo.blueberrymc.net") }
         maven { url = uri("https://repo2.acrylicstyle.xyz") }
     }
 
@@ -167,7 +169,7 @@ subprojects {
 subprojects {
     dependencies {
         implementation("xyz.acrylicstyle.util:maven:0.16.5")
-        implementation("net.blueberrymc:native-util:1.2.5")
+        implementation("net.blueberrymc:native-util:1.2.6")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
         implementation("xyz.acrylicstyle.util:all:0.16.5") {
             exclude("com.google.guava", "guava")
@@ -179,7 +181,7 @@ subprojects {
         implementation("xyz.acrylicstyle:sequelize4j:0.6.2") {
             exclude("xyz.acrylicstyle", "java-util-all")
         }
-        implementation("xyz.acrylicstyle:minecraft-util:0.5.4") {
+        implementation("xyz.acrylicstyle:minecraft-util:1.0.0") {
             exclude("xyz.acrylicstyle", "java-util-all")
         }
         compileOnly("org.mariadb.jdbc:mariadb-java-client:2.7.3")

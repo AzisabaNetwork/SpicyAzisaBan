@@ -473,4 +473,21 @@ object Util {
 
     fun <T> async(throwableConsumer: ThrowableConsumer<PromiseContext<T>>) =
         Promise.create("SpicyAzisaBan Worker #%d", throwableConsumer)
+
+    fun setLockdownAndAnnounce(actorName: String, enabled: Boolean): Promise<Unit> = async {
+        SpicyAzisaBan.instance.lockdown = enabled
+        SpicyAzisaBan.instance.settings.setLockdown(enabled)
+        val message = if (enabled) {
+            SpicyAzisaBan.debug("Enabled lockdown")
+            SABMessages.Commands.Lockdown.enabledLockdown.replaceVariables("actor" to actorName).translate()
+        } else {
+            SpicyAzisaBan.debug("Disabled lockdown")
+            SABMessages.Commands.Lockdown.disabledLockdown.replaceVariables("actor" to actorName).translate()
+        }
+        SpicyAzisaBan.instance
+            .getPlayers()
+            .filter { it.hasPermission("sab.lockdown") }
+            .forEach { it.send(message) }
+        SpicyAzisaBan.instance.getConsoleActor().send(message)
+    }
 }

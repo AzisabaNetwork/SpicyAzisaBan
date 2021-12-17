@@ -8,7 +8,6 @@ import net.azisaba.spicyAzisaBan.punishment.UnPunish
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.struct.Events
-import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import xyz.acrylicstyle.sql.options.FindOptions
 import java.sql.SQLException
 
@@ -41,39 +40,36 @@ class TimerTasks(private val connection: SQLConnection) {
                             SpicyAzisaBan.LOGGER.warning("Ignoring invalid event (invalid id): $e")
                             continue
                         }
-                        SpicyAzisaBan.debug("Removing cache of punishment $id (event received)")
-                        Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
-                        Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
                         val p = Punishment.fetchActivePunishmentById(id).complete()
                         if (p == null) {
                             SpicyAzisaBan.debug("Received update event for #$id but it is no longer active")
                             continue
                         }
-                        Punishment.canJoinServerCachedData.removeIf { triple, _ -> triple.first?.toString() == p.target || triple.second == p.target }
-                        Punishment.muteCache.removeIf { s, _ -> s.contains(p.target) }
+                        p.clearCache()
                     } else if (e.event == EventType.REMOVED_PUNISHMENT) {
                         val id = e.data.getLong("punish_id")
                         if (id <= 0) {
                             SpicyAzisaBan.LOGGER.warning("Ignoring invalid event (invalid punish_id): $e")
                             continue
                         }
-                        SpicyAzisaBan.debug("Removing cache of punishment $id (event received)")
-                        Punishment.canJoinServerCachedData.removeIf { _, value -> value.get()?.id == id }
-                        Punishment.muteCache.removeIf { _, value -> value.get()?.id == id }
-                        val punishment = Punishment.fetchPunishmentById(id).complete()
-                        if (punishment == null) {
+                        val p = Punishment.fetchPunishmentById(id).complete()
+                        if (p == null) {
                             SpicyAzisaBan.debug("Punishment #$id was removed entirely, skipping")
                             continue
                         }
-                        val td = connection.unpunish.findOne(FindOptions.Builder().addWhere("punish_id", id).build()).complete()
+                        p.clearCache()
+                        val td = connection.unpunish.findOne(FindOptions.Builder().addWhere("punish_id", id).build())
+                            .complete()
                         if (td == null) {
                             SpicyAzisaBan.LOGGER.warning("Received removed_punishment event but there was no unpunish record")
                             continue
                         }
-                        val unpunishRecord = UnPunish.fromTableData(punishment, td)
+                        val unpunishRecord = UnPunish.fromTableData(p, td)
                         unpunishRecord.notifyToAll()
+                    } else if (e.event == EventType.LOCKDOWN) {
+                        Util.setLockdownAndAnnounce(e.data.getString("actor_name"), e.data.getBoolean("lockdown_enabled"))
                     } else {
-                        SpicyAzisaBan.LOGGER.warning("Unknown event: $e")
+                        SpicyAzisaBan.LOGGER.warning("Event $e was not handled")
                     }
                 } catch (e: Exception) {
                     SpicyAzisaBan.LOGGER.warning("Received unprocessable event data")

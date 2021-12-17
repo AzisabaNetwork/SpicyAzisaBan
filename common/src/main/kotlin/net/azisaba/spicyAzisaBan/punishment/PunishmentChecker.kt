@@ -10,6 +10,7 @@ import net.azisaba.spicyAzisaBan.common.PlayerActor
 import net.azisaba.spicyAzisaBan.common.PlayerConnection
 import net.azisaba.spicyAzisaBan.common.ServerInfo
 import net.azisaba.spicyAzisaBan.common.chat.Component
+import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
@@ -22,10 +23,50 @@ import util.kt.promise.rewrite.catch
 import java.util.concurrent.TimeUnit
 
 object PunishmentChecker {
+    fun checkLockdown(connection: PlayerConnection, deny: (reason: Array<Component>) -> Unit) {
+        if (!SpicyAzisaBan.instance.lockdown) return
+        Util.async<Boolean> { context ->
+            Thread {
+                val start = System.currentTimeMillis()
+                SpicyAzisaBan.instance.schedule(800, TimeUnit.MILLISECONDS) { // single SELECT should not take long time
+                    context.resolve(false)
+                }
+                val exists = PlayerData.isExists(connection.uniqueId).complete()
+                if (!exists) {
+                    deny(Component.fromLegacyText(SABMessages.Commands.Lockdown.lockdown.replaceVariables().translate()))
+                    val message = SABMessages.Commands.Lockdown.lockdownJoinAttempt
+                        .replaceVariables("player" to (connection.name ?: connection.uniqueId).toString(), "IP_ADDRESS" to connection.getRemoteAddress().getIPAddress().toString()).translate()
+                        .translate()
+                    SpicyAzisaBan.instance.getPlayers().filter { it.hasPermission("sab.lockdown") }.forEach { it.send(message) }
+                    SpicyAzisaBan.instance.getConsoleActor().send(message)
+                }
+                val time = System.currentTimeMillis() - start
+                if (time > 500) {
+                    SpicyAzisaBan.LOGGER.warning("PunishmentChecker#checkGlobalBan took $time ms to process!")
+                }
+                context.resolve(true)
+            }.start()
+        }.thenDo { res ->
+            if (!res) {
+                SpicyAzisaBan.LOGGER.warning("Could not check lockdown state for ${connection.uniqueId} (Timed out, > 800 ms)")
+                if (SABConfig.database.failsafe) {
+                    deny(Component.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
+                }
+            }
+        }.catch {
+            SpicyAzisaBan.LOGGER.warning("Could not check lockdown state for ${connection.uniqueId}")
+            it.printStackTrace()
+            if (SABConfig.database.failsafe) {
+                deny(Component.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
+            }
+        }.complete()
+    }
+
     fun checkGlobalBan(connection: PlayerConnection, deny: (reason: Array<Component>) -> Unit) {
         Util.async<Boolean> { context ->
             Thread {
-                SpicyAzisaBan.instance.schedule(3, TimeUnit.SECONDS) {
+                val start = System.currentTimeMillis()
+                SpicyAzisaBan.instance.schedule(1500, TimeUnit.MILLISECONDS) {
                     context.resolve(false)
                 }
                 val p = Punishment.canJoinServer(
@@ -36,11 +77,15 @@ object PunishmentChecker {
                 if (p != null) {
                     deny(Component.fromLegacyText(p.getBannedMessage().complete()))
                 }
+                val time = System.currentTimeMillis() - start
+                if (time > 1000) {
+                    SpicyAzisaBan.LOGGER.warning("PunishmentChecker#checkGlobalBan took $time ms to process!")
+                }
                 context.resolve(true)
             }.start()
         }.thenDo { res ->
             if (!res) {
-                SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${connection.uniqueId} (Timed out)")
+                SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${connection.uniqueId} (Timed out, > 1500 ms)")
                 if (SABConfig.database.failsafe) {
                     deny(Component.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
                 }
@@ -94,7 +139,7 @@ object PunishmentChecker {
         }
         Util.async<Boolean> { context ->
             Thread({
-                SpicyAzisaBan.instance.schedule(3, TimeUnit.SECONDS) {
+                SpicyAzisaBan.instance.schedule(1500, TimeUnit.MILLISECONDS) {
                     context.resolve(false)
                 }
                 val p = Punishment.canJoinServer(player.uniqueId, ipAddress, target.name.lowercase()).complete()
@@ -119,7 +164,7 @@ object PunishmentChecker {
             }, "SpicyAzisaBan - CheckBanListener Thread").start()
         }.thenDo { res ->
             if (!res) {
-                SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${player.uniqueId} (Timed out)")
+                SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${player.uniqueId} (Timed out, > 1500 ms)")
                 if (SABConfig.database.failsafe) {
                     cancel()
                     if (currentServer == null || player.getServer() == null) {
