@@ -102,7 +102,7 @@ object PunishmentChecker {
     /**
      * Checks whether if the player is allowed to join the target server.
      * - Creates async context and fetch punishments asynchronously
-     * - Reject as "timed out" if punishment could not be fetched in 3 seconds
+     * - Reject as "timed out" if punishment could not be fetched in 1500 milliseconds
      */
     fun checkLocalBan(target: ServerInfo, player: PlayerActor, cancel: () -> Unit) {
         /**
