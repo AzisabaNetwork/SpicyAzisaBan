@@ -17,6 +17,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.sql.SQLNonTransientConnectionException
 import java.sql.Statement
 import java.util.Properties
 
@@ -40,6 +41,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         }
     }
 
+    lateinit var properties: Properties
     lateinit var punishments: Table
     lateinit var punishmentHistory: Table
     lateinit var groups: Table
@@ -61,6 +63,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
 
     fun connect(properties: Properties) {
         if (isConnected()) return
+        this.properties = properties
         this.authenticate(getMariaDBDriver(), properties)
         val dupe = arrayOf(
             TableDefinition.Builder("id", DataType.BIGINT).setAutoIncrement(true).setPrimaryKey(true).build(), // punish id
@@ -168,7 +171,15 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         logSql(sql, params)
         val statement = connection.prepareStatement(sql)
         params.forEachIndexed { index, any -> statement.setObject(index + 1, any) }
-        return statement.executeQuery()
+        try {
+            return statement.executeQuery()
+        } catch (e: SQLNonTransientConnectionException) {
+            if (e.toString().contains("Connection is closed")) {
+                connect(properties)
+                return executeQuery(sql, params)
+            }
+            throw e
+        }
     }
 
     fun sendEvent(eventType: EventType, data: JSONObject): Promise<Unit> = async {
