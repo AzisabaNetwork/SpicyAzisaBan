@@ -116,8 +116,12 @@ object PunishmentChecker {
         val ipAddress = player.getRemoteAddress().getIPAddress()?.reconstructIPAddress()
         val pair = Punishment.canJoinServerCached(player.uniqueId, ipAddress, target.name.lowercase())
         if (pair.first) { // true = cached, false = not cached
-            val p = pair.second ?: return // punishment
-            SpicyAzisaBan.debug("Found cached punishment for ${player.name} at ${p.server}")
+            SpicyAzisaBan.debug("Found cached punishment for ${player.name} at ${target.name.lowercase()}")
+            val p = pair.second // punishment
+            if (p == null) {
+                SpicyAzisaBan.debug("(null punishment)", 2)
+                return
+            }
             SpicyAzisaBan.debug(p.toString(), 2)
             if (p.isExpired()) {
                 SpicyAzisaBan.debug("but it is expired, removing it.")
