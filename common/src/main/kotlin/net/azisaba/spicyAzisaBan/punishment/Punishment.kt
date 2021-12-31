@@ -191,6 +191,9 @@ data class Punishment(
             context.resolve(punishValue)
         }
 
+        /**
+         * Fetch all active punishments by uuid, ip address, server name, and group name.
+         */
         private fun fetchActivePunishmentsBy(uuid: UUID?, ip: String?, server: String, group: String?): List<Punishment> {
             if (uuid == null && ip == null) throw IllegalArgumentException("Either uuid or ip must not be null")
             val sql = "SELECT * FROM `punishments` WHERE (`target` = ? OR `target` = ?) AND (`server` = \"global\" OR `server` = ? OR `server` = ?)"
@@ -203,7 +206,10 @@ data class Punishment(
             val ps = mutableListOf<Punishment>()
             val rs = s.executeQuery()
             SQLConnection.logSql(sql, System.currentTimeMillis() - start)
+            // TODO: remove these 2 debug messages later?
+            SpicyAzisaBan.debug("Params: uuid: $uuid, ip: $ip, server: $server, group: $group", 5)
             while (rs.next()) ps.add(fromResultSet(rs))
+            SpicyAzisaBan.debug("Result: $ps", 5)
             s.close()
             return ps
         }
