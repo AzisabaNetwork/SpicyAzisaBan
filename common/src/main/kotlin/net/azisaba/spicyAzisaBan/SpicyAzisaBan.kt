@@ -101,7 +101,7 @@ abstract class SpicyAzisaBan {
         instance = this
         PREFIX = SABMessages.General.prefix.translate()
     }
-   
+
     private fun initDatabase() {
         LOGGER.info("Connecting to database...")
         connection = SQLConnection(
