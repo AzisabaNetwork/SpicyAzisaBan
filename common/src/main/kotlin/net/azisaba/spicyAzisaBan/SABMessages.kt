@@ -171,7 +171,7 @@ object SABMessages {
             val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
             val globalUsage get() = obj.getMessage("globalUsage", defObj.getMessage("globalUsage"))
             val done get() = obj.getMessage("done", defObj.getMessage("done"))
-            val notify get() = obj.getMessage("notify", defObj.getMessage("done"))
+            val notify get() = obj.getMessage("notify", defObj.getMessage("notify"))
             val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
         }
 
