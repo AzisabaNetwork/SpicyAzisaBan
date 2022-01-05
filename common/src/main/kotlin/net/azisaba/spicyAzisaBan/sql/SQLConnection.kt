@@ -168,17 +168,19 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     }
 
     fun executeQuery(@Language("SQL") sql: String, vararg params: Any): ResultSet {
+        return executeQuery(sql, params, retry = false)
+    }
+
+    private fun executeQuery(@Language("SQL") sql: String, vararg params: Any, retry: Boolean): ResultSet {
         logSql(sql, params)
         val statement = connection.prepareStatement(sql)
         params.forEachIndexed { index, any -> statement.setObject(index + 1, any) }
-        try {
-            return statement.executeQuery()
+        return try {
+            statement.executeQuery()
         } catch (e: SQLNonTransientConnectionException) {
-            if (e.toString().contains("Connection is closed")) {
-                connect(properties)
-                return executeQuery(sql, params)
-            }
-            throw e
+            if (retry) throw e
+            connect(properties)
+            executeQuery(sql, params, retry = true)
         }
     }
 
