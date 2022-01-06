@@ -168,7 +168,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     }
 
     fun executeQuery(@Language("SQL") sql: String, vararg params: Any): ResultSet {
-        return executeQuery(sql, params, retry = false)
+        return executeQuery(sql, *params, retry = false)
     }
 
     private fun executeQuery(@Language("SQL") sql: String, vararg params: Any, retry: Boolean): ResultSet {
@@ -180,7 +180,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         } catch (e: SQLNonTransientConnectionException) {
             if (retry) throw e
             connect(properties)
-            executeQuery(sql, params, retry = true)
+            executeQuery(sql, *params, retry = true)
         }
     }
 
