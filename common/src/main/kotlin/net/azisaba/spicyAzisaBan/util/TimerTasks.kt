@@ -78,7 +78,7 @@ class TimerTasks(private val connection: SQLConnection) {
             }
             rs.statement.close()
             connection.execute("UPDATE `events` SET `seen` = concat(`seen`, ?) WHERE `seen` NOT LIKE ?", ",${SABConfig.serverId},", server)
-        } catch (e: SQLException) {
+        } catch (e: Exception) {
             SpicyAzisaBan.LOGGER.severe("Could not check for new events")
             e.printStackTrace()
         }

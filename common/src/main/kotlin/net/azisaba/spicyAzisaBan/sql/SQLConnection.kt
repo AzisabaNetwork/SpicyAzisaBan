@@ -41,6 +41,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         }
     }
 
+    var hasConnectedOnce = false
     lateinit var properties: Properties
     lateinit var punishments: Table
     lateinit var punishmentHistory: Table
@@ -65,6 +66,10 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         if (isConnected()) return
         this.properties = properties
         this.authenticate(getMariaDBDriver(), properties)
+        if (hasConnectedOnce) {
+            sync()
+            return
+        }
         val dupe = arrayOf(
             TableDefinition.Builder("id", DataType.BIGINT).setAutoIncrement(true).setPrimaryKey(true).build(), // punish id
             TableDefinition.Builder("name", DataType.STRING).setAllowNull(false).build(), // player name
@@ -158,6 +163,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             ),
         ).setupEventListener()
         this.sync()
+        hasConnectedOnce = true
     }
 
     fun execute(@Language("SQL") sql: String, vararg params: Any): Boolean {
