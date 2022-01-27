@@ -186,9 +186,12 @@ object PunishmentChecker {
 
     fun checkMute(sender: Actor, message: String, cancel: () -> Unit) {
         if (sender !is PlayerActor) return
-        if (message.startsWith("/") && !ReloadableSABConfig.getBlockedCommandsWhenMuted(sender.getServerName()).any { s ->
-                message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex())
-            }) return
+        val isCommand = message.startsWith("/")
+        if (isCommand &&
+            !ReloadableSABConfig.getBlockedCommandsWhenMuted(sender.getServerName()).any { s -> message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex()) }
+        ) {
+            return
+        }
         val res = Util.async<Boolean> { context ->
             SpicyAzisaBan.instance.schedule(3, TimeUnit.SECONDS) {
                 context.resolve(false)

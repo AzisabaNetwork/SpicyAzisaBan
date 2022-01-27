@@ -3,9 +3,11 @@ package net.azisaba.spicyAzisaBan.velocity.listener
 import com.velocitypowered.api.event.EventTask
 import com.velocitypowered.api.event.ResultedEvent
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.connection.LoginEvent
 import com.velocitypowered.api.event.player.PlayerChatEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
+import com.velocitypowered.api.proxy.Player
 import net.azisaba.spicyAzisaBan.common.ServerInfo
 import net.azisaba.spicyAzisaBan.punishment.PunishmentChecker
 import net.azisaba.spicyAzisaBan.struct.PlayerData
@@ -44,6 +46,14 @@ object EventListeners {
     fun onPlayerChat(e: PlayerChatEvent): EventTask = EventTask.async {
         PunishmentChecker.checkMute(VelocityPlayerActor(e.player), e.message) {
             e.result = PlayerChatEvent.ChatResult.denied()
+        }
+    }
+
+    @Subscribe
+    fun onCommandExecute(e: CommandExecuteEvent): EventTask = EventTask.async {
+        if (e.commandSource !is Player) return@async
+        PunishmentChecker.checkMute(VelocityPlayerActor(e.commandSource as Player), "/${e.command}") {
+            e.result = CommandExecuteEvent.CommandResult.denied()
         }
     }
 }
