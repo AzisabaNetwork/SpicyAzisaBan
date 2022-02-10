@@ -40,6 +40,9 @@ object SABMessages {
         return this.getArray(key)?.mapNotNull { o -> o?.toString() }?.joinToString("${ChatColor.RESET}\n") ?: def
     }
 
+    /**
+     * Replaces the variables (%KEY_IN_UPPERCASE%) in string with value.
+     */
     fun String.replaceVariables(variables: Map<String, String> = mapOf()): String {
         var s = replace("%PREFIX%", SpicyAzisaBan.PREFIX)
             .replace("%CMD_PREFIX%", SABConfig.prefix)
@@ -49,6 +52,9 @@ object SABMessages {
 
     fun String.replaceVariables(vararg pairs: Pair<String, String>) = replaceVariables(mapOf(*pairs))
 
+    /**
+     * Get a custom "banned" message or default one if there is no custom message.
+     */
     fun getBannedMessage(server: String) =
         ReloadableSABConfig.customBannedMessage[server] ?: Commands.General.removedFromServer
 

@@ -1,6 +1,5 @@
 package net.azisaba.spicyAzisaBan.bungee
 
-import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.bungee.listener.EventListeners
 import net.azisaba.spicyAzisaBan.bungee.listener.PlayerDataUpdaterListener
@@ -62,9 +61,7 @@ class BungeePlugin: Plugin() {
     }
 
     override fun onEnable() {
-        SpicyAzisaBan.debugLevel = 5
         SpicyAzisaBanBungee().doEnable()
-        if (!SABConfig.debugBuild) SpicyAzisaBan.debugLevel = 0
         proxy.pluginManager.registerListener(this, EventListeners)
         proxy.pluginManager.registerListener(this, PlayerDataUpdaterListener)
         logger.info("Hewwwwwwwwwoooooo!")

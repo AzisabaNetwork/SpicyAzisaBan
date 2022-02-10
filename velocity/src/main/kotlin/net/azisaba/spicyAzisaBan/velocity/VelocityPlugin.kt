@@ -29,6 +29,8 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
         lateinit var instance: VelocityPlugin
     }
 
+    private val urlsToBeAdded: List<Path>
+
     init {
         instance = this
         val dataFolder = File("plugins/SpicyAzisaBan")
@@ -54,20 +56,21 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
             }
         }.downloadAllDependencies()
         if (hasError) logger.warn("Failed to download some dependencies.")
-        val cl = VelocityPlugin::class.java.classLoader
-        val urls = files
+        urlsToBeAdded = files
             .filterNotNull()
             .map { file -> JarUtils.remapJarWithClassPrefix(file, "-remapped", "net.azisaba.spicyAzisaBan.libs") }
             .mapNotNull { file -> file.toPath() }
-        val m = cl::class.java.getDeclaredMethod("addPath", Path::class.java)
-        m.isAccessible = true
-        urls.forEach { path -> m.invoke(cl, path) }
-        logger.info("Loaded libraries (" + files.size + "):")
-        urls.forEach { path -> logger.info(" - $path") }
+//        val m = cl::class.java.getDeclaredMethod("addPath", Path::class.java)
+//        m.isAccessible = true
+//        urls.forEach { path -> m.invoke(cl, path) }
     }
 
     @Subscribe
     fun onProxyInitialization(e: ProxyInitializeEvent) {
+        for (path in urlsToBeAdded) {
+            server.pluginManager.addToClasspath(this, path)
+            logger.info("Loaded library $path")
+        }
         SpicyAzisaBan.debugLevel = 5
         SpicyAzisaBanVelocity(server).doEnable()
         if (!SABConfig.debugBuild) SpicyAzisaBan.debugLevel = 0

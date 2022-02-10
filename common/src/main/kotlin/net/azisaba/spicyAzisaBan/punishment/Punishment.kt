@@ -22,9 +22,9 @@ import net.azisaba.spicyAzisaBan.util.Util.getIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.getProfile
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.hasNotifyPermissionOf
+import net.azisaba.spicyAzisaBan.util.Util.isNotExpired
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.kick
-import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -55,6 +55,8 @@ data class Punishment(
 ) {
     companion object {
         private val pendingRemoval = mutableListOf<Long>()
+        internal val canJoinServerCachedData = PunishmentCache()
+        internal val muteCache = PunishmentCache()
         val recentPunishedPlayers = mutableSetOf<SimplePlayerProfile>()
 
         fun createByPlayer(
@@ -153,23 +155,22 @@ data class Punishment(
                     punishment = p
                 }
             }
-            canJoinServerCachedData[Triple(uuid, address, server)] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 120L) // 2 hours
+            canJoinServerCachedData[uuid, address, server] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 120L) // 2 hours
             context.resolve(punishment)
         }
 
-        internal val canJoinServerCachedData = mutableMapOf<Triple<UUID?, String?, String>, DataCache<Punishment>>()
         fun canJoinServerCached(uuid: UUID?, address: String?, server: String): Pair<Boolean, Punishment?> =
-            canJoinServerCachedData[Triple(uuid, address, server)]?.let { Pair(true, it.get()) } ?: Pair(false, null)
-
-        internal val muteCache = mutableMapOf<String, DataCache<Punishment>>()
+            canJoinServerCachedData.find(uuid, address, server)
+                ?.let { Pair(it.isNotExpired(), it.get()) }
+                ?: Pair(false, null)
 
         fun canSpeak(uuid: UUID?, address: String?, server: String, noCache: Boolean = false, noLookupGroup: Boolean = false): Promise<Punishment?> = async { context ->
             if (uuid == null && address == null) return@async context.reject(IllegalArgumentException("Either uuid or address must not be null"))
-            val punish = muteCache["$uuid,$address,$server"]
+            val punish = muteCache.find(uuid, address, server)
             val punishValue = punish?.get()
             if (noCache || punish == null || punish.ttl - System.currentTimeMillis() < 1000 * 60 * 5) {
                 SpicyAzisaBan.debug("Checking for $uuid, $address (trigger: ChatEvent on $server)")
-                muteCache["$uuid,$address,$server"] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
+                muteCache[uuid, address, server] = DataCache(punishValue, System.currentTimeMillis() + 1000L * 60L * 30L) // prevent spam to database
                 val group = if (server == "global" || noLookupGroup) server else SpicyAzisaBan.instance.connection.getGroupByServer(server).complete()
                 val ps = fetchActivePunishmentsBy(uuid, address, server, group)
                 if (ps.isEmpty()) return@async context.resolve(null)
@@ -181,7 +182,7 @@ data class Punishment(
                         punishment = p
                     }
                 }
-                muteCache["$uuid,$address,$server"] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 30L)
+                muteCache[uuid, address, server] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 30L)
                 return@async context.resolve(punishment)
             }
             if (punishValue?.isExpired() == true) {
@@ -279,11 +280,11 @@ data class Punishment(
         }
         if (type.isBan()) {
             SpicyAzisaBan.debug("Removing cache of $id (data was updated)")
-            canJoinServerCachedData.removeIf { k, value -> k.first.toString() == target || k.second == target || value.get()?.id == id }
+            canJoinServerCachedData.removeIf { k, value -> k.equalsTarget(target) || value.get()?.id == id }
         }
         if (type.isMute()) {
             SpicyAzisaBan.debug("Removing cache of $id (data was updated)")
-            muteCache.removeIf { s, value -> s.contains(target) || value.get()?.id == id }
+            muteCache.removeIf { key, value -> key.equalsTarget(target) || value.get()?.id == id }
         }
     }
 

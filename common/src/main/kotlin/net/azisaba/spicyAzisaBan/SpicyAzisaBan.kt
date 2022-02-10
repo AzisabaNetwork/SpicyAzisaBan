@@ -116,8 +116,8 @@ abstract class SpicyAzisaBan {
         connection.connect(props)
         settings = Settings()
         // dismiss all events for this server
-        val c = "%,${SABConfig.serverId},%"
-        connection.execute("UPDATE `events` SET `seen` = CONCAT(`seen`, ?) WHERE `seen` NOT LIKE ?", ",${SABConfig.serverId},", c)
+        val c = ",${SABConfig.serverId},"
+        connection.execute("UPDATE `events` SET `seen` = CONCAT(`seen`, ?) WHERE `seen` NOT LIKE ?", c, "%$c%")
         val version = settings.getDatabaseVersion().complete()
         if (version > SQLConnection.CURRENT_DATABASE_VERSION) {
             error("Cannot load the database that was used in a newer version of the plugin! Please update the plugin.\n" +
@@ -130,6 +130,7 @@ abstract class SpicyAzisaBan {
     }
     
     fun doEnable() {
+        if (SABConfig.debugBuild) debugLevel = 5
         if (SABConfig.prefix.contains("\\s+".toRegex())) throw IllegalArgumentException("prefix (in config.yml) contains whitespace")
         ReloadableSABConfig.reload()
         initDatabase()

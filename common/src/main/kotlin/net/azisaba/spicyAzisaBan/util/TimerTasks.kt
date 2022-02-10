@@ -37,7 +37,7 @@ class TimerTasks(private val connection: SQLConnection) {
                     } else if (e.event == EventType.UPDATED_PUNISHMENT) {
                         val id = e.data.getLong("id")
                         if (id <= 0) {
-                            SpicyAzisaBan.LOGGER.warning("Ignoring invalid event (invalid id): $e")
+                            SpicyAzisaBan.LOGGER.warning("Ignoring invalid event (invalid punishment id): $e")
                             continue
                         }
                         val p = Punishment.fetchActivePunishmentById(id).complete()
@@ -49,7 +49,7 @@ class TimerTasks(private val connection: SQLConnection) {
                     } else if (e.event == EventType.REMOVED_PUNISHMENT) {
                         val id = e.data.getLong("punish_id")
                         if (id <= 0) {
-                            SpicyAzisaBan.LOGGER.warning("Ignoring invalid event (invalid punish_id): $e")
+                            SpicyAzisaBan.LOGGER.warning("Ignoring invalid event (invalid punishment id): $e")
                             continue
                         }
                         val p = Punishment.fetchPunishmentById(id).complete()
@@ -69,7 +69,7 @@ class TimerTasks(private val connection: SQLConnection) {
                     } else if (e.event == EventType.LOCKDOWN) {
                         Util.setLockdownAndAnnounce(e.data.getString("actor_name"), e.data.getBoolean("lockdown_enabled"))
                     } else {
-                        SpicyAzisaBan.LOGGER.warning("Event $e was not handled")
+                        SpicyAzisaBan.LOGGER.warning("Unhandled event: $e")
                     }
                 } catch (e: Exception) {
                     SpicyAzisaBan.LOGGER.warning("Received unprocessable event data")

@@ -490,4 +490,9 @@ object Util {
             .forEach { it.send(message) }
         SpicyAzisaBan.instance.getConsoleActor().send(message)
     }
+
+    /**
+     * Checks if the DataCache is already expired.
+     */
+    fun DataCache<*>.isNotExpired() = System.currentTimeMillis() <= this.ttl
 }

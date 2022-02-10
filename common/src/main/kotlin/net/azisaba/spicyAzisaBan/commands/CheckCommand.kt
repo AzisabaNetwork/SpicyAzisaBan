@@ -31,7 +31,7 @@ import java.net.InetAddress
 
 object CheckCommand: Command() {
     override val name = "${SABConfig.prefix}check"
-    private val availableArguments = listOf(listOf("target=", "id="), listOf("--ip", "-i"), listOf("--only", "-o"), listOf("server="))
+    private val availableArguments = listOf(listOf("target=", "id="), listOf("--ip", "-i"), listOf("--only", "-o"), listOf("server="), listOf("--no-group-lookup"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission("sab.check")) {
@@ -62,6 +62,7 @@ object CheckCommand: Command() {
             return actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
         val only = arguments.contains("only") || arguments.contains("-o")
+        val noGroupLookup = arguments.contains("no-group-lookup")
         val specifiedServer = arguments.containsKey("server")
         val whereServer = if (specifiedServer) " AND `server` = ?" else ""
         async<Unit> { context ->
@@ -112,7 +113,7 @@ object CheckCommand: Command() {
                     SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     ps
                 }
-                val banInfo = Punishment.canJoinServer(null, ip, server, true)
+                val banInfo = Punishment.canJoinServer(null, ip, server, noGroupLookup)
                     .then {
                         if (it == null) {
                             SABMessages.General.none.translate()
@@ -121,7 +122,7 @@ object CheckCommand: Command() {
                         }
                     }
                     .complete()
-                val muteInfo = Punishment.canSpeak(null, ip, server, true)
+                val muteInfo = Punishment.canSpeak(null, ip, server, true, noGroupLookup)
                     .then {
                         if (it == null) {
                             SABMessages.General.none.translate()
@@ -180,16 +181,16 @@ object CheckCommand: Command() {
                     SQLConnection.logSql(sql, System.currentTimeMillis() - start)
                     ps
                 }
-                val banInfo = Punishment.canJoinServer(pd.uniqueId, if (only) null else pd.ip, server, true)
+                val banInfo = Punishment.canJoinServer(pd.uniqueId, if (only) null else pd.ip, server, noGroupLookup)
                     .then {
                         if (it == null) {
                             SABMessages.General.none.translate()
                         } else {
-                            SABMessages.Commands.Check.muteInfo.replaceVariables(it.getVariables().complete()).translate()
+                            SABMessages.Commands.Check.banInfo.replaceVariables(it.getVariables().complete()).translate()
                         }
                     }
                     .complete()
-                val muteInfo = Punishment.canSpeak(pd.uniqueId, if (only) null else pd.ip, server, true)
+                val muteInfo = Punishment.canSpeak(pd.uniqueId, if (only) null else pd.ip, server, true, noGroupLookup)
                     .then {
                         if (it == null) {
                             SABMessages.General.none.translate()
