@@ -252,6 +252,22 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         return group?.get()
     }
 
+    fun getCachedGroupByServerOrFetch(server: String): Promise<String?> {
+        if (server == "global") return Promise.resolve(null)
+        val group = cachedGroupByServer[server]
+        if (group == null || group.ttl - System.currentTimeMillis() < 10000) {
+            updatingCacheGroupByServer = true
+            return serverGroup.findOne(FindOptions.Builder().addWhere("server", server).setLimit(1).build())
+                .then {
+                    val g = it?.getString("group")
+                    cachedGroupByServer[server] = DataCache(g, System.currentTimeMillis() + 1000 * 60)
+                    updatingCacheGroupByServer = false
+                    return@then g
+                }
+        }
+        return Promise.resolve(group.get())
+    }
+
     fun isGroupExists(group: String): Promise<Boolean> =
         SpicyAzisaBan.instance.connection.groups
             .findOne(FindOptions.Builder().addWhere("id", group).build())

@@ -184,11 +184,11 @@ object PunishmentChecker {
         }
     }
 
-    fun checkMute(sender: Actor, message: String, cancel: () -> Unit) {
-        if (sender !is PlayerActor) return
+    fun checkMute(actor: Actor, message: String, cancel: () -> Unit) {
+        if (actor !is PlayerActor) return
         val isCommand = message.startsWith("/")
         if (isCommand &&
-            !ReloadableSABConfig.getBlockedCommandsWhenMuted(sender.getServerName()).any { s -> message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex()) }
+            !ReloadableSABConfig.getBlockedCommandsWhenMuted(actor.getServerName()).any { s -> message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex()) }
         ) {
             return
         }
@@ -197,28 +197,28 @@ object PunishmentChecker {
                 context.resolve(false)
             }
             val p = Punishment.canSpeak(
-                sender.uniqueId,
-                sender.getRemoteAddress().getIPAddress()?.reconstructIPAddress(),
-                sender.getServerName()
+                actor.uniqueId,
+                actor.getRemoteAddress().getIPAddress()?.reconstructIPAddress(),
+                actor.getServerName()
             ).complete()
-            if (p != null) {
+            if (p != null && !p.type.hasExemptPermission(actor).complete()) {
                 cancel()
-                sender.send(p.getBannedMessage().complete())
+                actor.send(p.getBannedMessage().complete())
             }
             context.resolve(true)
         }.catch {
-            SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${sender.uniqueId}")
+            SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${actor.uniqueId}")
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
                 cancel()
-                sender.send(SABMessages.General.error.replaceVariables().translate())
+                actor.send(SABMessages.General.error.replaceVariables().translate())
             }
         }.complete()
         if (!res) {
-            SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${sender.uniqueId} (Timed out)")
+            SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${actor.uniqueId} (Timed out)")
             if (SABConfig.database.failsafe) {
                 cancel()
-                sender.send(SABMessages.General.error.replaceVariables().translate())
+                actor.send(SABMessages.General.error.replaceVariables().translate())
             }
         }
     }

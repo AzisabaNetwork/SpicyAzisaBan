@@ -1,8 +1,8 @@
 import java.io.ByteArrayOutputStream
 
 plugins {
-    kotlin("jvm") version "1.6.0"
-    kotlin("kapt") version "1.6.0"
+    kotlin("jvm") version "1.6.10"
+    kotlin("kapt") version "1.6.10"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     `maven-publish`
 }
@@ -170,7 +170,7 @@ subprojects {
     dependencies {
         implementation("xyz.acrylicstyle.util:maven:0.16.5")
         implementation("net.blueberrymc:native-util:1.2.6")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
         implementation("xyz.acrylicstyle.util:all:0.16.5") {
             exclude("com.google.guava", "guava")
             exclude("org.reflections", "reflections")

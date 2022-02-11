@@ -362,7 +362,7 @@ object Util {
     }
 
     /**
-     * Try to get the server name of the server they're in. May be null if server is null or the sender isn't player.
+     * Try to get the server name of the server they're in. May be empty if server is null or the sender isn't player.
      */
     fun Actor.getServerName() = if (this is PlayerActor) this.getServer()?.name ?: "" else ""
 
