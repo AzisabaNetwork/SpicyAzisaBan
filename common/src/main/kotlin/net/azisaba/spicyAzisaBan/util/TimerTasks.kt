@@ -33,7 +33,7 @@ class TimerTasks(private val connection: SQLConnection) {
                             continue
                         }
                         p.doSomethingIfOnline()
-                        p.notifyToAll()
+                        p.notifyToAll(sendWebhook = e.seen.isEmpty())
                     } else if (e.event == EventType.UPDATED_PUNISHMENT) {
                         val id = e.data.getLong("id")
                         if (id <= 0) {

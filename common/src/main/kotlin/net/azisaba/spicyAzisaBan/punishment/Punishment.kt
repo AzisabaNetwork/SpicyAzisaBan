@@ -364,16 +364,29 @@ data class Punishment(
                 it.printStackTrace()
             }
 
-    fun notifyToAll() =
-        this.sendWebhook()
-            .then(getMessage())
-            .thenDo { message ->
-                SpicyAzisaBan.instance.getConsoleActor().send(message)
-                SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(type, server) }.forEach { player ->
-                    player.send(message)
+    fun notifyToAll(sendWebhook: Boolean = true): Promise<Unit> {
+        return if (sendWebhook) {
+            this.sendWebhook()
+                .then(getMessage())
+                .thenDo { message ->
+                    SpicyAzisaBan.instance.getConsoleActor().send(message)
+                    SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(type, server) }
+                        .forEach { player ->
+                            player.send(message)
+                        }
                 }
-            }
-            .then {}
+                .then {}
+        } else {
+            getMessage()
+                .thenDo { message ->
+                    SpicyAzisaBan.instance.getConsoleActor().send(message)
+                    SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(type, server) }
+                        .forEach { player ->
+                            player.send(message)
+                        }
+                }.then {}
+        }
+    }
 
     fun doSomethingIfOnline(actor: Actor? = null) = async<Unit> {
         val notifyTargetServer = (if (server == "global" && actor is PlayerActor) actor.getServer()?.name else server) ?: server
