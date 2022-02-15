@@ -10,11 +10,11 @@ import java.io.File
 
 object SABConfig {
     private val cfg: YamlObject
-    private val bungee = YamlConfiguration(ResourceLocator.getInstance(SpicyAzisaBan::class.java).getResourceAsStream("/spicyazisaban/version.yml")!!)
+    private val versionFile = YamlConfiguration(ResourceLocator.getInstance(SpicyAzisaBan::class.java).getResourceAsStream("/spicyazisaban/version.yml")!!)
         .asObject()
 
     init {
-        println("Loaded version.yml: ${bungee.rawData}")
+        println("Loaded version.yml: ${versionFile.rawData}")
         val dir = File("./plugins/SpicyAzisaBan")
         dir.mkdir()
         val file = File(dir, "config.yml")
@@ -46,10 +46,10 @@ object SABConfig {
 
     val serverId = cfg.getString("serverId") ?: "bungee"
 
-    val version = bungee.getString("version", "undefined")!!
-    val debugBuild = bungee.getBoolean("debugBuild", false)
-    val devBuild = bungee.getBoolean("devBuild", false)
-    val enableDebugFeatures = bungee.getBoolean("enableDebugFeatures", false)
+    val version = versionFile.getString("version", "undefined")!!
+    val debugBuild = versionFile.getBoolean("debugBuild", false)
+    val devBuild = versionFile.getBoolean("devBuild", false)
+    val enableDebugFeatures = versionFile.getBoolean("enableDebugFeatures", false)
 
     object Warning {
         private val obj
