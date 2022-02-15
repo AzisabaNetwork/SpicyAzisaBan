@@ -44,7 +44,13 @@ class SpicyAzisaBanVelocity(private val server: ProxyServer): SpicyAzisaBan() {
     }
 
     override fun createTextComponentFromLegacyText(legacyText: String): Array<Component> {
-        return arrayOf(VelocityComponent(LegacyComponentSerializer.legacySection().deserialize(legacyText)))
+        return arrayOf(VelocityComponent(
+            LegacyComponentSerializer.builder()
+                .character('\u00a7')
+                .extractUrls()
+                .build()
+                .deserialize(legacyText)
+        ))
     }
 
     override fun createTextComponent(content: String): Component {
