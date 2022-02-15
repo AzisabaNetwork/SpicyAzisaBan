@@ -61,7 +61,7 @@ repositories {
     mavenCentral()
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
     maven { url = uri("https://repo.blueberrymc.net") }
-    maven { url = uri("https://repo2.acrylicstyle.xyz") }
+    maven { url = uri("https://repo.acrylicstyle.xyz/repository/maven-public/") }
 }
 
 subprojects {
@@ -73,7 +73,7 @@ subprojects {
         mavenCentral()
         maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
         maven { url = uri("https://repo.blueberrymc.net") }
-        maven { url = uri("https://repo2.acrylicstyle.xyz") }
+        maven { url = uri("https://repo.acrylicstyle.xyz/repository/maven-public/") }
     }
 
     apply {
@@ -168,10 +168,10 @@ subprojects {
 
 subprojects {
     dependencies {
-        implementation("xyz.acrylicstyle.util:maven:0.16.5")
+        implementation("xyz.acrylicstyle.util:maven:0.16.6")
         implementation("net.blueberrymc:native-util:1.2.6")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-        implementation("xyz.acrylicstyle.util:all:0.16.5") {
+        implementation("xyz.acrylicstyle.util:all:0.16.6") {
             exclude("com.google.guava", "guava")
             exclude("org.reflections", "reflections")
             exclude("org.json", "json")

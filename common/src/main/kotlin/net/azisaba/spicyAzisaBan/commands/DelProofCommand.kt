@@ -13,9 +13,11 @@ import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.FindOptions
+import java.awt.Color
 
 object DelProofCommand: Command() {
     override val name = "${SABConfig.prefix}delproof"
@@ -45,6 +47,7 @@ object DelProofCommand: Command() {
         val list = SpicyAzisaBan.instance.connection.proofs.delete(FindOptions.Builder().addWhere("id", id).setLimit(1).build()).complete()
         if (list.isEmpty()) return actor.send(SABMessages.Commands.General.proofNotFound.replaceVariables().format(id).translate())
         val proof = Proof.fromTableData(list[0]).complete()!!
+        proof.sendWebhook(actor, "証拠が削除されました。", Color.RED)
         actor.send(
             SABMessages.Commands.DelProof.done
                 .replaceVariables("id" to proof.id.toString(), "pid" to proof.punishment.id.toString(), "text" to proof.text)

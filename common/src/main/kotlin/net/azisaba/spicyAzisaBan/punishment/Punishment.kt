@@ -28,6 +28,7 @@ import net.azisaba.spicyAzisaBan.util.Util.kick
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import org.json.JSONObject
 import util.concurrent.ref.DataCache
 import util.kt.promise.rewrite.catch
@@ -364,12 +365,15 @@ data class Punishment(
             }
 
     fun notifyToAll() =
-        getMessage().thenDo { message ->
-            SpicyAzisaBan.instance.getConsoleActor().send(message)
-            SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(type, server) }.forEach { player ->
-                player.send(message)
+        this.sendWebhook()
+            .then(getMessage())
+            .thenDo { message ->
+                SpicyAzisaBan.instance.getConsoleActor().send(message)
+                SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(type, server) }.forEach { player ->
+                    player.send(message)
+                }
             }
-        }.then {}
+            .then {}
 
     fun doSomethingIfOnline(actor: Actor? = null) = async<Unit> {
         val notifyTargetServer = (if (server == "global" && actor is PlayerActor) actor.getServer()?.name else server) ?: server

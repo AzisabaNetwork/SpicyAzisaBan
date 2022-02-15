@@ -15,6 +15,7 @@ import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendReasonChangedWebhook
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
@@ -63,6 +64,7 @@ object ChangeReasonCommand: Command() {
             .catch { actor.sendErrorMessage(it) }
             .complete() ?: return
         p.clearCache(sendEvent = true)
+        p.sendReasonChangedWebhook(actor, reason.text)
         actor.send(SABMessages.Commands.ChangeReason.done.replaceVariables(p.getVariables().complete()).translate())
     }
 

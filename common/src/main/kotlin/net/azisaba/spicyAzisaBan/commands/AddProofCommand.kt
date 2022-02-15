@@ -6,6 +6,7 @@ import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.command.Command
+import net.azisaba.spicyAzisaBan.punishment.Proof
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.async
@@ -16,10 +17,12 @@ import net.azisaba.spicyAzisaBan.util.Util.insert
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.InsertOptions
+import java.awt.Color
 
 object AddProofCommand: Command() {
     override val name = "${SABConfig.prefix}addproof"
@@ -63,6 +66,7 @@ object AddProofCommand: Command() {
             if (e.message == "cancel") return
             throw e
         }
+        Proof(proofId, p, text).sendWebhook(actor, "証拠が追加されました。", Color.GREEN)
         actor.send(
             SABMessages.Commands.AddProof.done
                 .replaceVariables("id" to proofId.toString(), "pid" to id.toString(), "text" to text)

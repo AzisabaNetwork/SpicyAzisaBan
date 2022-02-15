@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.util.Util.getProfile
 import net.azisaba.spicyAzisaBan.util.Util.hasNotifyPermissionOf
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.translate
+import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.TableData
@@ -59,10 +60,13 @@ data class UnPunish(
             }
 
     fun notifyToAll() =
-        getMessage().thenDo { message ->
-            SpicyAzisaBan.instance.getConsoleActor().send(message)
-            SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(punishment.type, punishment.server) }.forEach { player ->
-                player.send(message)
+        this.sendWebhook()
+            .then(getMessage())
+            .thenDo { message ->
+                SpicyAzisaBan.instance.getConsoleActor().send(message)
+                SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(punishment.type, punishment.server) }.forEach { player ->
+                    player.send(message)
+                }
             }
-        }.then {}
+            .then {}
 }
