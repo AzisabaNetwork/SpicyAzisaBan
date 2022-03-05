@@ -22,7 +22,7 @@ object WebhookUtil {
     }
 
     fun Punishment.sendWebhook(): Promise<Unit> {
-        val url = ReloadableSABConfig.getWebhookURL(server)
+        val url = ReloadableSABConfig.getWebhookURL(server, type)
         if (url != null && url.startsWith("http")) {
             val webhook = DiscordWebhook(url)
             return operator.getProfile().then { profile ->
@@ -49,7 +49,7 @@ object WebhookUtil {
     }
 
     fun Punishment.sendReasonChangedWebhook(actor: Actor, newReason: String): Promise<Unit> {
-        val url = ReloadableSABConfig.getWebhookURL(server)
+        val url = ReloadableSABConfig.getWebhookURL(server, type)
         if (url != null && url.startsWith("http")) {
             val webhook = DiscordWebhook(url)
             return async<Unit> { context ->
@@ -82,7 +82,7 @@ object WebhookUtil {
     }
 
     fun UnPunish.sendWebhook(): Promise<Unit> {
-        val url = ReloadableSABConfig.getWebhookURL(punishment.server)
+        val url = ReloadableSABConfig.getWebhookURL(punishment.server, punishment.type)
         if (url != null && url.startsWith("http")) {
             val webhook = DiscordWebhook(url)
             return punishment.operator.getProfile().then { profile ->
@@ -113,7 +113,7 @@ object WebhookUtil {
     }
 
     fun Proof.sendWebhook(actor: Actor, content: String, color: Color? = null): Promise<Unit> {
-        val url = ReloadableSABConfig.getWebhookURL(punishment.server)
+        val url = ReloadableSABConfig.getWebhookURL(punishment.server, punishment.type)
         if (url != null && url.startsWith("http")) {
             val webhook = DiscordWebhook(url)
             return async<Unit> { context ->

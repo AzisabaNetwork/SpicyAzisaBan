@@ -72,9 +72,16 @@ object ReloadableSABConfig {
             map.toMap()
         }
 
-    private val webhookURLs: Map<String, String?>
-        get() = cfg.getObj("webhookURLs").rawData.mapValues { (_, value) -> value?.toString() }.toMap()
+    private val webhookURLs: Map<String, Map<String, String?>>
+        get() = cfg.getObj("webhookURLs").rawData.mapValues { (_, value) ->
+            (value as Map<*, *>)
+                .mapKeys { (punishmentType, _) -> punishmentType.toString().uppercase() }
+                .mapValues { (_, url) -> url?.toString() }
+        }.toMap()
+
+    fun getWebhookURL(server: String, type: PunishmentType): String? =
+        (webhookURLs[server] ?: webhookURLs["__fallback__"])?.let { it[type.name.uppercase()] ?: it["default"] }
 
     fun getWebhookURL(server: String): String? =
-        webhookURLs[server] ?: webhookURLs["__fallback__"]
+        (webhookURLs[server] ?: webhookURLs["__fallback__"])?.get("default")
 }
