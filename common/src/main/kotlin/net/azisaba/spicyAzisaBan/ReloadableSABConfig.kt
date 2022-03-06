@@ -80,7 +80,7 @@ object ReloadableSABConfig {
         }.toMap()
 
     fun getWebhookURL(server: String, type: PunishmentType): String? =
-        (webhookURLs[server] ?: webhookURLs["__fallback__"])?.let { it[type.name.uppercase()] ?: it["default"] }
+        (webhookURLs[server] ?: webhookURLs["__fallback__"])?.let { it[type.name.uppercase()] ?: it["DEFAULT"] }
 
     fun getWebhookURL(server: String): String? =
         (webhookURLs[server] ?: webhookURLs["__fallback__"])?.get("default")
