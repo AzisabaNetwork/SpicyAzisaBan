@@ -14,6 +14,7 @@ import util.promise.rewrite.Promise
 import java.awt.Color
 
 object WebhookUtil {
+    @Deprecated(message = "unused")
     fun sendGenericWebhook(server: String, username: String?, content: String) {
         val url = ReloadableSABConfig.getWebhookURL(server)
         if (url != null && url.startsWith("http")) {

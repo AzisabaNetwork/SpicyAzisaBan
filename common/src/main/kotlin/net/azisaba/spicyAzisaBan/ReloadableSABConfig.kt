@@ -82,6 +82,7 @@ object ReloadableSABConfig {
     fun getWebhookURL(server: String, type: PunishmentType): String? =
         (webhookURLs[server] ?: webhookURLs["__fallback__"])?.let { it[type.name.uppercase()] ?: it["DEFAULT"] }
 
+    @Deprecated(message = "unused")
     fun getWebhookURL(server: String): String? =
-        (webhookURLs[server] ?: webhookURLs["__fallback__"])?.get("default")
+        (webhookURLs[server] ?: webhookURLs["__fallback__"])?.get("DEFAULT")
 }
