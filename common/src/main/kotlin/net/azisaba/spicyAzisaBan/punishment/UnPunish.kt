@@ -59,8 +59,8 @@ data class UnPunish(
                 it.printStackTrace()
             }
 
-    fun notifyToAll() =
-        this.sendWebhook()
+    fun notifyToAll(sendWebhook: Boolean = true) =
+        (if (sendWebhook) this.sendWebhook() else Promise.resolve(null))
             .then(getMessage())
             .thenDo { message ->
                 SpicyAzisaBan.instance.getConsoleActor().send(message)

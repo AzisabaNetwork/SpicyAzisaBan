@@ -65,7 +65,7 @@ class TimerTasks(private val connection: SQLConnection) {
                             continue
                         }
                         val unpunishRecord = UnPunish.fromTableData(p, td)
-                        unpunishRecord.notifyToAll()
+                        unpunishRecord.notifyToAll(sendWebhook = e.seen.isEmpty())
                     } else if (e.event == EventType.LOCKDOWN) {
                         Util.setLockdownAndAnnounce(e.data.getString("actor_name"), e.data.getBoolean("lockdown_enabled"))
                     } else {
