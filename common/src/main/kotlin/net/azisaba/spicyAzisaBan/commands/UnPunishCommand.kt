@@ -10,6 +10,7 @@ import net.azisaba.spicyAzisaBan.common.command.Command
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.punishment.UnPunish
+import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
@@ -21,6 +22,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
+import org.json.JSONObject
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.FindOptions
@@ -102,6 +104,7 @@ object UnPunishCommand: Command() {
             if (e.message == "cancel") return
             throw e
         }
+        SpicyAzisaBan.instance.connection.sendEvent(EventType.REMOVED_PUNISHMENT, JSONObject().put("punish_id", p.id)).complete()
         UnPunish(upid, p, reason.text, time, actor.uniqueId).notifyToAll().complete()
         p.clearCache(sendEvent = true)
         actor.send(SABMessages.Commands.Unpunish.done.replaceVariables(p.getVariables().complete()).translate())
