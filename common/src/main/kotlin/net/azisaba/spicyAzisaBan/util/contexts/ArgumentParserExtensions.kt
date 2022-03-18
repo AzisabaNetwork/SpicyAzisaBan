@@ -65,10 +65,6 @@ private fun ArgumentParser.getServer(actor: Actor, checkPermission: Boolean): Pr
             }
             isGroup = true
         } else {
-            if (!SpicyAzisaBan.instance.getServers().containsKey(server)) {
-                actor.send(SABMessages.Commands.General.invalidServer.replaceVariables().translate())
-                return@async context.resolve(ServerContext(false, server, false))
-            }
             if (checkPermission && !actor.hasPermission("sab.punish.server.$server")) {
                 actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
                 return@async context.resolve(ServerContext(false, server, false))

@@ -1,6 +1,7 @@
 package net.azisaba.spicyAzisaBan.velocity
 
 import com.velocitypowered.api.proxy.ProxyServer
+import net.azisaba.spicyAzisaBan.PlatformType
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.PlayerActor
@@ -11,11 +12,14 @@ import net.azisaba.spicyAzisaBan.common.scheduler.ScheduledTask
 import net.azisaba.spicyAzisaBan.velocity.command.VelocityCommand
 import net.azisaba.spicyAzisaBan.velocity.util.VelocityComponent
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import java.nio.file.Path
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import net.kyori.adventure.text.Component as KComponent
 
-class SpicyAzisaBanVelocity(private val server: ProxyServer): SpicyAzisaBan() {
+class SpicyAzisaBanVelocity(private val server: ProxyServer, private val dataFolder: Path): SpicyAzisaBan() {
+    override fun getPlatformType(): PlatformType = PlatformType.VELOCITY
+
     override fun getPluginName() = "SpicyAzisaBan"
 
     override fun getServerName(): String = server.version.name
@@ -69,4 +73,6 @@ class SpicyAzisaBanVelocity(private val server: ProxyServer): SpicyAzisaBan() {
     }
 
     override fun getConsoleActor(): Actor = VelocityActor(server.consoleCommandSource)
+
+    override fun getDataFolder(): Path = dataFolder
 }

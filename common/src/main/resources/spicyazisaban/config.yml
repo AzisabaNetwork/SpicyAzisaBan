@@ -1,3 +1,8 @@
+# SpicyAzisaBan config
+#
+# Important: If you are running from CLI, you only need to configure database settings, and you can just ignore
+# anything else.
+
 # Command prefix
 # ----------
 # You will be able to run command with: /${prefix}command
@@ -25,9 +30,10 @@ warning:
 # Server ID settings
 # ----------
 # Ignore if you are using only one plugin per network.
-# You *need* to change this if you are using more than 1 BungeeCord instances.
+# You *need* to change this if you are using more than 1 proxy instances.
 # The server ID will only be used internally and will not be exposed to any player.
-serverId: bungee1
+# This config is ignored entirely when running from CLI.
+serverId: proxy
 
 # These settings below are reloadable by doing /sab reload
 

@@ -13,31 +13,33 @@ interface DatabaseMigration {
 
         fun run(): Promise<Unit> = async { context ->
             val start = System.currentTimeMillis()
-            val initialVersion = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
-            SpicyAzisaBan.LOGGER.info("Running database migrations (current database version: $initialVersion)")
+            var currentVersion = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
+            val initialVersion = currentVersion
+            SpicyAzisaBan.LOGGER.info("Running database migrations (current database version: $currentVersion)")
             SpicyAzisaBan.LOGGER.info("${migrations.size} migrations loaded.")
             migrations.forEach { migration ->
-                val version = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
-                if (migration.targetDatabaseVersion == version) {
-                    SpicyAzisaBan.LOGGER.info("Migrating '${migration.name}' (database version $version)")
+                if (migration.targetDatabaseVersion == currentVersion) {
+                    SpicyAzisaBan.LOGGER.info("Migrating '${migration.name}' (database version $currentVersion)")
                     val sectionStart = System.currentTimeMillis()
                     try {
                         migration.execute(SpicyAzisaBan.instance.connection)
                     } catch (e: Throwable) {
-                        SpicyAzisaBan.LOGGER.severe("Error migrating '${migration.name}' (database version $version)")
+                        SpicyAzisaBan.LOGGER.severe("Error migrating '${migration.name}' (database version $currentVersion)")
                         throw e
                     }
                     val sectionTime = System.currentTimeMillis() - sectionStart
-                    SpicyAzisaBan.LOGGER.info("Migrated '${migration.name}' (database version $version, took ${sectionTime}ms)")
+                    SpicyAzisaBan.LOGGER.info("Migrated '${migration.name}' (database version $currentVersion, took ${sectionTime}ms)")
+                    currentVersion = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
                 }
             }
-            val version = SpicyAzisaBan.instance.settings.getDatabaseVersion().complete()
-            if (version != SQLConnection.CURRENT_DATABASE_VERSION) {
-                SpicyAzisaBan.LOGGER.severe("Database migration did not upgrade the database version from $version to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
+            if (currentVersion != SQLConnection.CURRENT_DATABASE_VERSION) {
+                SpicyAzisaBan.LOGGER.severe("Database migration did not upgrade the database version from $currentVersion to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
             }
             val time = System.currentTimeMillis() - start
-            SpicyAzisaBan.LOGGER.info("Completed database migrations (current database version: $version, took ${time}ms)")
-            SpicyAzisaBan.instance.settings.setDatabaseVersion(version)
+            SpicyAzisaBan.LOGGER.info("Completed database migrations (current database version: $currentVersion, took ${time}ms)")
+            if (initialVersion != currentVersion) {
+                SpicyAzisaBan.instance.settings.setDatabaseVersion(currentVersion)
+            }
             context.resolve()
         }
     }

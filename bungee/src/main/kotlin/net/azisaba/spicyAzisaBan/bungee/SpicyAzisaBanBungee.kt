@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.bungee
 
+import net.azisaba.spicyAzisaBan.PlatformType
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.bungee.command.BungeeCommand
 import net.azisaba.spicyAzisaBan.bungee.util.BungeeUtil.toCommon
@@ -11,11 +12,15 @@ import net.azisaba.spicyAzisaBan.common.command.Command
 import net.azisaba.spicyAzisaBan.common.scheduler.ScheduledTask
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
+import java.io.File
+import java.nio.file.Path
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class SpicyAzisaBanBungee: SpicyAzisaBan() {
     private val server = ProxyServer.getInstance()
+
+    override fun getPlatformType(): PlatformType = PlatformType.BUNGEECORD
 
     override fun getPluginName(): String = BungeePlugin.instance.description.name
 
@@ -57,4 +62,6 @@ class SpicyAzisaBanBungee: SpicyAzisaBan() {
     }
 
     override fun getConsoleActor(): Actor = BungeeActor(server.console)
+
+    override fun getDataFolder(): Path = File("./plugins/SpicyAzisaBan").toPath()
 }

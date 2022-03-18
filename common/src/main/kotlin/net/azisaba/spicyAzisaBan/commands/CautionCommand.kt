@@ -53,6 +53,10 @@ object CautionCommand: Command() {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
+        doCaution(actor, player, server, reason)
+    }
+
+    fun doCaution(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext) {
         val p = Punishment
             .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.CAUTION, -1, server.name)
             .insert(actor)

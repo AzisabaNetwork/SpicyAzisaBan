@@ -52,8 +52,19 @@ object TempMuteCommand: Command() {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
-        val time = arguments.get(Contexts.TIME, actor).complete().apply { if (!isSuccess) return }.time
-        if (time == -1L) {
+        val time = arguments.get(Contexts.TIME, actor).complete().apply { if (!isSuccess) return }
+        doTempMute(actor, player, server, reason, time, arguments.contains("all"))
+    }
+
+    fun doTempMute(
+        actor: Actor,
+        player: PlayerContext,
+        server: ServerContext,
+        reason: ReasonContext,
+        time: TimeContext,
+        all: Boolean,
+    ) {
+        if (time.time == -1L) {
             actor.send(SABMessages.Commands.General.timeNotSpecified.replaceVariables().translate())
             return
         }
@@ -62,7 +73,14 @@ object TempMuteCommand: Command() {
             return
         }
         val p = Punishment
-            .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.TEMP_MUTE, System.currentTimeMillis() + time, server.name)
+            .createByPlayer(
+                player.profile,
+                reason.text,
+                actor.uniqueId,
+                PunishmentType.TEMP_MUTE,
+                System.currentTimeMillis() + time.time,
+                server.name
+            )
             .insert(actor)
             .catch {
                 SpicyAzisaBan.LOGGER.warning("Something went wrong while handling command from ${actor.name}!")
@@ -70,7 +88,7 @@ object TempMuteCommand: Command() {
             }
             .complete() ?: return
         p.notifyToAll().complete()
-        if (arguments.contains("all")) {
+        if (all) {
             p.applyToSameIPs(player.profile.uniqueId).catch { actor.sendErrorMessage(it) }.complete()
         }
         actor.send(SABMessages.Commands.TempMute.done.replaceVariables(p.getVariables().complete()).translate())

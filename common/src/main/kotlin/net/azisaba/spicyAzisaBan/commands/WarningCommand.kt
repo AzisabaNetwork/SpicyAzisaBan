@@ -54,6 +54,10 @@ object WarningCommand: Command() {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
+        doWarning(actor, player, server, reason)
+    }
+
+    fun doWarning(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext) {
         val p = Punishment
             .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.WARNING, -1, server.name)
             .insert(actor)
@@ -74,9 +78,15 @@ object WarningCommand: Command() {
             val count = rs.getInt(1)
             rs.statement.close()
             if (count >= ReloadableSABConfig.BanOnWarning.threshold) {
-                SpicyAzisaBan.instance.executeCommand(
+                TempBanCommand.doTempBan(
                     SpicyAzisaBan.instance.getConsoleActor(),
-                    "${SABConfig.prefix}gtempban player=${player.profile.name} reason=\"${ReloadableSABConfig.BanOnWarning.reason.replaceVariables("count" to count.toString()).translate()}\" server=${server.name} time=${ReloadableSABConfig.BanOnWarning.time}",
+                    ArgumentParser(
+                        "player=${player.profile.name} reason=\"${
+                            ReloadableSABConfig.BanOnWarning.reason.replaceVariables(
+                                "count" to count.toString()
+                            ).translate()
+                        }\" server=${server.name} time=${ReloadableSABConfig.BanOnWarning.time}"
+                    )
                 )
             }
         }

@@ -192,7 +192,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                     InsertOptions.Builder()
                         .addValue("event_id", eventType.name.lowercase())
                         .addValue("data", data.toString())
-                        .addValue("seen", ",${SABConfig.serverId},") // mark sender server as "seen"
+                        .addValue("seen", if (SABConfig.serverId == null) "" else ",${SABConfig.serverId},") // mark sender server as "seen"
                         .build()
                 ).complete()
             }
@@ -202,7 +202,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             it.resolve()
             return@async
         }
-        SpicyAzisaBan.LOGGER.info("Sending event with id $id")
+        SpicyAzisaBan.debug("Sending event with id $id")
         SpicyAzisaBan.debug("Event type: $eventType")
         SpicyAzisaBan.debug("Event data: ${data.toString(2)}")
         it.resolve()
@@ -269,9 +269,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
     }
 
     fun isGroupExists(group: String): Promise<Boolean> =
-        SpicyAzisaBan.instance.connection.groups
-            .findOne(FindOptions.Builder().addWhere("id", group).build())
-            .then { it != null }
+        groups.findOne(FindOptions.Builder().addWhere("id", group).build()).then { it != null }
 
     fun getGroupByServer(server: String): Promise<String?> {
         if (server == "global") return Promise.resolve(null)

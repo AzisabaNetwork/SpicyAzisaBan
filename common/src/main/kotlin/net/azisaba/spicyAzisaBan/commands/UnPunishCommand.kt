@@ -60,6 +60,10 @@ object UnPunishCommand: Command() {
         }
         val reason = arguments.get(Contexts.REASON, actor).complete()
         if (reason.text == "none") return actor.send(SABMessages.Commands.General.noReasonSpecified.replaceVariables().translate())
+        doUnPunish(actor, id, reason)
+    }
+
+    fun doUnPunish(actor: Actor, id: Long, reason: ReasonContext) {
         val p = Punishment.fetchActivePunishmentById(id).complete()
         if (p == null) {
             actor.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().format(id).translate())

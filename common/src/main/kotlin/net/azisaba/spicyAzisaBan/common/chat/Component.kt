@@ -9,6 +9,9 @@ interface Component {
         fun text(content: String) = SpicyAzisaBan.instance.createTextComponent(content)
 
         @JvmStatic
+        fun text(content: String, color: ChatColor) = SpicyAzisaBan.instance.createTextComponent(content).apply { setColor(color) }
+
+        @JvmStatic
         fun fromLegacyText(legacyText: String) = SpicyAzisaBan.instance.createTextComponentFromLegacyText(legacyText)
     }
 

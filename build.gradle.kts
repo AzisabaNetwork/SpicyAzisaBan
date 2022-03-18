@@ -135,23 +135,25 @@ subprojects {
         }
 
         shadowJar {
-            dependencies {
-                exclude(dependency("com.google.guava:guava:.*"))
-                exclude(dependency("org.reflections:reflections:.*"))
-                exclude(dependency("org.json:json:.*"))
-                exclude(dependency("org.yaml:snakeyaml:.*"))
-                exclude(dependency("com.google.code.findbugs:jsr305:.*"))
-                exclude(dependency("org.javassist:javassist:.*"))
-                exclude(dependency("org.slf4j:slf4j-api:.*"))
-                exclude(dependency("com.google.guava:failureaccess:.*"))
-                exclude(dependency("com.google.guava:listenablefuture:.*"))
-                exclude(dependency("com.google.code.findbugs:jsr305:.*"))
-                exclude(dependency("org.checkerframework:checker-qual:.*"))
-                exclude(dependency("com.google.errorprone:error_prone_annotations:.*"))
-                exclude(dependency("com.google.j2objc:j2objc-annotations:.*"))
-                exclude(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:.*"))
-                exclude(dependency("org.xerial.snappy:snappy-java:"))
-                exclude(dependency("org.jetbrains:annotations:.*"))
+            if (project.name != "cli") {
+                dependencies {
+                    exclude(dependency("com.google.guava:guava:.*"))
+                    exclude(dependency("org.reflections:reflections:.*"))
+                    exclude(dependency("org.json:json:.*"))
+                    exclude(dependency("org.yaml:snakeyaml:.*"))
+                    exclude(dependency("com.google.code.findbugs:jsr305:.*"))
+                    exclude(dependency("org.javassist:javassist:.*"))
+                    exclude(dependency("org.slf4j:slf4j-api:.*"))
+                    exclude(dependency("com.google.guava:failureaccess:.*"))
+                    exclude(dependency("com.google.guava:listenablefuture:.*"))
+                    exclude(dependency("com.google.code.findbugs:jsr305:.*"))
+                    exclude(dependency("org.checkerframework:checker-qual:.*"))
+                    exclude(dependency("com.google.errorprone:error_prone_annotations:.*"))
+                    exclude(dependency("com.google.j2objc:j2objc-annotations:.*"))
+                    exclude(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:.*"))
+                    exclude(dependency("org.xerial.snappy:snappy-java:"))
+                    exclude(dependency("org.jetbrains:annotations:.*"))
+                }
             }
             relocate("kotlin", "net.azisaba.spicyAzisaBan.libs.kotlin")
             relocate("util", "net.azisaba.spicyAzisaBan.libs.util")
@@ -178,7 +180,7 @@ subprojects {
             exclude("org.yaml", "snakeyaml")
             exclude("xyz.acrylicstyle.util", "maven")
         }
-        implementation("xyz.acrylicstyle:sequelize4j:0.6.2") {
+        implementation("xyz.acrylicstyle:sequelize4j:0.6.3") {
             exclude("xyz.acrylicstyle", "java-util-all")
         }
         implementation("xyz.acrylicstyle:minecraft-util:1.0.0") {

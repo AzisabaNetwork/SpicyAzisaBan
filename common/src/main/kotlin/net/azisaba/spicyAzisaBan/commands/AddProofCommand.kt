@@ -51,6 +51,10 @@ object AddProofCommand: Command() {
             return
         }
         val text = arguments.getString("text") ?: return actor.send(SABMessages.Commands.General.noProofSpecified.replaceVariables().translate())
+        execute(actor, id, text)
+    }
+
+    fun execute(actor: Actor, id: Long, text: String) {
         val p = Punishment.fetchActivePunishmentById(id).complete()
             ?: return actor.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().format(id).translate())
         val proofId = try {

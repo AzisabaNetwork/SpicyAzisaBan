@@ -19,7 +19,7 @@ object SABMessages {
     }
 
     fun reload() {
-        val dir = File("./plugins/SpicyAzisaBan")
+        val dir = SpicyAzisaBan.instance.getDataFolder().toFile()
         dir.mkdir()
         val file = File(dir, "messages.yml")
         val input = ResourceLocator.getInstance(SABMessages::class.java).getResourceAsStream("/spicyazisaban/messages.yml")

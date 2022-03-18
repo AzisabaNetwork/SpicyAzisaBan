@@ -20,6 +20,7 @@ import net.azisaba.spicyAzisaBan.util.Util.sendOrSuppressErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.toUUID
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import util.kt.promise.rewrite.catch
+import util.promise.rewrite.Promise
 import java.net.InetAddress
 
 object SeenCommand: Command() {
@@ -36,6 +37,10 @@ object SeenCommand: Command() {
         val list = args.toMutableList()
         val ambiguous = list.remove("--ambiguous")
         val target = list[0]
+        doSeen(actor, target, ambiguous)
+    }
+
+    fun doSeen(actor: Actor, target: String, ambiguous: Boolean): Promise<Unit> =
         async<Unit> { context ->
             actor.send(SABMessages.Commands.Seen.searching.replaceVariables().translate())
             if (target.isValidIPAddress()) {
@@ -46,7 +51,7 @@ object SeenCommand: Command() {
                 }
                 val hostname = InetAddress.getByName(target).hostName
                 // * = the player has different ip currently
-                val players = pd.joinToString(", ") { if (it.ip != list[0]) "${it.name}*" else it.name }
+                val players = pd.joinToString(", ") { if (it.ip != target) "${it.name}*" else it.name }
                 actor.send(
                     SABMessages.Commands.Seen.layoutIP
                         .replaceVariables(
@@ -104,7 +109,6 @@ object SeenCommand: Command() {
             }
             context.resolve()
         }.catch { actor.sendErrorMessage(it) }
-    }
 
     override fun onTabComplete(actor: Actor, args: Array<String>): Collection<String> {
         if (!actor.hasPermission("sab.seen")) return emptyList()

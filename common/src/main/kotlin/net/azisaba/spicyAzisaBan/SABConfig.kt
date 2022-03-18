@@ -14,8 +14,8 @@ object SABConfig {
         .asObject()
 
     init {
-        println("Loaded version.yml: ${versionFile.rawData}")
-        val dir = File("./plugins/SpicyAzisaBan")
+        //SpicyAzisaBan.LOGGER.info("Loaded version.yml: ${versionFile.rawData}")
+        val dir = SpicyAzisaBan.instance.getDataFolder().toFile()
         dir.mkdir()
         val file = File(dir, "config.yml")
         if (!file.exists()) {
@@ -44,10 +44,11 @@ object SABConfig {
         val failsafe = obj.getBoolean("failsafe", true)
     }
 
-    val serverId = cfg.getString("serverId") ?: "bungee"
+    val serverId: String?
+        get() = if (SpicyAzisaBan.instance.getPlatformType() == PlatformType.CLI) null else cfg.getString("serverId")
 
     val version = versionFile.getString("version", "undefined")!!
-    val debugBuild = versionFile.getBoolean("debugBuild", false)
+    val debugBuild = false//versionFile.getBoolean("debugBuild", false)
     val devBuild = versionFile.getBoolean("devBuild", false)
     val enableDebugFeatures = versionFile.getBoolean("enableDebugFeatures", false)
 

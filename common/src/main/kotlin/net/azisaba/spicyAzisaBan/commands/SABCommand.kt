@@ -1,5 +1,6 @@
 package net.azisaba.spicyAzisaBan.commands
 
+import net.azisaba.spicyAzisaBan.PlatformType
 import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
@@ -20,6 +21,7 @@ import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import util.kt.promise.rewrite.catch
+import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.InsertOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
@@ -91,91 +93,11 @@ object SABCommand: Command() {
         when (args[0].lowercase()) {
             "creategroup" -> {
                 if (args.size <= 1) return actor.sendHelp()
-                val groupName = args[1]
-                if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
-                    return actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
-                }
-                SpicyAzisaBan.instance.connection.getAllGroups()
-                    .then { list ->
-                        if (list.any { it.equals(groupName, true) }) {
-                            actor.send("$PREFIX${ChatColor.RED}この名前はすでに使用されています。")
-                            throw Exception()
-                        }
-                    }
-                    .thenDo {
-                        insert {
-                            SpicyAzisaBan.instance.connection.groups.insert(
-                                InsertOptions.Builder().addValue("id", groupName).build()
-                            ).complete()
-                        }
-                    }
-                    .thenDo { SpicyAzisaBan.instance.connection.cachedGroups.set(null) }
-                    .then { actor.send("${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を作成しました。") }
-                    .catch {
-                        if (it::class.java == Exception::class.java) return@catch
-                        actor.send("$PREFIX${ChatColor.RED}グループの作成に失敗しました。")
-                        it.printStackTrace()
-                    }
+                executeCreateGroup(actor, args[1])
             }
             "deletegroup" -> {
                 if (args.size <= 1) return actor.sendHelp()
-                val groupName = args[1]
-                if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
-                    return actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
-                }
-                SpicyAzisaBan.instance.connection.getAllGroups()
-                    .then { list ->
-                        if (!list.any { it == groupName }) {
-                            actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
-                            throw Exception()
-                        }
-                        val a = args.joinToString()
-                        if (groupRemoveConfirmation[actor.uniqueId] != a) {
-                            actor.send("$PREFIX${ChatColor.GOLD}グループ「${ChatColor.YELLOW}$groupName${ChatColor.GOLD}」を削除しますか？関連付けられているすべての処罰が解除されます。")
-                            actor.send("$PREFIX${ChatColor.GOLD}削除するには10秒以内に同じコマンドをもう一度打ってください。")
-                            groupRemoveConfirmation[actor.uniqueId] = a
-                            SpicyAzisaBan.instance.schedule(10, TimeUnit.SECONDS) {
-                                if (groupRemoveConfirmation[actor.uniqueId] == a) {
-                                    groupRemoveConfirmation.remove(actor.uniqueId)
-                                }
-                            }
-                            throw Exception()
-                        }
-                    }
-                    .then(SpicyAzisaBan.instance.connection.groups.delete(FindOptions.Builder().addWhere("id", groupName).build()))
-                    .then(SpicyAzisaBan.instance.connection.serverGroup.delete(FindOptions.Builder().addWhere("group", groupName).build()))
-                    .thenDo {
-                        SpicyAzisaBan.instance.connection.cachedGroups.set(null)
-                        actor.send("$PREFIX${ChatColor.GREEN}グループに関連付けられた処罰を削除中...")
-                        SpicyAzisaBan.instance.connection.punishments
-                            .delete(FindOptions.Builder().addWhere("server", groupName).build())
-                            .then { it.map { td -> Punishment.fromTableData(td) } }
-                            .then { list ->
-                                val reason = SABMessages.Commands.Sab.deleteGroupUnpunishReason
-                                    .replaceVariables("group" to groupName)
-                                    .translate()
-                                list.forEach { p ->
-                                    SpicyAzisaBan.instance.connection.unpunish.insert(
-                                        InsertOptions.Builder()
-                                            .addValue("punish_id", p.id)
-                                            .addValue("reason", reason)
-                                            .addValue("timestamp", System.currentTimeMillis())
-                                            .addValue("operator", actor.uniqueId.toString())
-                                            .build()
-                                    ).complete()
-                                }
-                            }
-                            .catch { actor.sendErrorMessage(it) }
-                            .complete()
-                        groupRemoveConfirmation.remove(actor.uniqueId)
-                    }
-                    .then { actor.send("$PREFIX${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を削除しました。") }
-                    .catch {
-                        if (it::class.java == Exception::class.java) return@catch
-                        actor.send("$PREFIX${ChatColor.RED}グループの削除に失敗しました。")
-                        SpicyAzisaBan.LOGGER.warning("Failed to delete group $groupName")
-                        it.printStackTrace()
-                    }
+                executeDeleteGroup(actor, args[1], false)
             }
             "group" -> {
                 if (args.size <= 2 || !groupCommands.contains(args[2])) return actor.sendGroupHelp()
@@ -229,29 +151,7 @@ object SABCommand: Command() {
                         }
                     }
             }
-            "info" -> {
-                async<Unit> { context ->
-                    val dbVersion = SpicyAzisaBan.instance
-                        .settings
-                        .getDatabaseVersion()
-                        .onCatch {}
-                        .complete() ?: -1
-                    actor.send(SABMessages.Commands.Sab.info.replaceVariables(
-                        "server_name" to SpicyAzisaBan.instance.getServerName(),
-                        "server_version" to SpicyAzisaBan.instance.getServerVersion(),
-                        "db_connected" to SpicyAzisaBan.instance.connection.isConnected().toMinecraft(),
-                        "db_version" to dbVersion.toString(),
-                        "db_failsafe" to SABConfig.database.failsafe.toMinecraft(),
-                        "uptime" to SpicyAzisaBan.getUptime(),
-                        "version" to SABConfig.version,
-                        "is_devbuild" to SABConfig.devBuild.toMinecraft(),
-                        "is_debugbuild" to SABConfig.debugBuild.toMinecraft(),
-                        "server_id" to SABConfig.serverId,
-                        "is_lockdown" to SpicyAzisaBan.instance.lockdown.toMinecraft(),
-                    ).translate())
-                    context.resolve()
-                }
-            }
+            "info" -> executeInfo(actor)
             "deletepunishmenthistory" -> {
                 if (args.size <= 1) return actor.sendHelp()
                 val id = try {
@@ -283,16 +183,16 @@ object SABCommand: Command() {
                     }
             }
             "debug" -> {
-                if (args.size <= 1) {
-                    SpicyAzisaBan.debugLevel = 0
+                val debugLevel = if (args.size <= 1) {
+                    0
                 } else {
-                    SpicyAzisaBan.debugLevel = try {
+                    try {
                         min(max(Integer.parseInt(args[1]), 0), 99999)
                     } catch (e: NumberFormatException) {
                         0
                     }
                 }
-                actor.send(SABMessages.Commands.Sab.setDebugLevel.replaceVariables().format(SpicyAzisaBan.debugLevel).translate())
+                executeDebug(actor, debugLevel)
             }
             "reload" -> {
                 try {
@@ -357,6 +257,128 @@ object SABCommand: Command() {
             }
             else -> actor.sendHelp()
         }
+    }
+
+    fun executeDeleteGroup(actor: Actor, groupName: String, confirmed: Boolean): Promise<Unit> {
+        if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
+            actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
+            return Promise.resolve(null)
+        }
+        return SpicyAzisaBan.instance.connection.getAllGroups()
+            .then { list ->
+                if (!list.any { it == groupName }) {
+                    actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
+                    throw Exception()
+                }
+                if ((SpicyAzisaBan.instance.getPlatformType() == PlatformType.CLI && !confirmed) ||
+                    (SpicyAzisaBan.instance.getPlatformType() != PlatformType.CLI && groupRemoveConfirmation[actor.uniqueId] != groupName)
+                ) {
+                    println("send")
+                    actor.send("$PREFIX${ChatColor.GOLD}グループ「${ChatColor.YELLOW}$groupName${ChatColor.GOLD}」を削除しますか？関連付けられているすべての処罰が解除されます。")
+                    if (SpicyAzisaBan.instance.getPlatformType() == PlatformType.CLI) {
+                        actor.send("$PREFIX${ChatColor.GOLD}削除するには${ChatColor.YELLOW}--confirm${ChatColor.GOLD}を入れて実行してください。")
+                    } else {
+                        actor.send("$PREFIX${ChatColor.GOLD}削除するには10秒以内に同じコマンドをもう一度実行してください。")
+                    }
+                    if (SpicyAzisaBan.instance.getPlatformType() != PlatformType.CLI) {
+                        groupRemoveConfirmation[actor.uniqueId] = groupName
+                        SpicyAzisaBan.instance.schedule(10, TimeUnit.SECONDS) {
+                            if (groupRemoveConfirmation[actor.uniqueId] == groupName) {
+                                groupRemoveConfirmation.remove(actor.uniqueId)
+                            }
+                        }
+                    }
+                    throw Exception()
+                }
+            }
+            .thenDo { SpicyAzisaBan.instance.connection.groups.delete(FindOptions.Builder().addWhere("id", groupName).build()).complete() }
+            .thenDo { SpicyAzisaBan.instance.connection.serverGroup.delete(FindOptions.Builder().addWhere("group", groupName).build()).complete() }
+            .thenDo {
+                SpicyAzisaBan.instance.connection.cachedGroups.set(null)
+                actor.send("$PREFIX${ChatColor.GREEN}グループに関連付けられた処罰を削除中...")
+                SpicyAzisaBan.instance.connection.punishments
+                    .delete(FindOptions.Builder().addWhere("server", groupName).build())
+                    .then { it.map { td -> Punishment.fromTableData(td) } }
+                    .then { list ->
+                        val reason = SABMessages.Commands.Sab.deleteGroupUnpunishReason
+                            .replaceVariables("group" to groupName)
+                            .translate()
+                        list.forEach { p ->
+                            SpicyAzisaBan.instance.connection.unpunish.insert(
+                                InsertOptions.Builder()
+                                    .addValue("punish_id", p.id)
+                                    .addValue("reason", reason)
+                                    .addValue("timestamp", System.currentTimeMillis())
+                                    .addValue("operator", actor.uniqueId.toString())
+                                    .build()
+                            ).complete()
+                        }
+                    }
+                    .catch { actor.sendErrorMessage(it) }
+                    .complete()
+                groupRemoveConfirmation.remove(actor.uniqueId)
+                actor.send("$PREFIX${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を削除しました。")
+            }
+            .catch {
+                if (it::class.java == Exception::class.java) return@catch
+                actor.send("$PREFIX${ChatColor.RED}グループの削除に失敗しました。")
+                SpicyAzisaBan.LOGGER.warning("Failed to delete group $groupName")
+                it.printStackTrace()
+            }
+    }
+
+    fun executeCreateGroup(actor: Actor, groupName: String): Promise<Unit> {
+        if (!groupName.matches(SpicyAzisaBan.GROUP_PATTERN)) {
+            actor.send(SABMessages.Commands.General.invalidGroup.replaceVariables().translate())
+            return Promise.resolve(null)
+        }
+        return SpicyAzisaBan.instance.connection.getAllGroups()
+            .then { list ->
+                if (list.any { it.equals(groupName, true) }) {
+                    actor.send("$PREFIX${ChatColor.RED}この名前はすでに使用されています。")
+                    throw Exception()
+                }
+            }
+            .thenDo {
+                insert {
+                    SpicyAzisaBan.instance.connection.groups.insert(
+                        InsertOptions.Builder().addValue("id", groupName).build()
+                    ).complete()
+                }
+            }
+            .thenDo { SpicyAzisaBan.instance.connection.cachedGroups.set(null) }
+            .then { actor.send("${ChatColor.GREEN}グループ「${ChatColor.GOLD}$groupName${ChatColor.GREEN}」を作成しました。") }
+            .catch {
+                if (it::class.java == Exception::class.java) return@catch
+                actor.send("$PREFIX${ChatColor.RED}グループの作成に失敗しました。")
+                it.printStackTrace()
+            }
+    }
+
+    fun executeInfo(actor: Actor): Promise<Unit> = async<Unit> { context ->
+        val dbVersion = SpicyAzisaBan.instance
+            .settings
+            .getDatabaseVersion()
+            .onCatch {}
+            .complete() ?: -1
+        actor.send(SABMessages.Commands.Sab.info.replaceVariables(
+            "server_name" to SpicyAzisaBan.instance.getServerName(),
+            "server_version" to SpicyAzisaBan.instance.getServerVersion(),
+            "db_connected" to SpicyAzisaBan.instance.connection.isConnected().toMinecraft(),
+            "db_version" to dbVersion.toString(),
+            "db_failsafe" to SABConfig.database.failsafe.toMinecraft(),
+            "uptime" to SpicyAzisaBan.getUptime(),
+            "version" to SABConfig.version,
+            "is_devbuild" to SABConfig.devBuild.toMinecraft(),
+            "is_debugbuild" to SABConfig.debugBuild.toMinecraft(),
+            "server_id" to (SABConfig.serverId ?: "<null>"),
+            "is_lockdown" to SpicyAzisaBan.instance.lockdown.toMinecraft(),).translate())
+        context.resolve()
+    }
+
+    fun executeDebug(actor: Actor, debugLevel: Int) {
+        SpicyAzisaBan.debugLevel = debugLevel
+        actor.send(SABMessages.Commands.Sab.setDebugLevel.replaceVariables().format(SpicyAzisaBan.debugLevel).translate())
     }
 
     override fun onTabComplete(actor: Actor, args: Array<String>): Collection<String> {

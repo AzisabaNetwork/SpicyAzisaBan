@@ -53,6 +53,7 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
+import java.nio.file.Path
 import java.util.Properties
 import java.util.Timer
 import java.util.UUID
@@ -75,6 +76,7 @@ abstract class SpicyAzisaBan {
         lateinit var PREFIX: String
         @JvmStatic
         lateinit var instance: SpicyAzisaBan
+        var wasInitialized = false
 
         private val startTime = System.currentTimeMillis()
         @JvmStatic
@@ -98,12 +100,16 @@ abstract class SpicyAzisaBan {
     }
 
     init {
+        if (wasInitialized) error("Cannot construct SpicyAzisaBan more than once")
+        wasInitialized = true
         instance = this
         PREFIX = SABMessages.General.prefix.translate()
     }
 
     private fun initDatabase() {
-        LOGGER.info("Connecting to database...")
+        if (getPlatformType() != PlatformType.CLI) {
+            LOGGER.info("Connecting to database...")
+        }
         connection = SQLConnection(
             SABConfig.database.host,
             SABConfig.database.name,
@@ -115,9 +121,11 @@ abstract class SpicyAzisaBan {
         props.setProperty("useSSL", SABConfig.database.useSSL.toString())
         connection.connect(props)
         settings = Settings()
-        // dismiss all events for this server
-        val c = ",${SABConfig.serverId},"
-        connection.execute("UPDATE `events` SET `seen` = CONCAT(`seen`, ?) WHERE `seen` NOT LIKE ?", c, "%$c%")
+        if (SABConfig.serverId != null) {
+            // dismiss all events for this server
+            val c = ",${SABConfig.serverId},"
+            connection.execute("UPDATE `events` SET `seen` = CONCAT(`seen`, ?) WHERE `seen` NOT LIKE ?", c, "%$c%")
+        }
         val version = settings.getDatabaseVersion().complete()
         if (version > SQLConnection.CURRENT_DATABASE_VERSION) {
             error("Cannot load the database that was used in a newer version of the plugin! Please update the plugin.\n" +
@@ -125,19 +133,33 @@ abstract class SpicyAzisaBan {
                     "Version stored in the plugin: ${SQLConnection.CURRENT_DATABASE_VERSION}")
         }
         lockdown = settings.isLockdown().complete()
-        LOGGER.info("Lockdown is " + if  (lockdown) "enabled" else "disabled")
-        LOGGER.info("Connected.")
+        if (getPlatformType() != PlatformType.CLI) {
+            LOGGER.info("Lockdown is " + if (lockdown) "enabled" else "disabled")
+            LOGGER.info("Connected.")
+        }
     }
     
-    fun doEnable() {
+    open fun doEnable() {
         if (SABConfig.debugBuild) debugLevel = 5
         if (SABConfig.prefix.contains("\\s+".toRegex())) throw IllegalArgumentException("prefix (in config.yml) contains whitespace")
         ReloadableSABConfig.reload()
         initDatabase()
-        DatabaseMigration.run().complete()
-        LOGGER.info("Supported event types: ${EventType.values().joinToString(", ") { it.name.lowercase() }}")
+        if (getPlatformType() != PlatformType.CLI) {
+            DatabaseMigration.run().complete()
+            LOGGER.info("Supported event types: ${EventType.values().joinToString(", ") { it.name.lowercase() }}")
+        }
+        val currentDatabaseVersion = settings.getDatabaseVersion().complete()
+        if (currentDatabaseVersion != SQLConnection.CURRENT_DATABASE_VERSION) {
+            throw IllegalStateException("Incompatible database version detected.\n" +
+                    "Version stored in database: $currentDatabaseVersion\n" +
+                    "Version stored in plugin: ${SQLConnection.CURRENT_DATABASE_VERSION}")
+        }
         val timerTasks = TimerTasks(connection)
-        timer.scheduleAtFixedRate(10000, 10000) { timerTasks.checkEvents() }
+        if (SABConfig.serverId != null) {
+            timer.scheduleAtFixedRate(10000, 10000) { timerTasks.checkEvents() }
+        } else if (getPlatformType() != PlatformType.CLI) {
+            LOGGER.warning("Disabled event check loop because serverId is null")
+        }
         timer.scheduleAtFixedRate(SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery) { timerTasks.sendWarningTitle() }
         registerCommands()
     }
@@ -187,6 +209,7 @@ abstract class SpicyAzisaBan {
         timer.cancel()
     }
 
+    abstract fun getPlatformType(): PlatformType
     abstract fun getPluginName(): String
     abstract fun getServerName(): String
     abstract fun getServerVersion(): String
@@ -199,6 +222,7 @@ abstract class SpicyAzisaBan {
     abstract fun registerCommand(command: Command)
     abstract fun executeCommand(actor: Actor, command: String)
     abstract fun getConsoleActor(): Actor
+    abstract fun getDataFolder(): Path
 
     class Settings {
 

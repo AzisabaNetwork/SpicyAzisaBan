@@ -53,6 +53,10 @@ object BanCommand: Command() {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
+        doBan(actor, player, server, reason, arguments.contains("all"))
+    }
+
+    fun doBan(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext, all: Boolean) {
         if (Punishment.canJoinServer(player.profile.uniqueId, null, server.name).complete() != null) {
             actor.send(SABMessages.Commands.General.alreadyPunished.replaceVariables().translate())
             return
@@ -66,7 +70,7 @@ object BanCommand: Command() {
             }
             .complete() ?: return
         p.notifyToAll().complete()
-        if (arguments.contains("all")) {
+        if (all) {
             p.applyToSameIPs(player.profile.uniqueId).catch { actor.sendErrorMessage(it) }.complete()
         }
         actor.send(SABMessages.Commands.Ban.done.replaceVariables(p.getVariables().complete()).translate())

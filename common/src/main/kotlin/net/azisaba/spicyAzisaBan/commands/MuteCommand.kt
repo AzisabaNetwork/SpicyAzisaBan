@@ -51,6 +51,10 @@ object MuteCommand: Command() {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
+        doMute(actor, player, server, reason, arguments.contains("all"))
+    }
+
+    fun doMute(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext, all: Boolean) {
         if (Punishment.canSpeak(player.profile.uniqueId, null, server.name).complete() != null) {
             actor.send(SABMessages.Commands.General.alreadyPunished.replaceVariables().translate())
             return
@@ -64,7 +68,7 @@ object MuteCommand: Command() {
             }
             .complete() ?: return
         p.notifyToAll().complete()
-        if (arguments.contains("all")) {
+        if (all) {
             p.applyToSameIPs(player.profile.uniqueId).catch { actor.sendErrorMessage(it) }.complete()
         }
         actor.send(SABMessages.Commands.Mute.done.replaceVariables(p.getVariables().complete()).translate())

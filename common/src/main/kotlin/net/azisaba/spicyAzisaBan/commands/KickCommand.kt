@@ -51,6 +51,10 @@ object KickCommand: Command() {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
+        doKick(actor, player, server, reason)
+    }
+
+    fun doKick(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext) {
         val p = Punishment
             .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.KICK, -1, server.name)
             .insert(actor)

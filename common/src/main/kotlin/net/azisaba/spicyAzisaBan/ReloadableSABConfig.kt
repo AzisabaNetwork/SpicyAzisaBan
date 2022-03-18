@@ -13,7 +13,7 @@ object ReloadableSABConfig {
     private lateinit var cfg: YamlObject
 
     fun reload() {
-        cfg = YamlConfiguration(File("./plugins/SpicyAzisaBan/config.yml")).asObject()
+        cfg = YamlConfiguration(File(SpicyAzisaBan.instance.getDataFolder().toFile(), "config.yml")).asObject()
     }
 
     val serverNames
