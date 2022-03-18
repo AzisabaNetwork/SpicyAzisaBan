@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "net.azisaba.spicyazisaban"
-version = "0.0.37-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
+version = "0.1.0-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
 
 java {
     withJavadocJar()
