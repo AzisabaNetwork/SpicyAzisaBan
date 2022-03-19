@@ -72,7 +72,7 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
             logger.info("Loaded library $path")
         }
         SpicyAzisaBan.debugLevel = 5
-        SpicyAzisaBanVelocity(server, File("plugins/SpicyAzisaBan").toPath()).doEnable()
+        SpicyAzisaBanVelocity(server).doEnable()
         if (!SABConfig.debugBuild) SpicyAzisaBan.debugLevel = 0
         server.eventManager.register(this, EventListeners)
         server.eventManager.register(this, PlayerDataUpdaterListener)
