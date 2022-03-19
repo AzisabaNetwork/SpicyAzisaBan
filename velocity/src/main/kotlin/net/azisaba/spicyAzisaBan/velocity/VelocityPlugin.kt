@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.velocity.listener.EventListeners
+import net.azisaba.spicyAzisaBan.velocity.listener.LockdownListener
 import net.azisaba.spicyAzisaBan.velocity.listener.PlayerDataUpdaterListener
 import org.slf4j.Logger
 import util.maven.Dependency
@@ -67,14 +68,22 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
 
     @Subscribe
     fun onProxyInitialization(e: ProxyInitializeEvent) {
-        for (path in urlsToBeAdded) {
-            server.pluginManager.addToClasspath(this, path)
-            logger.info("Loaded library $path")
+        try {
+            for (path in urlsToBeAdded) {
+                server.pluginManager.addToClasspath(this, path)
+                logger.info("Loaded library $path")
+            }
+            SpicyAzisaBan.debugLevel = 5
+            SpicyAzisaBanVelocity(server).doEnable()
+            if (!SABConfig.debugBuild) SpicyAzisaBan.debugLevel = 0
+            server.eventManager.register(this, EventListeners)
+            server.eventManager.register(this, PlayerDataUpdaterListener)
+        } catch (e: Exception) {
+            logger.error("Fatal error occurred while initializing the plugin", e)
+            if (SABConfig.database.failsafe) {
+                logger.info("Failsafe is enabled, locking down the server")
+                server.eventManager.register(this, LockdownListener)
+            }
         }
-        SpicyAzisaBan.debugLevel = 5
-        SpicyAzisaBanVelocity(server).doEnable()
-        if (!SABConfig.debugBuild) SpicyAzisaBan.debugLevel = 0
-        server.eventManager.register(this, EventListeners)
-        server.eventManager.register(this, PlayerDataUpdaterListener)
     }
 }
