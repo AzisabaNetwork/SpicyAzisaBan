@@ -3,9 +3,10 @@ package net.azisaba.spicyAzisaBan.punishment
 import net.azisaba.spicyAzisaBan.util.Util.removeIf
 import util.concurrent.ref.DataCache
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 class PunishmentCache {
-    private val map = mutableMapOf<PunishmentCacheKey, DataCache<Punishment>>()
+    private val map = ConcurrentHashMap<PunishmentCacheKey, DataCache<Punishment>>()
 
     fun find(key: PunishmentCacheKey) = map.filter { (k, _) -> k == key }.values.firstOrNull()
 
