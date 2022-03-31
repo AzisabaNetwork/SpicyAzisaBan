@@ -157,6 +157,7 @@ data class Punishment(
                 }
             }
             canJoinServerCachedData[uuid, address, server] = DataCache(punishment, System.currentTimeMillis() + 1000L * 60L * 120L) // 2 hours
+            SpicyAzisaBan.debug("Put punishment data into cache: ${canJoinServerCachedData.find(uuid, address, server)} ($punishment)")
             context.resolve(punishment)
         }
 
