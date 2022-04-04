@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.PlayerActor
 import net.azisaba.spicyAzisaBan.common.command.Command
+import net.azisaba.spicyAzisaBan.punishment.Expiration
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.async
@@ -78,7 +79,7 @@ object TempMuteCommand: Command() {
                 reason.text,
                 actor.uniqueId,
                 PunishmentType.TEMP_MUTE,
-                System.currentTimeMillis() + time.time,
+                Expiration.ExpireAt.of(System.currentTimeMillis() + time.time),
                 server.name
             )
             .insert(actor)

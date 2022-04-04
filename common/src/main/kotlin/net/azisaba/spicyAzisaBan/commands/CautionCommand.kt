@@ -8,6 +8,7 @@ import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.ChatColor
 import net.azisaba.spicyAzisaBan.common.PlayerActor
 import net.azisaba.spicyAzisaBan.common.command.Command
+import net.azisaba.spicyAzisaBan.punishment.Expiration
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.async
@@ -58,7 +59,7 @@ object CautionCommand: Command() {
 
     fun doCaution(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext) {
         val p = Punishment
-            .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.CAUTION, -1, server.name)
+            .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.CAUTION, Expiration.NeverExpire, server.name)
             .insert(actor)
             .catch {
                 SpicyAzisaBan.LOGGER.warning("Something went wrong while handling command from ${actor.name}!")

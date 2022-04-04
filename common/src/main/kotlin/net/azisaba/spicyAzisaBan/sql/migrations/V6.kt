@@ -4,7 +4,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 
 /**
- * v5 -> v6 converter
+ * v6 -> v7 converter
  */
 object V6: DatabaseMigration {
     override val targetDatabaseVersion = 6

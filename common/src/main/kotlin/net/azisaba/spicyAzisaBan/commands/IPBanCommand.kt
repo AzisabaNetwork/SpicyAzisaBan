@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.PlayerActor
 import net.azisaba.spicyAzisaBan.common.command.Command
+import net.azisaba.spicyAzisaBan.punishment.Expiration
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.async
@@ -57,7 +58,7 @@ object IPBanCommand: Command() {
             return
         }
         val p = Punishment
-            .createByIPAddress(ip, reason.text, actor.uniqueId, PunishmentType.IP_BAN, -1, server.name)
+            .createByIPAddress(ip, reason.text, actor.uniqueId, PunishmentType.IP_BAN, Expiration.NeverExpire, server.name)
             .insert(actor)
             .catch {
                 SpicyAzisaBan.LOGGER.warning("Something went wrong while handling command from ${actor.name}!")

@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.PlayerActor
 import net.azisaba.spicyAzisaBan.common.command.Command
+import net.azisaba.spicyAzisaBan.punishment.Expiration
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.util.Util.async
@@ -60,7 +61,7 @@ object MuteCommand: Command() {
             return
         }
         val p = Punishment
-            .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.MUTE, -1, server.name)
+            .createByPlayer(player.profile, reason.text, actor.uniqueId, PunishmentType.MUTE, Expiration.NeverExpire, server.name)
             .insert(actor)
             .catch {
                 SpicyAzisaBan.LOGGER.warning("Something went wrong while handling command from ${actor.name}!")

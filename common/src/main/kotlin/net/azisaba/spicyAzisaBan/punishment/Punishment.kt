@@ -50,7 +50,7 @@ data class Punishment(
     val operator: UUID,
     val type: PunishmentType,
     val start: Long,
-    val end: Long,
+    val end: Expiration,
     val server: String,
     val flags: MutableList<Flags> = mutableListOf(),
 ) {
@@ -65,7 +65,7 @@ data class Punishment(
             reason: String,
             operator: UUID,
             type: PunishmentType,
-            end: Long,
+            end: Expiration,
             server: String,
         ): Punishment {
             if (type.isIPBased()) error("Wrong type for #createByPlayer: ${type.name}")
@@ -82,7 +82,7 @@ data class Punishment(
             )
         }
 
-        fun createByIPAddress(ip: String, reason: String, operator: UUID, type: PunishmentType, end: Long, server: String): Punishment {
+        fun createByIPAddress(ip: String, reason: String, operator: UUID, type: PunishmentType, end: Expiration, server: String): Punishment {
             if (!type.isIPBased()) error("Wrong type for #createByIPAddress: ${type.name}")
             return Punishment(-1, ip, ip, reason, operator, type, System.currentTimeMillis(), end, server)
         }
@@ -95,7 +95,8 @@ data class Punishment(
             val operator = UUID.fromString(td.getString("operator")!!)!!
             val type = PunishmentType.valueOf(td.getString("type"))
             val start = td.getLong("start") ?: 0
-            val end = td.getLong("end") ?: 0
+            val end = Expiration.deserializeFromLong(td.getLong("end") ?: -1)
+                ?: error("Could not deserialize expiration from ${td.getLong("end") ?: -1}")
             val server = td.getString("server")!!
             val flags = Flags.fromDatabase(td.getString("extra")!!)
             return Punishment(
@@ -120,7 +121,8 @@ data class Punishment(
             val operator = UUID.fromString(rs.getString("operator")!!)!!
             val type = PunishmentType.valueOf(rs.getString("type")!!)
             val start = rs.getLong("start")
-            val end = rs.getLong("end")
+            val end = Expiration.deserializeFromLong(rs.getLong("end"))
+                ?: error("Could not deserialize expiration from ${rs.getLong("end")}")
             val server = rs.getString("server")!!
             val flags = Flags.fromDatabase(rs.getString("extra")!!)
             return Punishment(
@@ -232,7 +234,7 @@ data class Punishment(
             try {
                 val uuid = getTargetUUID()
                 recentPunishedPlayers.add(SimplePlayerProfile(name, uuid))
-            } catch (e: IllegalArgumentException) {}
+            } catch (_: IllegalArgumentException) {}
         }
     }
 
@@ -311,10 +313,10 @@ data class Punishment(
                 "type" to type.id.replaceFirstChar { it.uppercase() },
                 "reason" to reason,
                 "server" to if (server.lowercase() == "global") SABMessages.General.global else ReloadableSABConfig.serverNames.getOrDefault(server.lowercase(), server.lowercase()),
-                "duration" to Util.unProcessTime(end - System.currentTimeMillis()),
-                "time" to Util.unProcessTime(end - start),
+                "duration" to if (end is Expiration.NeverExpire) SABMessages.General.permanent else Util.unProcessTime(end.serializeAsLong() - System.currentTimeMillis()),
+                "time" to if (end is Expiration.NeverExpire) SABMessages.General.permanent else Util.unProcessTime(end.serializeAsLong() - start),
                 "date" to SABMessages.formatDate(start),
-                "end_date" to if (end == -1L) "N/A" else SABMessages.formatDate(end),
+                "end_date" to if (end is Expiration.NeverExpire) "N/A" else SABMessages.formatDate(end.serializeAsLong()),
                 "is_expired" to isExpired().toMinecraft(),
             )
         }
@@ -453,7 +455,7 @@ data class Punishment(
         it.printStackTrace()
     }
 
-    fun isExpired() = (end != -1L && end < System.currentTimeMillis()) || pendingRemoval.contains(id)
+    fun isExpired() = end.isExpired() || pendingRemoval.contains(id)
 
     fun updateFlags(): Promise<Unit> =
         SpicyAzisaBan.instance.connection.punishments.update("extra", flags.toDatabase(), FindOptions.Builder().addWhere("id", id).build())
@@ -473,7 +475,7 @@ data class Punishment(
             .addValue("operator", operator.toString())
             .addValue("type", type.name)
             .addValue("start", start)
-            .addValue("end", end)
+            .addValue("end", end.serializeAsLong())
             .addValue("server", server.lowercase())
             .addValue("extra", flags.toDatabase())
         var cancel = false

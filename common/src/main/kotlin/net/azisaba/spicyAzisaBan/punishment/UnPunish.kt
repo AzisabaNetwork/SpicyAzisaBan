@@ -46,8 +46,8 @@ data class UnPunish(
                 "reason" to reason,
                 "preason" to punishment.reason,
                 "server" to if (punishment.server.lowercase() == "global") SABMessages.General.global else ReloadableSABConfig.serverNames.getOrDefault(punishment.server.lowercase(), punishment.server.lowercase()),
-                "duration" to Util.unProcessTime(punishment.end - System.currentTimeMillis()),
-                "time" to Util.unProcessTime(punishment.end - punishment.start),
+                "duration" to Util.unProcessTime(punishment.end.serializeAsLong() - System.currentTimeMillis()),
+                "time" to Util.unProcessTime(punishment.end.serializeAsLong() - punishment.start),
             )
         }
 

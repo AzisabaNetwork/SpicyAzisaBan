@@ -3,6 +3,7 @@ package net.azisaba.spicyAzisaBan.util
 import net.azisaba.spicyAzisaBan.ReloadableSABConfig
 import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.common.Actor
+import net.azisaba.spicyAzisaBan.punishment.Expiration
 import net.azisaba.spicyAzisaBan.punishment.Proof
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.UnPunish
@@ -14,14 +15,6 @@ import util.promise.rewrite.Promise
 import java.awt.Color
 
 object WebhookUtil {
-    @Deprecated(message = "unused")
-    fun sendGenericWebhook(server: String, username: String?, content: String) {
-        val url = ReloadableSABConfig.getWebhookURL(server)
-        if (url != null && url.startsWith("http")) {
-            DiscordWebhook.of(url, username, content).execute()
-        }
-    }
-
     fun Punishment.sendWebhook(): Promise<Unit> {
         val url = ReloadableSABConfig.getWebhookURL(server, type)
         if (url != null && url.startsWith("http")) {
@@ -39,8 +32,8 @@ object WebhookUtil {
                 embed.addField("ID", id.toString(), false)
                 embed.addField("処罰日時", SABMessages.formatDate(start), false)
                 if (type.name.contains("TEMP")) {
-                    embed.addField("期間", Util.unProcessTime(end - start), false)
-                    embed.addField("期限", if (end == -1L) "無期限" else SABMessages.formatDate(end), false)
+                    embed.addField("期間", Util.unProcessTime(end.serializeAsLong() - start), false)
+                    embed.addField("期限", if (end is Expiration.NeverExpire) SABMessages.General.permanent else SABMessages.formatDate(end.serializeAsLong()), false)
                 }
                 webhook.addEmbed(embed)
                 webhook.execute()
@@ -67,8 +60,8 @@ object WebhookUtil {
                 embed.addField("ID", id.toString(), false)
                 embed.addField("処罰日時", SABMessages.formatDate(start), false)
                 if (type.name.contains("TEMP")) {
-                    embed.addField("期間", Util.unProcessTime(end - start), false)
-                    embed.addField("期限", if (end == -1L) "無期限" else SABMessages.formatDate(end), false)
+                    embed.addField("期間", Util.unProcessTime(end.serializeAsLong() - start), false)
+                    embed.addField("期限", if (end is Expiration.NeverExpire) SABMessages.General.permanent else SABMessages.formatDate(end.serializeAsLong()), false)
                 }
                 webhook.addEmbed(embed)
                 try {
@@ -103,8 +96,8 @@ object WebhookUtil {
                 embed.addField("処罰ID", punishment.id.toString(), false)
                 embed.addField("処罰日時", SABMessages.formatDate(punishment.start), false)
                 if (punishment.type.name.contains("TEMP")) {
-                    embed.addField("期間", Util.unProcessTime(punishment.end - punishment.start), false)
-                    embed.addField("期限", if (punishment.end == -1L) "無期限" else SABMessages.formatDate(punishment.end), false)
+                    embed.addField("期間", Util.unProcessTime(punishment.end.serializeAsLong() - punishment.start), false)
+                    embed.addField("期限", if (punishment.end is Expiration.NeverExpire) SABMessages.General.permanent else SABMessages.formatDate(punishment.end.serializeAsLong()), false)
                 }
                 webhook.addEmbed(embed)
                 webhook.execute()

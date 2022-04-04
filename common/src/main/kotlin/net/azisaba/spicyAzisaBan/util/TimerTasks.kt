@@ -12,18 +12,27 @@ import xyz.acrylicstyle.sql.options.FindOptions
 import java.sql.SQLException
 
 class TimerTasks(private val connection: SQLConnection) {
+    private var currentEventId = -1L
+
     fun checkEvents(server: String = "%,${SABConfig.serverId},%") {
         try {
-            val rs = connection.executeQuery("SELECT * FROM `events` WHERE `seen` NOT LIKE ?", server)
+            if (currentEventId == -1L) {
+                connection.executeQuery("SELECT `id` FROM `events` ORDER BY `id` DESC LIMIT 1").apply {
+                    currentEventId = getLong("id")
+                    statement.close()
+                }
+            }
+            val rs = connection.executeQuery("SELECT * FROM `events` WHERE `id` > ?", currentEventId)
             while (rs.next()) {
                 SpicyAzisaBan.LOGGER.info("Received event id ${rs.getLong("id")} (${rs.getString("event_id")})")
                 val e = try {
                     Events.fromResultSet(rs)
                 } catch (e: IllegalArgumentException) {
-                    SpicyAzisaBan.LOGGER.warning("Failed to process event data. You might need a newer version of the plugin.")
+                    SpicyAzisaBan.LOGGER.warning("Failed to process event data (#${rs.getLong("id")}). You might need a newer version of the plugin.")
                     e.printStackTrace()
                     continue
                 }
+                if (e.id > currentEventId) currentEventId = e.id
                 try {
                     if (e.event == EventType.ADD_PUNISHMENT) {
                         val id = e.data.getLong("id")
