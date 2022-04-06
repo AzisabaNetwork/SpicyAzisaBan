@@ -9,6 +9,11 @@ interface Expiration {
 
         fun deserializeFromLong(value: Long): Expiration? =
             DESERIALIZERS.find { it.canDeserialize(value) }?.deserialize(value)
+
+        init {
+            addDeserializer(NeverExpire.deserializer)
+            addDeserializer(ExpireAt.deserializer)
+        }
     }
 
     fun isExpired(): Boolean
@@ -22,12 +27,10 @@ interface Expiration {
     }
 
     object NeverExpire : Expiration {
-        init {
-            addDeserializer(object : Deserializer {
-                override fun canDeserialize(serialized: Long): Boolean = serialized == -1L
+        val deserializer = object : Deserializer {
+            override fun canDeserialize(serialized: Long): Boolean = serialized == -1L
 
-                override fun deserialize(serialized: Long): Expiration = NeverExpire
-            })
+            override fun deserialize(serialized: Long): Expiration = NeverExpire
         }
 
         override fun isExpired(): Boolean = false
@@ -39,12 +42,10 @@ interface Expiration {
         companion object {
             fun of(expireAt: Long): ExpireAt = ExpireAt(expireAt)
 
-            init {
-                addDeserializer(object : Deserializer {
-                    override fun canDeserialize(serialized: Long): Boolean = serialized > 0L
+            val deserializer = object : Deserializer {
+                override fun canDeserialize(serialized: Long): Boolean = serialized > 0L
 
-                    override fun deserialize(serialized: Long): Expiration = ExpireAt(serialized)
-                })
+                override fun deserialize(serialized: Long): Expiration = ExpireAt(serialized)
             }
         }
 
