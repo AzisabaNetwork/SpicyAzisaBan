@@ -8,7 +8,10 @@
 general:
   prefix: "&c&lSpicyAzisaBan &8&l» &r"
   missingPermissions: "%PREFIX%&c権限がありません!"
-  error: "%PREFIX%&c処理中に不明なエラーが発生しました。"
+  error: "&c処理中に不明なエラーが発生しました。"
+
+  # available variables: defalt + %EXCEPTION_CLASS_NAME%, %EXCEPTION_MESSAGE%
+  errorDetailed: "&c処理中に不明なエラーが発生しました。 (%EXCEPTION_CLASS_NAME%)"
 
   # these are "words" and you can't use variables here
   none: "なし"

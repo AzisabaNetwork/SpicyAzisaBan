@@ -57,7 +57,10 @@ object PunishmentChecker {
             SpicyAzisaBan.LOGGER.warning("Could not check lockdown state for ${connection.uniqueId}")
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
-                deny(Component.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
+                deny(Component.fromLegacyText(SABMessages.General.errorDetailed.replaceVariables(
+                    "EXCEPTION_CLASS_NAME" to it.javaClass.name,
+                    "EXCEPTION_MESSAGE" to (it.message ?: "null"),
+                ).translate()))
             }
         }.complete()
     }
@@ -94,7 +97,10 @@ object PunishmentChecker {
             SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${connection.uniqueId}")
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
-                deny(Component.fromLegacyText(SABMessages.General.error.replaceVariables().translate()))
+                deny(Component.fromLegacyText(SABMessages.General.errorDetailed.replaceVariables(
+                    "EXCEPTION_CLASS_NAME" to it.javaClass.name,
+                    "EXCEPTION_MESSAGE" to (it.message ?: "null"),
+                ).translate()))
             }
         }.complete()
     }
@@ -179,7 +185,10 @@ object PunishmentChecker {
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
                 cancel()
-                player.kick(SABMessages.General.error.replaceVariables().translate())
+                player.kick(SABMessages.General.errorDetailed.replaceVariables(
+                    "EXCEPTION_CLASS_NAME" to it.javaClass.name,
+                    "EXCEPTION_MESSAGE" to (it.message ?: "null"),
+                ).translate())
             }
         }
     }
@@ -211,7 +220,10 @@ object PunishmentChecker {
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
                 cancel()
-                actor.send(SABMessages.General.error.replaceVariables().translate())
+                actor.send(SABMessages.General.errorDetailed.replaceVariables(
+                    "EXCEPTION_CLASS_NAME" to it.javaClass.name,
+                    "EXCEPTION_MESSAGE" to (it.message ?: "null"),
+                ).translate())
             }
         }.complete()
         if (!res) {

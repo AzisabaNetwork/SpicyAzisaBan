@@ -52,7 +52,10 @@ object Util {
     fun Actor.sendErrorMessage(throwable: Throwable) {
         if (throwable::class.java.canonicalName.endsWith("Cancel")) return // intended to block throwable like Promise$Cancel
         throwable.printStackTrace()
-        send(SABMessages.General.error.replaceVariables().translate())
+        send(SABMessages.General.errorDetailed.replaceVariables(
+            "EXCEPTION_CLASS_NAME" to throwable.javaClass.name,
+            "EXCEPTION_MESSAGE" to (throwable.message ?: "null"),
+        ).translate())
     }
 
     /**
@@ -63,7 +66,10 @@ object Util {
         if (throwable::class.java.canonicalName.endsWith("Cancel")) return
         if (throwable is T) return
         throwable.printStackTrace()
-        send(SABMessages.General.error.replaceVariables().translate())
+        send(SABMessages.General.errorDetailed.replaceVariables(
+            "EXCEPTION_CLASS_NAME" to throwable.javaClass.name,
+            "EXCEPTION_MESSAGE" to (throwable.message ?: "null"),
+        ).translate())
     }
 
     /**
