@@ -18,7 +18,11 @@ class TimerTasks(private val connection: SQLConnection) {
         try {
             if (currentEventId == -1L) {
                 connection.executeQuery("SELECT `id` FROM `events` ORDER BY `id` DESC LIMIT 1").apply {
-                    currentEventId = getLong("id")
+                    currentEventId = if (this.next()) {
+                        getLong("id")
+                    } else {
+                        0
+                    }
                     statement.close()
                 }
             }
