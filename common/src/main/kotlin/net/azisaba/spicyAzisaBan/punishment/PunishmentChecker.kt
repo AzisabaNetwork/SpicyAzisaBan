@@ -197,7 +197,7 @@ object PunishmentChecker {
         if (actor !is PlayerActor) return
         val isCommand = message.startsWith("/")
         if (isCommand &&
-            !ReloadableSABConfig.getBlockedCommandsWhenMuted(actor.getServerName()).any { s -> message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex()) }
+            !ReloadableSABConfig.getBlockedCommandsWhenMuted(actor.getServerName()).any { s -> message.matches("^/(.*:)?$s(\$|\\s+.*)".toRegex(RegexOption.IGNORE_CASE)) }
         ) {
             return
         }
