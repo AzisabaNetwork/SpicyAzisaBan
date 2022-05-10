@@ -1,6 +1,5 @@
 package net.azisaba.spicyAzisaBan.util
 
-import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.punishment.PunishmentType
@@ -14,7 +13,7 @@ import java.sql.SQLException
 class TimerTasks(private val connection: SQLConnection) {
     private var currentEventId = -1L
 
-    fun checkEvents(server: String = "%,${SABConfig.serverId},%") {
+    fun checkEvents() {
         try {
             if (currentEventId == -1L) {
                 connection.executeQuery("SELECT `id` FROM `events` ORDER BY `id` DESC LIMIT 1").apply {
@@ -46,7 +45,9 @@ class TimerTasks(private val connection: SQLConnection) {
                             continue
                         }
                         p.doSomethingIfOnline()
-                        p.notifyToAll(sendWebhook = e.seen.isEmpty())
+                        if (!SpicyAzisaBan.instance.connection.eventsByUs.contains(e.id)) {
+                            p.notifyToAll(sendWebhook = !e.handled)
+                        }
                     } else if (e.event == EventType.UPDATED_PUNISHMENT) {
                         val id = e.data.getLong("id")
                         if (id <= 0) {
@@ -71,16 +72,23 @@ class TimerTasks(private val connection: SQLConnection) {
                             continue
                         }
                         p.clearCache()
-                        val td = connection.unpunish.findOne(FindOptions.Builder().addWhere("punish_id", id).build())
-                            .complete()
-                        if (td == null) {
-                            SpicyAzisaBan.LOGGER.warning("Received removed_punishment event but there was no unpunish record")
-                            continue
+                        if (!SpicyAzisaBan.instance.connection.eventsByUs.contains(e.id)) {
+                            val td = connection.unpunish.findOne(FindOptions.Builder().addWhere("punish_id", id).build())
+                                .complete()
+                            if (td == null) {
+                                SpicyAzisaBan.LOGGER.warning("Received removed_punishment event but there was no unpunish record")
+                                continue
+                            }
+                            val unpunishRecord = UnPunish.fromTableData(p, td)
+                            unpunishRecord.notifyToAll(sendWebhook = !e.handled)
                         }
-                        val unpunishRecord = UnPunish.fromTableData(p, td)
-                        unpunishRecord.notifyToAll(sendWebhook = e.seen.isEmpty())
                     } else if (e.event == EventType.LOCKDOWN) {
-                        Util.setLockdownAndAnnounce(e.data.getString("actor_name"), e.data.getBoolean("lockdown_enabled"))
+                        if (!SpicyAzisaBan.instance.connection.eventsByUs.contains(e.id)) {
+                            Util.setLockdownAndAnnounce(
+                                e.data.getString("actor_name"),
+                                e.data.getBoolean("lockdown_enabled"),
+                            )
+                        }
                     } else {
                         SpicyAzisaBan.LOGGER.warning("Unhandled event: $e")
                     }
@@ -90,7 +98,7 @@ class TimerTasks(private val connection: SQLConnection) {
                 }
             }
             rs.statement.close()
-            connection.execute("UPDATE `events` SET `seen` = concat(`seen`, ?) WHERE `seen` NOT LIKE ?", ",${SABConfig.serverId},", server)
+            connection.execute("UPDATE `events` SET `handled` = 1 WHERE `id` <= ? AND `handled` = 0", currentEventId)
         } catch (e: Exception) {
             SpicyAzisaBan.LOGGER.severe("Could not check for new events")
             e.printStackTrace()

@@ -3,8 +3,6 @@ package net.azisaba.spicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.ChatColor
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.translate
-import util.ResourceLocator
-import util.base.Bytes
 import util.yaml.YamlConfiguration
 import util.yaml.YamlObject
 import java.io.File
@@ -22,10 +20,10 @@ object SABMessages {
         val dir = SpicyAzisaBan.instance.getDataFolder().toFile()
         dir.mkdir()
         val file = File(dir, "messages.yml")
-        val input = ResourceLocator.getInstance(SABMessages::class.java).getResourceAsStream("/spicyazisaban/messages.yml")
+        val input = SABMessages::class.java.getResourceAsStream("/spicyazisaban/messages.yml")
             ?: error("Could not find messages.yml in jar file!")
         if (!file.exists()) {
-            Bytes.copy(input, file)
+            file.outputStream().use { input.copyTo(it) }
             SpicyAzisaBan.LOGGER.info("Generated default messages.yml")
         }
         defCfg = YamlConfiguration(input).asObject()

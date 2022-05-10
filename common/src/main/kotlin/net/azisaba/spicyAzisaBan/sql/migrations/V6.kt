@@ -7,7 +7,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
  * v6 -> v7 converter
  */
 object V6: DatabaseMigration {
-    override val targetDatabaseVersion = 6
+    override val sourceDatabaseVersion = 6
     override val name = "Add (first|last)_login(_attempt)? to players table"
 
     override fun execute(sql: SQLConnection) {

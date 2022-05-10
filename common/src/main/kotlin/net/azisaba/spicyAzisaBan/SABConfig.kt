@@ -2,15 +2,13 @@ package net.azisaba.spicyAzisaBan
 
 import net.azisaba.spicyAzisaBan.SABMessages.getObj
 import net.azisaba.spicyAzisaBan.util.Util
-import util.ResourceLocator
-import util.base.Bytes
 import util.yaml.YamlConfiguration
 import util.yaml.YamlObject
 import java.io.File
 
 object SABConfig {
     private val cfg: YamlObject
-    private val versionFile = YamlConfiguration(ResourceLocator.getInstance(SpicyAzisaBan::class.java).getResourceAsStream("/spicyazisaban/version.yml")!!)
+    private val versionFile = YamlConfiguration(SpicyAzisaBan::class.java.getResourceAsStream("/spicyazisaban/version.yml")!!)
         .asObject()
 
     init {
@@ -19,11 +17,11 @@ object SABConfig {
         dir.mkdir()
         val file = File(dir, "config.yml")
         if (!file.exists()) {
-            val input = ResourceLocator.getInstance(SpicyAzisaBan::class.java).getResourceAsStream("/spicyazisaban/config.yml")
+            val input = SpicyAzisaBan::class.java.getResourceAsStream("/spicyazisaban/config.yml")
             if (input == null) {
                 SpicyAzisaBan.LOGGER.severe("Could not find config.yml in jar file!")
             } else {
-                Bytes.copy(input, file)
+                file.outputStream().use { input.copyTo(it) }
                 SpicyAzisaBan.LOGGER.info("Copied config.yml!")
             }
         }

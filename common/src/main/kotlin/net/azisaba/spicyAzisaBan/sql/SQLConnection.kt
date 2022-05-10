@@ -1,6 +1,5 @@
 package net.azisaba.spicyAzisaBan.sql
 
-import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.struct.EventType
 import net.azisaba.spicyAzisaBan.util.Util
@@ -23,7 +22,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 7
+        const val CURRENT_DATABASE_VERSION = 8
 
         fun logSql(s: String, time: Long) {
             SpicyAzisaBan.debug("Executed SQL: $s (took $time ms)", 3)
@@ -41,6 +40,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         }
     }
 
+    internal val eventsByUs = mutableListOf<Long>()
     lateinit var properties: Properties
     lateinit var punishments: Table
     lateinit var punishmentHistory: Table
@@ -155,7 +155,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("id", DataType.BIGINT).setPrimaryKey(true).setAutoIncrement(true).build(),
                 TableDefinition.Builder("event_id", DataType.STRING).setAllowNull(false).build(),
                 TableDefinition.Builder("data", DataType.TEXT).setAllowNull(false).build(),
-                TableDefinition.Builder("seen", DataType.TEXT).setAllowNull(false).build(),
+                TableDefinition.Builder("handled", DataType.BOOL).setAllowNull(false).setDefaultValue(0).build(),
             ),
         ).setupEventListener()
         this.sync()
@@ -163,9 +163,10 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
 
     fun execute(@Language("SQL") sql: String, vararg params: Any): Boolean {
         logSql(sql, params)
-        val statement = connection.prepareStatement(sql)
-        params.forEachIndexed { index, any -> statement.setObject(index + 1, any) }
-        return statement.execute()
+        connection.prepareStatement(sql).use { statement ->
+            params.forEachIndexed { index, any -> statement.setObject(index + 1, any) }
+            return statement.execute()
+        }
     }
 
     fun executeQuery(@Language("SQL") sql: String, vararg params: Any): ResultSet {
@@ -182,17 +183,19 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             if (retry) throw e
             connect(properties)
             executeQuery(sql, *params, retry = true)
+        } finally {
+            statement.close()
         }
     }
 
-    fun sendEvent(eventType: EventType, data: JSONObject): Promise<Unit> = async {
+    fun sendEvent(eventType: EventType, data: JSONObject, handled: Boolean = true): Promise<Unit> = async {
         val id = try {
             Util.insert {
                 events.insert(
                     InsertOptions.Builder()
                         .addValue("event_id", eventType.name.lowercase())
                         .addValue("data", data.toString())
-                        .addValue("seen", if (SABConfig.serverId == null) "" else ",${SABConfig.serverId},") // mark sender server as "seen"
+                        .addValue("handled", handled)
                         .build()
                 ).complete()
             }
@@ -202,6 +205,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             it.resolve()
             return@async
         }
+        eventsByUs.add(id)
         SpicyAzisaBan.debug("Sending event with id $id")
         SpicyAzisaBan.debug("Event type: $eventType")
         SpicyAzisaBan.debug("Event data: ${data.toString(2)}")
@@ -233,8 +237,8 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
         return groups
     }
 
-    val cachedGroupByServer = mutableMapOf<String, DataCache<String>>()
-    var updatingCacheGroupByServer = false
+    private val cachedGroupByServer = mutableMapOf<String, DataCache<String>>()
+    private var updatingCacheGroupByServer = false
     fun getCachedGroupByServer(server: String): String? {
         if (server == "global") return null
         val group = cachedGroupByServer[server]

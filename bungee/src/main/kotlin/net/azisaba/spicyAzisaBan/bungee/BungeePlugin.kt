@@ -3,7 +3,7 @@ package net.azisaba.spicyAzisaBan.bungee
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.bungee.listener.EventListeners
 import net.azisaba.spicyAzisaBan.bungee.listener.PlayerDataUpdaterListener
-import net.blueberrymc.native_util.NativeUtil
+import net.blueberrymc.nativeutil.NativeUtil
 import net.md_5.bungee.api.plugin.Plugin
 import util.maven.Dependency
 import util.maven.JarUtils

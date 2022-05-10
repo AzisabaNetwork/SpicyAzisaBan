@@ -7,15 +7,15 @@ data class Events(
     val id: Long,
     val event: EventType,
     val data: JSONObject,
-    val seen: String,
+    val handled: Boolean,
 ) {
     companion object {
         fun fromResultSet(rs: ResultSet): Events {
             val id = rs.getLong("id")
             val event = EventType.valueOf(rs.getString("event_id").uppercase())
             val data = JSONObject(rs.getString("data"))
-            val seen = rs.getString("seen")!!
-            return Events(id, event, data, seen)
+            val handled = rs.getBoolean("handled")
+            return Events(id, event, data, handled)
         }
     }
 }

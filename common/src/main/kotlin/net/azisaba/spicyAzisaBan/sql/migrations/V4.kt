@@ -7,7 +7,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
  * v4 -> v5 converter
  */
 object V4: DatabaseMigration {
-    override val targetDatabaseVersion = 4
+    override val sourceDatabaseVersion = 4
     override val name = "Add ipAddressHistory table"
 
     override fun execute(sql: SQLConnection) {

@@ -7,7 +7,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
  * v3 -> v4 converter
  */
 object V3: DatabaseMigration {
-    override val targetDatabaseVersion = 3
+    override val sourceDatabaseVersion = 3
     override val name = "Add unpunish, proofs, players, usernameHistory tables"
 
     override fun execute(sql: SQLConnection) {

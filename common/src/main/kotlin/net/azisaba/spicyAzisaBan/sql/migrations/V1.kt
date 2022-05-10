@@ -8,7 +8,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection.Companion.executeAndLog
  * v1 -> v2 converter
  */
 object V1: DatabaseMigration {
-    override val targetDatabaseVersion = 1
+    override val sourceDatabaseVersion = 1
     override val name = "Add NOT NULL to 'server' in punishments and punishmentHistory table"
 
     override fun execute(sql: SQLConnection) {

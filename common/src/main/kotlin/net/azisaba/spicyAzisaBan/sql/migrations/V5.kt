@@ -7,7 +7,7 @@ import net.azisaba.spicyAzisaBan.sql.SQLConnection
  * v5 -> v6 converter
  */
 object V5: DatabaseMigration {
-    override val targetDatabaseVersion = 5
+    override val sourceDatabaseVersion = 5
     override val name = "Add events table"
 
     override fun execute(sql: SQLConnection) {

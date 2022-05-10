@@ -71,7 +71,7 @@ abstract class SpicyAzisaBan {
     companion object {
         val LOGGER: Logger = Logger.getLogger("SpicyAzisaBan")
         @JvmStatic
-        val GROUP_PATTERN = "^[a-zA-Z0-9+_\\-]{1,32}$".toRegex()
+        val GROUP_PATTERN = "^[a-zA-Z\\d+_\\-]{1,32}$".toRegex()
         @JvmStatic
         lateinit var PREFIX: String
         @JvmStatic
@@ -121,11 +121,6 @@ abstract class SpicyAzisaBan {
         props.setProperty("useSSL", SABConfig.database.useSSL.toString())
         connection.connect(props)
         settings = Settings()
-        if (SABConfig.serverId != null) {
-            // dismiss all events for this server
-            val c = ",${SABConfig.serverId},"
-            connection.execute("UPDATE `events` SET `seen` = CONCAT(`seen`, ?) WHERE `seen` NOT LIKE ?", c, "%$c%")
-        }
         val version = settings.getDatabaseVersion().complete()
         if (version > SQLConnection.CURRENT_DATABASE_VERSION) {
             error("Cannot load the database that was used in a newer version of the plugin! Please update the plugin.\n" +

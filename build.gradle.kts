@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "net.azisaba.spicyazisaban"
-version = "0.1.0-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
+version = "0.2.0-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
 
 java {
     withJavadocJar()
@@ -60,7 +60,7 @@ repositories {
     // mavenLocal()
     mavenCentral()
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-    maven { url = uri("https://repo.blueberrymc.net") }
+    maven { url = uri("https://repo.blueberrymc.net/repository/maven-public/") }
     maven { url = uri("https://repo.acrylicstyle.xyz/repository/maven-public/") }
 }
 
@@ -72,7 +72,7 @@ subprojects {
         // mavenLocal()
         mavenCentral()
         maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-        maven { url = uri("https://repo.blueberrymc.net") }
+        maven { url = uri("https://repo.blueberrymc.net/repository/maven-public/") }
         maven { url = uri("https://repo.acrylicstyle.xyz/repository/maven-public/") }
     }
 
@@ -102,7 +102,7 @@ subprojects {
             useJUnitPlatform()
         }
 
-        withType<ProcessResources> {
+        processResources {
             filteringCharset = "UTF-8"
             from(sourceSets.main.get().resources.srcDirs) {
                 include("**")
@@ -171,7 +171,7 @@ subprojects {
 subprojects {
     dependencies {
         implementation("xyz.acrylicstyle.util:maven:0.16.6")
-        implementation("net.blueberrymc:native-util:1.2.6")
+        implementation("net.blueberrymc:native-util:2.1.0")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
         implementation("xyz.acrylicstyle.util:all:0.16.6") {
             exclude("com.google.guava", "guava")

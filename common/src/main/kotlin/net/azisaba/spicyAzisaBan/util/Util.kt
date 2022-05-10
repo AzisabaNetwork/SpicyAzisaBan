@@ -498,7 +498,7 @@ object Util {
     }
 
     /**
-     * Checks if the DataCache is already expired.
+     * Checks if the DataCache is not expired yet.
      */
     fun DataCache<*>.isNotExpired() = System.currentTimeMillis() <= this.ttl
 }

@@ -8,7 +8,7 @@ import util.promise.rewrite.Promise
 interface DatabaseMigration {
     companion object {
         private val migrations = listOf(
-            V1, V2, V3, V4, V5, V6,
+            V1, V2, V3, V4, V5, V6, V7,
         )
 
         fun run(): Promise<Unit> = async { context ->
@@ -18,7 +18,7 @@ interface DatabaseMigration {
             SpicyAzisaBan.LOGGER.info("Running database migrations (current database version: $currentVersion)")
             SpicyAzisaBan.LOGGER.info("${migrations.size} migrations loaded.")
             migrations.forEach { migration ->
-                if (migration.targetDatabaseVersion == currentVersion) {
+                if (migration.sourceDatabaseVersion == currentVersion) {
                     SpicyAzisaBan.LOGGER.info("Migrating '${migration.name}' (database version $currentVersion)")
                     val sectionStart = System.currentTimeMillis()
                     try {
@@ -33,7 +33,12 @@ interface DatabaseMigration {
                 }
             }
             if (currentVersion != SQLConnection.CURRENT_DATABASE_VERSION) {
-                SpicyAzisaBan.LOGGER.severe("Database migration did not upgrade the database version from $currentVersion to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen")
+                IllegalStateException("Database migration did not upgrade the database version from $currentVersion to ${SQLConnection.CURRENT_DATABASE_VERSION}, this really should not happen.\n" +
+                        "If you want to continue anyway, you can update the database version via the sql query: UPDATE `settings` SET `valueInt` = ${SQLConnection.CURRENT_DATABASE_VERSION} WHERE `key` = \"database_version\";")
+                    .let {
+                        context.reject(it)
+                        throw it
+                    }
             }
             val time = System.currentTimeMillis() - start
             SpicyAzisaBan.LOGGER.info("Completed database migrations (current database version: $currentVersion, took ${time}ms)")
@@ -45,8 +50,8 @@ interface DatabaseMigration {
     }
 
     val name: String
-        get() = "Migration for database version $targetDatabaseVersion"
-    val targetDatabaseVersion: Int
+        get() = "Migration for database version $sourceDatabaseVersion"
+    val sourceDatabaseVersion: Int
 
     fun execute(sql: SQLConnection)
 }

@@ -13,11 +13,11 @@ import java.util.UUID
 object CLIActor: PlayerActor, Actor {
     override fun getServer(): ServerInfo? = null
 
-    override fun disconnect(reason: Component) = throw AssertionError("Cannot disconnect CLIActor")
+    override fun disconnect(reason: Component) = error("Cannot disconnect CLIActor")
 
-    override fun disconnect(vararg reason: Component) = throw AssertionError("Cannot disconnect CLIActor")
+    override fun disconnect(vararg reason: Component) = error("Cannot disconnect CLIActor")
 
-    override fun connect(server: ServerInfo) = throw AssertionError("Cannot connect CLIActor to server")
+    override fun connect(server: ServerInfo) = error("Cannot connect CLIActor to server")
 
     override fun sendTitle(title: Title) {}
 
@@ -38,5 +38,5 @@ object CLIActor: PlayerActor, Actor {
 
     override fun hasPermission(permission: String): Boolean = true // all permissions granted
 
-    override fun getRemoteAddress(): SocketAddress = throw AssertionError("Cannot get socket address of CLIActor")
+    override fun getRemoteAddress(): SocketAddress = error("Cannot get socket address of CLIActor")
 }
