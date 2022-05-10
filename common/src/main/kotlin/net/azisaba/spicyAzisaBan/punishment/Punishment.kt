@@ -523,9 +523,14 @@ data class Punishment(
             .complete()
             ?.forEach { pd ->
                 if (pd.uuid == uuid) return@forEach
+                if ((type == PunishmentType.BAN || type == PunishmentType.TEMP_BAN) &&
+                    canJoinServer(pd.uuid, null, server).complete() != null) {
+                    return@forEach
+                }
                 val p = alsoApplyToPlayer(pd).catch { context.reject(it) }.complete() ?: return@async context.resolve(emptyList())
                 punishments.add(p)
                 if (p.type.isBan()) {
+                    if (canJoinServer(pd.uuid, null, server).complete() != null)
                     p.getBannedMessage().thenDo { SpicyAzisaBan.instance.getPlayer(pd.uuid)?.kick(it) }
                 } else {
                     p.getBannedMessage().thenDo { SpicyAzisaBan.instance.getPlayer(pd.uuid)?.send(it) }
