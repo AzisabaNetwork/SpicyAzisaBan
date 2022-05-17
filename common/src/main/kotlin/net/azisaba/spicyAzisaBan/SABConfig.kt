@@ -42,6 +42,7 @@ object SABConfig {
         val failsafe = obj.getBoolean("failsafe", true)
     }
 
+    // TODO: remove this, it's not used anymore
     val serverId: String?
         get() = if (SpicyAzisaBan.instance.getPlatformType() == PlatformType.CLI) null else cfg.getString("serverId")
 
