@@ -27,6 +27,8 @@ class TimerTasks(private val connection: SQLConnection) {
             }
             val rs = connection.executeQuery("SELECT * FROM `events` WHERE `id` > ?", currentEventId)
             while (rs.next()) {
+                val id = rs.getLong("id")
+                if (id > currentEventId) currentEventId = id
                 SpicyAzisaBan.LOGGER.info("Received event id ${rs.getLong("id")} (${rs.getString("event_id")})")
                 val e = try {
                     Events.fromResultSet(rs)
@@ -35,7 +37,6 @@ class TimerTasks(private val connection: SQLConnection) {
                     e.printStackTrace()
                     continue
                 }
-                if (e.id > currentEventId) currentEventId = e.id
                 try {
                     if (e.event == EventType.ADD_PUNISHMENT) {
                         val id = e.data.getLong("id")
