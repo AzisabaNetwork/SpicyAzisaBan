@@ -371,7 +371,6 @@ object SABCommand: Command() {
             "version" to SABConfig.version,
             "is_devbuild" to SABConfig.devBuild.toMinecraft(),
             "is_debugbuild" to SABConfig.debugBuild.toMinecraft(),
-            "server_id" to (SABConfig.serverId ?: "<null>"),
             "is_lockdown" to SpicyAzisaBan.instance.lockdown.toMinecraft(),).translate())
         context.resolve()
     }

@@ -78,7 +78,6 @@ commands:
       - "%PREFIX%    &6バージョン: &a%VERSION%"
       - "%PREFIX%    &6Debugビルド: %IS_DEBUGBUILD%"
       - "%PREFIX%    &6Devビルド: %IS_DEVBUILD%"
-      - "%PREFIX%    &6サーバーID: &f%SERVER_ID%"
       - "%PREFIX%    &6ロックダウン: %IS_LOCKDOWN%"
       - "%PREFIX%- &bサーバーバージョン"
       - "%PREFIX%    %SERVER_NAME% %SERVER_VERSION%"

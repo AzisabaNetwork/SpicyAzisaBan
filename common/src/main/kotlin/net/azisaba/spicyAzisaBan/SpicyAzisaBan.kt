@@ -150,10 +150,8 @@ abstract class SpicyAzisaBan {
                     "Version stored in plugin: ${SQLConnection.CURRENT_DATABASE_VERSION}")
         }
         val timerTasks = TimerTasks(connection)
-        if (SABConfig.serverId != null) {
+        if (getPlatformType() != PlatformType.CLI) {
             timer.scheduleAtFixedRate(10000, 10000) { timerTasks.checkEvents() }
-        } else if (getPlatformType() != PlatformType.CLI) {
-            LOGGER.warning("Disabled event check loop because serverId is null")
         }
         timer.scheduleAtFixedRate(SABConfig.Warning.sendTitleEvery, SABConfig.Warning.sendTitleEvery) { timerTasks.sendWarningTitle() }
         registerCommands()

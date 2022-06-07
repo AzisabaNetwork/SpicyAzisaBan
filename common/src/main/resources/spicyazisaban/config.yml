@@ -23,17 +23,9 @@ database:
   failsafe: true
 
 warning:
-  # Don't set to 1s because it's terrible because we fetch the punishments from database every time we check for warnings
+  # Don't set to 1s, it's too terrible because we fetch the punishments from database every time we check for warnings
   sendTitleEvery: 10s
   titleStayTime: 5s
-
-# Server ID settings
-# ----------
-# Ignore if you are using only one plugin per network.
-# You *need* to change this if you are using more than 1 proxy instances.
-# The server ID will only be used internally and will not be exposed to any player.
-# This config is ignored entirely when running from CLI.
-serverId: proxy
 
 # These settings below are reloadable by doing /sab reload
 
