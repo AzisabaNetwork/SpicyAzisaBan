@@ -16,9 +16,11 @@ import net.azisaba.spicyAzisaBan.util.Util.getServerName
 import net.azisaba.spicyAzisaBan.util.Util.insert
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
+import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
+import net.azisaba.spicyAzisaBan.util.contexts.getFlag
 import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.InsertOptions
@@ -27,7 +29,7 @@ import java.awt.Color
 object AddProofCommand: Command() {
     override val name = "${SABConfig.prefix}addproof"
 
-    private val availableArguments = listOf("id=", "text=\"\"")
+    private val availableArguments = listOf("id=", "text=\"\"", "public")
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission("sab.addproof")) {
@@ -51,10 +53,10 @@ object AddProofCommand: Command() {
             return
         }
         val text = arguments.getString("text") ?: return actor.send(SABMessages.Commands.General.noProofSpecified.replaceVariables().translate())
-        execute(actor, id, text)
+        execute(actor, id, text, arguments.getFlag("public"))
     }
 
-    fun execute(actor: Actor, id: Long, text: String) {
+    fun execute(actor: Actor, id: Long, text: String, public: Boolean) {
         val p = Punishment.fetchActivePunishmentById(id).complete()
             ?: return actor.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().format(id).translate())
         val proofId = try {
@@ -63,6 +65,7 @@ object AddProofCommand: Command() {
                     InsertOptions.Builder()
                         .addValue("punish_id", p.id)
                         .addValue("text", text)
+                        .addValue("public", public)
                         .build()
                 ).complete()
             }
@@ -70,10 +73,15 @@ object AddProofCommand: Command() {
             if (e.message == "cancel") return
             throw e
         }
-        Proof(proofId, p, text).sendWebhook(actor, "証拠が追加されました。", Color.GREEN)
+        Proof(proofId, p, text, public).sendWebhook(actor, "証拠が追加されました。", Color.GREEN)
         actor.send(
             SABMessages.Commands.AddProof.done
-                .replaceVariables("id" to proofId.toString(), "pid" to id.toString(), "text" to text)
+                .replaceVariables(
+                    "id" to proofId.toString(),
+                    "pid" to id.toString(),
+                    "text" to text,
+                    "public" to public.toMinecraft(),
+                )
                 .replaceVariables(p.getVariables().complete())
                 .translate()
         )

@@ -21,6 +21,15 @@ import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
 import java.sql.SQLException
 
+/**
+ * Try to get boolean value from options or from arguments. Defaults to false.
+ */
+fun ArgumentParser.getFlag(name: String): Boolean =
+    parsedRawOptions[name]?.toBooleanStrictOrNull() ?: arguments.contains(name)
+
+fun ArgumentParser.isFlagNotSpecified(name: String): Boolean =
+    parsedRawOptions[name] == null && !arguments.contains(name)
+
 @Suppress("UNCHECKED_CAST")
 fun <T : Context> ArgumentParser.get(context: Contexts<T>, actor: Actor): Promise<T> {
     if (context == Contexts.PLAYER) return getPlayer(actor) as Promise<T>

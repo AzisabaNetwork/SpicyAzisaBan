@@ -13,10 +13,11 @@ import kotlin.system.exitProcess
 object CLIAddProofCommand: Subcommand("add-proof", "Add a proof to a punishment") {
     private val id by argument(LongArgType, "id", "Punishment ID")
     private val text by argument(ArgType.String, "text", "Proof text")
+    private val public by option(ArgType.Boolean, "public", description = "whether if proof is public (viewable by player who got punished) or not")
 
     override fun execute() {
         SpicyAzisaBanCLI().doEnable()
-        AddProofCommand.execute(CLIActor, id, text)
+        AddProofCommand.execute(CLIActor, id, text, public ?: false)
         exitProcess(0)
     }
 }

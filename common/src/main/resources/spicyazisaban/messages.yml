@@ -308,10 +308,9 @@ commands:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%changereason <id=...> <reason=\"...\">"
     done: "%PREFIX%&7処罰&a#%ID%&7は正常に更新されました。"
   addproof:
-    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%addproof <id=...> <text=\"...\">"
-    # %PID% can be used here (punishment id), and %ID% is proof id
-    # and %TEXT% for proof text
-    done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&8)"
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%addproof <id=...> <text=\"...\"> [public]"
+    # %PID% can be used here (punishment id), %ID% for proof id, %TEXT% for proof text, and %PUBLIC% for colored true/false value
+    done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&f, &7Public: %PUBLIC%&8)"
   delproof:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%delproof <id=...>"
     # %PID% can be used here (punishment id), and %ID% is proof id

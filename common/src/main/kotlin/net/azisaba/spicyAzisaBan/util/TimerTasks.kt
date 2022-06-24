@@ -99,9 +99,9 @@ class TimerTasks(private val connection: SQLConnection) {
                     SpicyAzisaBan.LOGGER.warning("Received unprocessable event data")
                     e.printStackTrace()
                 }
+                connection.execute("UPDATE `events` SET `handled` = 1 WHERE `id` = ? AND `handled` = 0", iteratingCurrentEventId)
             }
             rs.statement.close()
-            connection.execute("UPDATE `events` SET `handled` = 1 WHERE `id` <= ? AND `handled` = 0", currentEventId)
         } catch (e: Exception) {
             SpicyAzisaBan.LOGGER.severe("Could not check for new events")
             e.printStackTrace()
