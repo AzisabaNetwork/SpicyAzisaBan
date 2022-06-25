@@ -32,6 +32,7 @@ import kotlin.math.min
 
 object BanListCommand: Command() {
     override val name = "${SABConfig.prefix}banlist"
+    override val permission = "sab.banlist"
     private val availableArguments =
         listOf(
             listOf("--help"),

@@ -28,6 +28,7 @@ import util.kt.promise.rewrite.catch
 
 object TempBanCommand: Command() {
     override val name = "${SABConfig.prefix}tempban"
+    override val permission = PunishmentType.TEMP_BAN.perm
     private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=", "--all")
 
     override fun execute(actor: Actor, args: Array<String>) {

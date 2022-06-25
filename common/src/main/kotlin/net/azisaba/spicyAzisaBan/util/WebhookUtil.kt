@@ -123,6 +123,7 @@ object WebhookUtil {
                 embed.addField("被処罰者", punishment.name, false)
                 embed.addField("処罰ID", punishment.id.toString(), false)
                 embed.addField("処罰理由", punishment.reason, false)
+                embed.addField("被処罰者に対して公開", public.toString(), false)
                 if (text.startsWith("https://") &&
                     !text.contains(" ") &&
                     (text.endsWith(".png", true) || text.endsWith(".jpg", true) || text.endsWith(".gif", true))

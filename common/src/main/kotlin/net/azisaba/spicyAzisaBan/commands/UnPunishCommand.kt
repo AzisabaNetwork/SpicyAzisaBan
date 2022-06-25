@@ -30,6 +30,7 @@ import xyz.acrylicstyle.sql.options.InsertOptions
 
 object UnPunishCommand: Command() {
     override val name = "${SABConfig.prefix}unpunish"
+    override val permission = "sab.unpunish"
     private val availableArguments = listOf("id=", "reason=\"\"")
 
     override fun execute(actor: Actor, args: Array<String>) {

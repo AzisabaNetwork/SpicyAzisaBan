@@ -22,7 +22,7 @@ import java.util.Properties
 
 class SQLConnection(host: String, name: String, user:String, password: String): Sequelize(host, name, user, password) {
     companion object {
-        const val CURRENT_DATABASE_VERSION = 8
+        const val CURRENT_DATABASE_VERSION = 9
 
         fun logSql(s: String, time: Long) {
             SpicyAzisaBan.debug("Executed SQL: $s (took $time ms)", 3)
@@ -118,6 +118,7 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
                 TableDefinition.Builder("id", DataType.BIGINT).setAutoIncrement(true).setPrimaryKey(true).build(),
                 TableDefinition.Builder("punish_id", DataType.BIGINT).setAllowNull(false).build(),
                 TableDefinition.Builder("text", DataType.STRING).setAllowNull(false).build(),
+                TableDefinition.Builder("public", DataType.BOOLEAN).setAllowNull(false).setDefaultValue(false).build(),
             ),
         ).setupEventListener()
         players = this.define(

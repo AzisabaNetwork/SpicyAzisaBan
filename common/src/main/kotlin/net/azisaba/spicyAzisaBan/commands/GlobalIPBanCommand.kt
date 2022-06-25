@@ -20,6 +20,7 @@ import util.kt.promise.rewrite.catch
 
 object GlobalIPBanCommand: Command() {
     override val name = "${SABConfig.prefix}gipban"
+    override val permission = PunishmentType.IP_BAN.perm
     private val availableArguments = listOf("target=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

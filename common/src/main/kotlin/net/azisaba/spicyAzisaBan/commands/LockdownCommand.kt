@@ -15,6 +15,7 @@ import org.json.JSONObject
 
 object LockdownCommand: Command() {
     override val name = "${SABConfig.prefix}lockdown"
+    override val permission = "sab.lockdown"
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission("sab.lockdown")) {

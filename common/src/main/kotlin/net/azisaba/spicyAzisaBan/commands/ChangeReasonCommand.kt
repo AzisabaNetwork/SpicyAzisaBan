@@ -25,6 +25,7 @@ import xyz.acrylicstyle.sql.options.FindOptions
 
 object ChangeReasonCommand: Command() {
     override val name = "${SABConfig.prefix}changereason"
+    override val permission = "sab.changereason"
     override val aliases = arrayOf("${SABConfig.prefix}change-reason")
     private val availableArguments = listOf("id=", "reason=\"\"")
 

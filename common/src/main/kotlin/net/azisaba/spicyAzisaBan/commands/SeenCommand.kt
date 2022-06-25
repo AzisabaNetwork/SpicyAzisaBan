@@ -25,6 +25,7 @@ import java.net.InetAddress
 
 object SeenCommand: Command() {
     override val name = "${SABConfig.prefix}seen"
+    override val permission = "sab.seen"
     private val availableArguments = listOf(listOf("--ambiguous"))
 
     override fun execute(actor: Actor, args: Array<String>) {

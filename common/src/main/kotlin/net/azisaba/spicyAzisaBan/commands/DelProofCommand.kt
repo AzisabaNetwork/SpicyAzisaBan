@@ -21,6 +21,7 @@ import java.awt.Color
 
 object DelProofCommand: Command() {
     override val name = "${SABConfig.prefix}delproof"
+    override val permission = "sab.delproof"
     private val availableArguments = listOf("id=")
 
     override fun execute(actor: Actor, args: Array<String>) {
@@ -41,7 +42,7 @@ object DelProofCommand: Command() {
         val id = try {
             arguments.parsedRawOptions["id"]?.toLong() ?: -1
         } catch (e: NumberFormatException) {
-            actor.send(SABMessages.Commands.General.notPunished.replaceVariables().translate())
+            actor.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
             return
         }
         val list = SpicyAzisaBan.instance.connection.proofs.delete(FindOptions.Builder().addWhere("id", id).setLimit(1).build()).complete()

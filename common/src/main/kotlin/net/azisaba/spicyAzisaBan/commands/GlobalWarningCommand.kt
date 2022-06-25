@@ -20,6 +20,7 @@ import util.kt.promise.rewrite.catch
 
 object GlobalWarningCommand: Command() {
     override val name = "${SABConfig.prefix}gwarning"
+    override val permission = PunishmentType.WARNING.perm
     override val aliases = arrayOf("${SABConfig.prefix}gwarn")
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 

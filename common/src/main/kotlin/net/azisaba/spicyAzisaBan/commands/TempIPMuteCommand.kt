@@ -28,6 +28,7 @@ import util.kt.promise.rewrite.catch
 
 object TempIPMuteCommand: Command() {
     override val name = "${SABConfig.prefix}tempipmute"
+    override val permission = PunishmentType.TEMP_IP_MUTE.perm
     private val availableArguments = listOf("target=", "reason=\"\"", "time=", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

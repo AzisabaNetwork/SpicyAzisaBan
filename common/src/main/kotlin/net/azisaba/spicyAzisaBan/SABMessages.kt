@@ -301,6 +301,13 @@ object SABMessages {
             val done get() = obj.getMessage("done", defObj.getMessage("done"))
         }
 
+        object UpdateProof {
+            private val defObj get() = Commands.defObj.getObj("updateproof")
+            private val obj get() = Commands.obj.getObj("updateproof")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+            val done get() = obj.getMessage("done", defObj.getMessage("done"))
+        }
+
         object DelProof {
             private val defObj get() = Commands.defObj.getObj("delproof")
             private val obj get() = Commands.obj.getObj("delproof")
@@ -356,6 +363,8 @@ object SABMessages {
             val notWarnedYet get() = obj.getMessage("notWarnedYet", defObj.getMessage("notWarnedYet"))
             val header get() = obj.getMessage("header", defObj.getMessage("header"))
             val layout get() = obj.getMessage("layout", defObj.getMessage("layout"))
+            val viewableProofs get() = obj.getMessage("viewable-proofs", defObj.getMessage("viewable-proofs"))
+            val proofEntry get() = obj.getMessage("proof-entry", defObj.getMessage("proof-entry"))
         }
 
         object BanList {

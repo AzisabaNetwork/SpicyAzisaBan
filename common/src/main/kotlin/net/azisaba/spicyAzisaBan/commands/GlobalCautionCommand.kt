@@ -20,6 +20,7 @@ import util.kt.promise.rewrite.catch
 
 object GlobalCautionCommand: Command() {
     override val name = "${SABConfig.prefix}gcaution"
+    override val permission = PunishmentType.CAUTION.perm
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

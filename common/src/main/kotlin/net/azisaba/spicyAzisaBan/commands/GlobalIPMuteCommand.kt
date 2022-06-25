@@ -20,6 +20,7 @@ import util.kt.promise.rewrite.catch
 
 object GlobalIPMuteCommand: Command() {
     override val name = "${SABConfig.prefix}gipmute"
+    override val permission = PunishmentType.IP_MUTE.perm
     private val availableArguments = listOf("target=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

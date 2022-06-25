@@ -28,6 +28,7 @@ import util.kt.promise.rewrite.catch
 
 object CautionCommand: Command() {
     override val name = "${SABConfig.prefix}caution"
+    override val permission = PunishmentType.CAUTION.perm
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

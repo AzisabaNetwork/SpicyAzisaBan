@@ -31,6 +31,7 @@ import java.net.InetAddress
 
 object CheckCommand: Command() {
     override val name = "${SABConfig.prefix}check"
+    override val permission = "sab.check"
     private val availableArguments = listOf(listOf("target=", "id="), listOf("--ip", "-i"), listOf("--only", "-o"), listOf("server="), listOf("--no-group-lookup"))
 
     override fun execute(actor: Actor, args: Array<String>) {

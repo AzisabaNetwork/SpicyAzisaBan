@@ -31,6 +31,7 @@ import kotlin.math.min
 
 object HistoryCommand: Command() {
     override val name = "${SABConfig.prefix}history"
+    override val permission = "sab.history"
     private val availableArguments =
         listOf(
             listOf("target="),

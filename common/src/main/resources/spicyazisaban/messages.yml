@@ -311,6 +311,10 @@ commands:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%addproof <id=...> <text=\"...\"> [public]"
     # %PID% can be used here (punishment id), %ID% for proof id, %TEXT% for proof text, and %PUBLIC% for colored true/false value
     done: "%PREFIX%&7処罰&a#%PID%&7に証拠を追加しました。&8(&7ID: &e%ID%&f, &7Public: %PUBLIC%&8)"
+  updateproof:
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%updateproof <id=...> [text=\"...\"] [public]"
+    # %PID% can be used here (punishment id), %ID% for proof id, %TEXT% for proof text, and %PUBLIC% for colored true/false value
+    done: "%PREFIX%&7処罰&a#%PID%&7の証拠&a#%ID%&7は正常に更新されました。"
   delproof:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%delproof <id=...>"
     # %PID% can be used here (punishment id), and %ID% is proof id
@@ -337,15 +341,20 @@ commands:
       - "%PREFIX%&c&o%IP_ADDRESS% &8(&e&o%HOSTNAME%&8)&eは過去に%PLAYERS_COUNT%個のアカウントで接続しています:"
       - "&6%PLAYERS%"
   warns:
-    notWarnedYet: "%PREFIX%&c&oまだ警告を受けていません。"
     # Available variables: default
+    notWarnedYet: "%PREFIX%&c&oまだ警告を受けていません。"
     header: "%PREFIX%&c有効な警告一覧:"
-    # Available variables: punishment
+
+    # Available variables: punishment, default
     layout:
       - "&8[&e%DATE%&8]"
       - "&cタイプ &8> &7&o%TYPE%"
       - "&c対象サーバー &8> &7&o%SERVER%"
       - "&c理由 &8> &7&o%REASON%"
+    viewable-proofs: "&c閲覧可能な証拠:"
+
+    # Available variables: %ID% - id of proof, %TEXT% - the text of proof, %PUBLIC% - always true (with color of green)
+    proof-entry: "  &c- &f%TEXT%"
   history:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%history <target=Player/IP> [page=...] [--all] [--active]"
     # Available variables: %TARGET%
@@ -402,9 +411,9 @@ commands:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%proofs <ID>"
     # Available variables: punishment + %PID% (punishment id)
     header: "%PREFIX%&e処罰&a#%PID%&eの証拠一覧:"
-    # Available variables: %PID% (punishment id), %ID% (proof id), %TEXT% (proof text)
+    # Available variables: %PID% (punishment id), %ID% (proof id), %TEXT% (proof text), %PUBLIC% (colored true/false value)
     layout:
-      - "&c&o証拠ID #%ID% &8> &e&o%TEXT%"
+      - "&c&o証拠ID #%ID% &7(公開: %PUBLIC%&7) &8> &e&o%TEXT%"
   banlist:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%banlist [page=...] [type=...] [server=...] [--all] [--active]"
     # Available variables: default

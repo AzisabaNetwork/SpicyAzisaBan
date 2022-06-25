@@ -1,7 +1,9 @@
 package net.azisaba.spicyAzisaBan.bungee
 
+import net.azisaba.spicyAzisaBan.SABConfig
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.bungee.listener.EventListeners
+import net.azisaba.spicyAzisaBan.bungee.listener.LockdownListener
 import net.azisaba.spicyAzisaBan.bungee.listener.PlayerDataUpdaterListener
 import net.blueberrymc.nativeutil.NativeUtil
 import net.md_5.bungee.api.plugin.Plugin
@@ -61,10 +63,19 @@ class BungeePlugin: Plugin() {
     }
 
     override fun onEnable() {
-        SpicyAzisaBanBungee().doEnable()
-        proxy.pluginManager.registerListener(this, EventListeners)
-        proxy.pluginManager.registerListener(this, PlayerDataUpdaterListener)
-        logger.info("Hewwwwwwwwwoooooo!")
+        try {
+            SpicyAzisaBanBungee().doEnable()
+            proxy.pluginManager.registerListener(this, EventListeners)
+            proxy.pluginManager.registerListener(this, PlayerDataUpdaterListener)
+            logger.info("Hewwwwwwwwwoooooo!")
+        } catch (e: Exception) {
+            logger.severe("Fatal error occurred while initializing the plugin")
+            e.printStackTrace()
+            if (SABConfig.database.failsafe) {
+                logger.info("Failsafe is enabled, locking down the server")
+                proxy.pluginManager.registerListener(this, LockdownListener)
+            }
+        }
     }
 
     override fun onDisable() {

@@ -28,6 +28,7 @@ import util.kt.promise.rewrite.catch
 
 object TempIPBanCommand: Command() {
     override val name = "${SABConfig.prefix}tempipban"
+    override val permission = PunishmentType.TEMP_IP_BAN.perm
     override val aliases = arrayOf("${SABConfig.prefix}tipban")
     private val availableArguments = listOf("target=", "reason=\"\"", "server=", "time=")
 

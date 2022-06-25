@@ -36,6 +36,7 @@ import net.azisaba.spicyAzisaBan.commands.TempMuteCommand
 import net.azisaba.spicyAzisaBan.commands.UnBanCommand
 import net.azisaba.spicyAzisaBan.commands.UnMuteCommand
 import net.azisaba.spicyAzisaBan.commands.UnPunishCommand
+import net.azisaba.spicyAzisaBan.commands.UpdateProofCommand
 import net.azisaba.spicyAzisaBan.commands.WarningCommand
 import net.azisaba.spicyAzisaBan.commands.WarnsCommand
 import net.azisaba.spicyAzisaBan.common.Actor
@@ -193,6 +194,7 @@ abstract class SpicyAzisaBan {
         instance.registerCommand(BanListCommand)
         instance.registerCommand(WarnsCommand)
         instance.registerCommand(AddProofCommand)
+        instance.registerCommand(UpdateProofCommand)
         instance.registerCommand(DelProofCommand)
         instance.registerCommand(ProofsCommand)
         instance.registerCommand(LockdownCommand)

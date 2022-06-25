@@ -27,6 +27,7 @@ import util.kt.promise.rewrite.catch
 
 object NoteCommand: Command() {
     override val name = "${SABConfig.prefix}note"
+    override val permission = PunishmentType.NOTE.perm
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

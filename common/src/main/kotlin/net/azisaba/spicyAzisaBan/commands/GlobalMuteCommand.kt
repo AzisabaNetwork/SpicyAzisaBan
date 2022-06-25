@@ -20,6 +20,7 @@ import util.kt.promise.rewrite.catch
 
 object GlobalMuteCommand: Command() {
     override val name = "${SABConfig.prefix}gmute"
+    override val permission = PunishmentType.MUTE.perm
     private val availableArguments = listOf("player=", "reason=\"\"", "server=", "--all")
 
     override fun execute(actor: Actor, args: Array<String>) {

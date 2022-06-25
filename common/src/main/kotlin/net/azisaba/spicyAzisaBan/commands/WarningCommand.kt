@@ -28,6 +28,7 @@ import util.kt.promise.rewrite.catch
 
 object WarningCommand: Command() {
     override val name = "${SABConfig.prefix}warning"
+    override val permission = PunishmentType.WARNING.perm
     override val aliases = arrayOf("${SABConfig.prefix}warn")
 
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")

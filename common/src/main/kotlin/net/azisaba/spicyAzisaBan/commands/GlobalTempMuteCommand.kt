@@ -21,6 +21,7 @@ import util.kt.promise.rewrite.catch
 
 object GlobalTempMuteCommand: Command() {
     override val name = "${SABConfig.prefix}gtempmute"
+    override val permission = PunishmentType.TEMP_MUTE.perm
     private val availableArguments = listOf("player=", "reason=\"\"", "time=", "server=", "--all")
 
     override fun execute(actor: Actor, args: Array<String>) {

@@ -15,6 +15,7 @@ import util.kt.promise.rewrite.catch
 
 object ProofsCommand: Command() {
     override val name = "${SABConfig.prefix}proofs"
+    override val permission = "sab.proofs"
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission("sab.proofs")) {
@@ -25,7 +26,7 @@ object ProofsCommand: Command() {
         val id = try {
             arguments.getString("id")?.toLong() ?: arguments.arguments.getOrNull(0)?.toLong() ?: -1
         } catch (e: NumberFormatException) {
-            actor.send(SABMessages.Commands.General.punishmentNotFound.replaceVariables().translate())
+            actor.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
             return
         }
         async<Unit> { context ->
@@ -42,14 +43,7 @@ object ProofsCommand: Command() {
                     .translate()
             )
             proofs.forEach { proof ->
-                actor.send(
-                    SABMessages.Commands.Proofs.layout
-                        .replaceVariables(
-                            "id" to proof.id.toString(),
-                            "text" to proof.text,
-                        )
-                        .translate()
-                )
+                actor.send(SABMessages.Commands.Proofs.layout.replaceVariables(proof.variables).translate())
             }
             context.resolve()
         }.catch {

@@ -32,6 +32,7 @@ import kotlin.math.min
 
 object SABCommand: Command() {
     override val name = "${SABConfig.prefix}spicyazisaban"
+    override val permission = "sab.command.spicyazisaban"
     override val aliases = arrayOf("sab")
 
     private val commands = listOf(

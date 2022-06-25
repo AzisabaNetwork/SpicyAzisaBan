@@ -30,6 +30,7 @@ import xyz.acrylicstyle.sql.options.InsertOptions
 
 object UnMuteCommand: Command() {
     override val name = "${SABConfig.prefix}unmute"
+    override val permission = "sab.unmute"
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {

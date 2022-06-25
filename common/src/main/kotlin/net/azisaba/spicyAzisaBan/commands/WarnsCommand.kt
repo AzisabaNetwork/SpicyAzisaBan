@@ -18,9 +18,13 @@ import xyz.acrylicstyle.sql.options.FindOptions
 
 object WarnsCommand: Command() {
     override val name = "${SABConfig.prefix}warns"
+    override val permission = "sab.warns" // this should be set to true for everyone
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (actor !is PlayerActor) return actor.send("e^1")
+        if (!actor.hasPermission(permission)) {
+            return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
+        }
         async<Unit> { context ->
             val ps = SpicyAzisaBan.instance.connection.punishments
                 .findAll(FindOptions.Builder().addWhere("target", actor.uniqueId.toString()).build())
@@ -42,9 +46,17 @@ object WarnsCommand: Command() {
             }
             actor.clearTitle()
             val variables = ps.map { it.getVariables().complete() }
+            val proofs = ps.map { it.getProofs().complete() }
             actor.send(SABMessages.Commands.Warns.header.replaceVariables().translate())
-            variables.forEach { s ->
-                actor.send(SABMessages.Commands.Warns.layout.replaceVariables(s).translate())
+            variables.forEachIndexed { index, map ->
+                actor.send(SABMessages.Commands.Warns.layout.replaceVariables(map).translate())
+                val proofList = proofs[index].filter { it.public }
+                if (proofList.isNotEmpty()) {
+                    actor.send(SABMessages.Commands.Warns.viewableProofs.replaceVariables(map).translate())
+                    proofList.forEach { proof ->
+                        actor.send(SABMessages.Commands.Warns.proofEntry.replaceVariables(proof.variables).translate())
+                    }
+                }
             }
             context.resolve()
         }.catch {

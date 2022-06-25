@@ -30,6 +30,7 @@ import xyz.acrylicstyle.sql.options.InsertOptions
 
 object UnBanCommand: Command() {
     override val name = "${SABConfig.prefix}unban"
+    override val permission = "sab.unban"
     private val availableArguments = listOf("player=", "reason=\"\"", "server=")
 
     override fun execute(actor: Actor, args: Array<String>) {
