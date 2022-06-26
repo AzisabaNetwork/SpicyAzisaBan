@@ -15,7 +15,6 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 
 object GlobalNoteCommand: Command() {
@@ -28,7 +27,7 @@ object GlobalNoteCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.Note.globalUsage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             NoteCommand.doNote(actor, arguments)
             context.resolve()

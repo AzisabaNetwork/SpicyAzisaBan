@@ -14,9 +14,9 @@ import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.FindOptions
+import xyz.acrylicstyle.util.ArgumentParsedResult
 import java.awt.Color
 
 object DelProofCommand: Command() {
@@ -29,7 +29,7 @@ object DelProofCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.DelProof.usage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             execute(actor, arguments)
             context.resolve()
@@ -38,9 +38,9 @@ object DelProofCommand: Command() {
         }
     }
 
-    private fun execute(actor: Actor, arguments: ArgumentParser) {
+    private fun execute(actor: Actor, arguments: ArgumentParsedResult) {
         val id = try {
-            arguments.parsedRawOptions["id"]?.toLong() ?: -1
+            arguments.getArgument("id")?.toLong() ?: -1
         } catch (e: NumberFormatException) {
             actor.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
             return

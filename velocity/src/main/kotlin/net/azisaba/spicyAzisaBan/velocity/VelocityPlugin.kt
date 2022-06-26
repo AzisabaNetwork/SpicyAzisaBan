@@ -67,7 +67,7 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
     }
 
     @Subscribe
-    fun onProxyInitialization(e: ProxyInitializeEvent) {
+    fun onProxyInitialization(@Suppress("UNUSED_PARAMETER") e: ProxyInitializeEvent) {
         try {
             for (path in urlsToBeAdded) {
                 server.pluginManager.addToClasspath(this, path)

@@ -14,7 +14,6 @@ import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
-import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.plus
 import net.azisaba.spicyAzisaBan.util.Util.send
@@ -24,7 +23,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.IPAddressContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.FindOptions
 import java.net.InetAddress
@@ -41,9 +39,9 @@ object CheckCommand: Command() {
         if (args.isEmpty()) {
             return actor.send(SABMessages.Commands.Check.usage.replaceVariables().translate())
         }
-        val arguments = ArgumentParser(args.joinToString(" "))
-        val target = arguments.parsedRawOptions["target"] ?: arguments.getNonParamStringAt(0)
-        val pid = arguments.parsedRawOptions["id"]?.toLongOrNull()
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
+        val target = arguments.getArgument("target") ?: arguments.unhandledArguments().getOrNull(0)
+        val pid = arguments.getArgument("id")?.toLongOrNull()
         if (target.isNullOrBlank() && pid == null) {
             return actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
@@ -62,9 +60,9 @@ object CheckCommand: Command() {
         if (target.isNullOrBlank()) {
             return actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
-        val only = arguments.contains("only") || arguments.contains("-o")
-        val noGroupLookup = arguments.contains("no-group-lookup")
-        val specifiedServer = arguments.containsKey("server")
+        val only = arguments.containsUnhandledArgument("only") || arguments.containsShortArgument('o')
+        val noGroupLookup = arguments.containsUnhandledArgument("no-group-lookup")
+        val specifiedServer = arguments.containsArgumentKey("server")
         val whereServer = if (specifiedServer) " AND `server` = ?" else ""
         async<Unit> { context ->
             actor.send(SABMessages.Commands.Check.searching.replaceVariables().translate())
@@ -72,7 +70,7 @@ object CheckCommand: Command() {
                 .complete()
                 .apply { if (!isSuccess) return@async }
                 .name
-            if (arguments.contains("ip") || arguments.contains("-i") || target.isValidIPAddress()) {
+            if (arguments.containsUnhandledArgument("ip") || arguments.containsShortArgument('i') || target.isValidIPAddress()) {
                 val ip = if (target.isValidIPAddress()) {
                     target
                 } else {
@@ -163,7 +161,7 @@ object CheckCommand: Command() {
                     actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@async context.resolve()
                 }
-                val punishments = if (arguments.contains("only") || arguments.contains("-o")) {
+                val punishments = if (arguments.containsUnhandledArgument("only") || arguments.containsShortArgument('o')) {
                     SpicyAzisaBan.instance.connection.punishmentHistory
                         .findAll(FindOptions.Builder().addWhere("target", pd.uniqueId.toString()).apply { if (specifiedServer) addWhere("server", server) }.build())
                         .then { list -> list.map { td -> Punishment.fromTableData(td) } }

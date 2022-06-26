@@ -5,7 +5,6 @@ import net.azisaba.spicyAzisaBan.SABMessages
 import net.azisaba.spicyAzisaBan.SABMessages.replaceVariables
 import net.azisaba.spicyAzisaBan.SpicyAzisaBan
 import net.azisaba.spicyAzisaBan.common.Actor
-import net.azisaba.spicyAzisaBan.common.PlayerActor
 import net.azisaba.spicyAzisaBan.common.command.Command
 import net.azisaba.spicyAzisaBan.punishment.Expiration
 import net.azisaba.spicyAzisaBan.punishment.Punishment
@@ -14,6 +13,7 @@ import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
+import net.azisaba.spicyAzisaBan.util.Util.getServerOrGroupName
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -22,42 +22,44 @@ import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
+import net.azisaba.spicyAzisaBan.util.contexts.getServer
 import util.kt.promise.rewrite.catch
+import xyz.acrylicstyle.util.ArgumentParsedResult
 
 object MuteCommand: Command() {
     override val name = "${SABConfig.prefix}mute"
     override val permission = PunishmentType.MUTE.perm
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "--all")
+    private val availableArguments = listOf(listOf("player="), listOf("reason=\"\""), listOf("server="), listOf("--all", "-a"), listOf("--force", "-f"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission(PunishmentType.MUTE.perm)) {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.Mute.usage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
-            if (!arguments.parsedRawOptions.containsKey("server") && actor is PlayerActor) {
-                val serverName = actor.getServerName()
-                val group = SpicyAzisaBan.instance.connection.getGroupByServer(serverName).complete()
-                arguments.parsedRawOptions["server"] = group ?: serverName
-            }
-            doMute(actor, arguments)
+            doMute(actor, arguments, actor.getServerOrGroupName(arguments))
             context.resolve()
         }.catch {
             actor.sendErrorMessage(it)
         }
     }
 
-    internal fun doMute(actor: Actor, arguments: ArgumentParser) {
+    internal fun doMute(actor: Actor, arguments: ArgumentParsedResult, serverName: String? = null) {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
-        val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
+        val server = if (serverName == null) {
+            arguments.get(Contexts.SERVER, actor)
+        } else {
+            arguments.getServer(actor, serverName, true)
+        }.complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
-        doMute(actor, player, server, reason, arguments.contains("all"))
+        val all = arguments.containsUnhandledArgument("all") || arguments.containsShortArgument('a')
+        val force = arguments.containsUnhandledArgument("force") || arguments.containsShortArgument('f')
+        doMute(actor, player, server, reason, all, force)
     }
 
-    fun doMute(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext, all: Boolean) {
-        if (Punishment.canSpeak(player.profile.uniqueId, null, server.name).complete() != null) {
+    fun doMute(actor: Actor, player: PlayerContext, server: ServerContext, reason: ReasonContext, all: Boolean, force: Boolean) {
+        if (!force && Punishment.canSpeak(player.profile.uniqueId, null, server.name).complete() != null) {
             actor.send(SABMessages.Commands.General.alreadyPunished.replaceVariables().translate())
             return
         }

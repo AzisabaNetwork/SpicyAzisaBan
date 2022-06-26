@@ -549,6 +549,7 @@ data class Punishment(
         SpicyAzisaBan.instance.getPlayers().filter { it.hasNotifyPermissionOf(type, server) }.forEach { player ->
             player.send(message)
         }
+        list.sendWebhook()
     }
 
     fun getHistoryMessage(): Promise<String> = async { context ->

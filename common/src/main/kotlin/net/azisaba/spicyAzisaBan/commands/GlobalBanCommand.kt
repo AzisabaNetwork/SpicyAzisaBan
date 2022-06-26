@@ -15,20 +15,19 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 
 object GlobalBanCommand: Command() {
     override val name = "${SABConfig.prefix}gban"
     override val permission = PunishmentType.BAN.perm
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "--all")
+    private val availableArguments = listOf(listOf("player="), listOf("reason=\"\""), listOf("server="), listOf("--all", "-a"), listOf("--force", "-f"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission(PunishmentType.BAN.perm)) {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.Ban.globalUsage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             BanCommand.doBan(actor, arguments)
             context.resolve()

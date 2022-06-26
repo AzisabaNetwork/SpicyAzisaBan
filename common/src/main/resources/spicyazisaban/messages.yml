@@ -9,6 +9,7 @@ general:
   prefix: "&c&lSpicyAzisaBan &8&l» &r"
   missingPermissions: "%PREFIX%&c権限がありません!"
   error: "&c処理中に不明なエラーが発生しました。"
+  invalid-syntax: "&c構文エラー: %s"
 
   # available variables: defalt + %EXCEPTION_CLASS_NAME%, %EXCEPTION_MESSAGE%
   errorDetailed: "&c処理中に不明なエラーが発生しました。 (%EXCEPTION_CLASS_NAME%)"

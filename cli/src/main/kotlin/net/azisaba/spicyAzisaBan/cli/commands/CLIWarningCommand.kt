@@ -5,11 +5,11 @@ import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 import net.azisaba.spicyAzisaBan.cli.SpicyAzisaBanCLI
 import net.azisaba.spicyAzisaBan.cli.actor.CLIActor
+import net.azisaba.spicyAzisaBan.cli.util.CLIUtil
 import net.azisaba.spicyAzisaBan.commands.WarningCommand
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalCli::class)
@@ -22,8 +22,14 @@ object CLIWarningCommand: Subcommand("warning", "Issues a 'warning' punishment t
         SpicyAzisaBanCLI().doEnable()
         WarningCommand.doWarning(
             CLIActor,
-            ArgumentParser("player=$player").get(Contexts.PLAYER, CLIActor).complete().apply { if (!isSuccess) exitProcess(1) },
-            ArgumentParser("server=${server ?: "global"}").get(Contexts.SERVER_NO_PERM_CHECK, CLIActor).complete().apply { if (!isSuccess) exitProcess(1) },
+            CLIUtil.genericArgumentParser.parse("player=$player")
+                .get(Contexts.PLAYER, CLIActor)
+                .complete()
+                .apply { if (!isSuccess) exitProcess(1) },
+            CLIUtil.genericArgumentParser.parse("server=${server ?: "global"}")
+                .get(Contexts.SERVER_NO_PERM_CHECK, CLIActor)
+                .complete()
+                .apply { if (!isSuccess) exitProcess(1) },
             ReasonContext(reason),
         )
         exitProcess(0)

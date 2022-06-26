@@ -16,14 +16,12 @@ import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
-import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.toIntOr
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.IPAddressContext
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import kotlin.math.ceil
 import kotlin.math.max
@@ -49,17 +47,17 @@ object HistoryCommand: Command() {
         if (args.isEmpty()) {
             return actor.send(SABMessages.Commands.History.usage.replaceVariables().translate())
         }
-        val arguments = ArgumentParser(args.joinToString(" "))
-        val target = arguments.parsedRawOptions["target"] ?: arguments.getNonParamStringAt(0)
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
+        val target = arguments.getArgument("target") ?: arguments.unhandledArguments().getOrNull(0)
         if (target.isNullOrBlank()) {
             return actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         }
-        val active = arguments.contains("active")
-        val all = arguments.contains("all")
-        val ipOpt = arguments.contains("ip") || arguments.contains("-i")
-        val only = arguments.contains("only") || arguments.contains("-o")
+        val active = arguments.containsUnhandledArgument("active")
+        val all = arguments.containsUnhandledArgument("all")
+        val ipOpt = arguments.containsUnhandledArgument("ip") || arguments.containsShortArgument('i')
+        val only = arguments.containsUnhandledArgument("only") || arguments.containsShortArgument('o')
         if (active && all) return actor.send(SABMessages.Commands.History.invalidArguments.replaceVariables().translate())
-        var page = max(1, arguments.parsedRawOptions["page"]?.toIntOr(1) ?: 1)
+        var page = max(1, arguments.getArgument("page")?.toIntOr(1) ?: 1)
         val tableName = if (active) "punishments" else "punishmentHistory"
         val left = if (!all) "LEFT OUTER JOIN unpunish ON ($tableName.id = unpunish.punish_id)" else ""
         val extraWhere = if (!all) "AND unpunish.punish_id IS NULL" else ""

@@ -15,7 +15,6 @@ import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.sql.SQLConnection
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
-import util.ArgumentParser
 import util.StringReader
 import util.UUIDUtil
 import util.concurrent.ref.DataCache
@@ -25,12 +24,16 @@ import util.promise.rewrite.Promise
 import util.promise.rewrite.PromiseContext
 import xyz.acrylicstyle.mcutil.common.PlayerProfile
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
+import xyz.acrylicstyle.util.ArgumentParsedResult
+import xyz.acrylicstyle.util.InvalidArgumentException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
 
 object Util {
     /**
@@ -372,6 +375,15 @@ object Util {
      */
     fun Actor.getServerName() = if (this is PlayerActor) this.getServer()?.name ?: "" else ""
 
+    fun Actor.getServerOrGroupName(arguments: ArgumentParsedResult) =
+        if (!arguments.containsArgumentKey("server")) {
+            val serverName = getServerName()
+            val group = SpicyAzisaBan.instance.connection.getGroupByServer(serverName).complete()
+            group ?: serverName
+        } else {
+            null
+        }
+
     /**
      * Sends the message to specified server after 100 + (random time in range 0-300) seconds.
      */
@@ -473,10 +485,6 @@ object Util {
         toRemove.forEach { this.remove(it) }
     }
 
-    fun ArgumentParser.getNonParamStringAt(index: Int): String? {
-        return this.arguments.filter { s: String -> !s.contains("=") && !s.contains("-") }.getOrNull(index)
-    }
-
     fun <T> async(throwableConsumer: ThrowableConsumer<PromiseContext<T>>) =
         Promise.create("SpicyAzisaBan Worker #%d", throwableConsumer)
 
@@ -501,4 +509,53 @@ object Util {
      * Checks if the DataCache is not expired yet.
      */
     fun DataCache<*>.isNotExpired() = System.currentTimeMillis() <= this.ttl
+
+    fun InvalidArgumentException.toComponent(): Component {
+        val errorComponent = Component.text(SABMessages.General.invalidSyntax.replaceVariables().format(message).translate(), ChatColor.RED)
+        val context = this.context ?: return errorComponent
+        //val sb = StringBuilder(super.toString())
+        val prev = context.peekWithAmount(-min(context.index(), 15))
+        var next = context.peekWithAmount(
+            min(
+                context.readableCharacters(),
+                max(15, length)
+            )
+        )
+        if (next.isEmpty()) {
+            next = " ".repeat(length)
+        }
+        //val cursor = min(15, context.index())
+        val c = Component.text("")
+        c.addChildren(errorComponent)
+        //c.addChildren(Component.text(super.toString()))
+        c.addChildren(Component.text("\n"))
+        c.addChildren(Component.text(prev, ChatColor.WHITE))
+        val left = next.substring(0, length)
+        val right = next.substring(length, next.length)
+        val problem = Component.text(left, ChatColor.RED)
+        problem.setUnderlined()
+        c.addChildren(problem)
+        c.addChildren(Component.text(right, ChatColor.WHITE))
+        //sb.append("\n").append(prev).append(next)
+        /*
+        sb.append("\n").append(InvalidArgumentException.repeat(" ", cursor)).append("^").append(
+            InvalidArgumentException.repeat("~", length - 1)
+        )
+        return sb.toString().also { toString = it }
+        */
+        return c
+    }
+
+    fun <T> List<T>.split(max: Int): List<List<T>> {
+        val result = mutableListOf<List<T>>()
+        var i = 0
+        while (i < this.size) {
+            val list = this.subList(i, min(i + max, this.size))
+            result.add(list)
+            i += max
+        }
+        return result
+    }
+
+    fun <T> List<T>.limit(max: Int): List<T> = this.subList(0, min(max, this.size))
 }

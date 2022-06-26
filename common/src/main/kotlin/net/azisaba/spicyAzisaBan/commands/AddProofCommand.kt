@@ -18,9 +18,9 @@ import net.azisaba.spicyAzisaBan.util.Util.toMinecraft
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import net.azisaba.spicyAzisaBan.util.contexts.getFlag
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.InsertOptions
+import xyz.acrylicstyle.util.ArgumentParsedResult
 import java.awt.Color
 
 object AddProofCommand: Command() {
@@ -34,7 +34,7 @@ object AddProofCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.AddProof.usage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             execute(actor, arguments)
             context.resolve()
@@ -43,14 +43,17 @@ object AddProofCommand: Command() {
         }
     }
 
-    private fun execute(actor: Actor, arguments: ArgumentParser) {
+    private fun execute(actor: Actor, arguments: ArgumentParsedResult) {
         val id = try {
-            arguments.parsedRawOptions["id"]?.toLong() ?: -1
+            arguments.getArgument("id")?.toLong() ?: -1
         } catch (e: NumberFormatException) {
             actor.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
             return
         }
-        val text = arguments.getString("text") ?: return actor.send(SABMessages.Commands.General.noProofSpecified.replaceVariables().translate())
+        val text = arguments.getArgument("text")
+        if (text.isNullOrBlank()) {
+            return actor.send(SABMessages.Commands.General.noProofSpecified.replaceVariables().translate())
+        }
         execute(actor, id, text, arguments.getFlag("public"))
     }
 
@@ -90,6 +93,7 @@ object AddProofCommand: Command() {
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
+        if (s.startsWith("public=")) return listOf("public=true", "public=false").filtr(args.last())
         return emptyList()
     }
 }

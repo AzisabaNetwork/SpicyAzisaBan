@@ -17,24 +17,24 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.WebhookUtil.sendWebhook
 import net.azisaba.spicyAzisaBan.util.contexts.getFlag
 import net.azisaba.spicyAzisaBan.util.contexts.isFlagNotSpecified
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import xyz.acrylicstyle.sql.options.FindOptions
 import xyz.acrylicstyle.sql.options.UpsertOptions
+import xyz.acrylicstyle.util.ArgumentParsedResult
 import java.awt.Color
 
 object UpdateProofCommand: Command() {
     override val name = "${SABConfig.prefix}updateproof"
     override val permission = "sab.updateproof"
 
-    private val availableArguments = listOf("id=", "text=\"\"", "public")
+    private val availableArguments = listOf("id=", "text=\"\"", "public=")
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission("sab.updateproof")) {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.UpdateProof.usage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             execute(actor, arguments)
             context.resolve()
@@ -43,19 +43,19 @@ object UpdateProofCommand: Command() {
         }
     }
 
-    private fun execute(actor: Actor, arguments: ArgumentParser) {
+    private fun execute(actor: Actor, arguments: ArgumentParsedResult) {
         val id = try {
-            arguments.parsedRawOptions["id"]?.toLong() ?: -1
+            arguments.getArgument("id")?.toLong() ?: -1
         } catch (e: NumberFormatException) {
             actor.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
             return
         }
-        val text: String? = arguments.getString("text")
+        val text: String? = arguments.getArgument("text")
         execute(actor, id, text, if (arguments.isFlagNotSpecified("public")) null else arguments.getFlag("public"))
     }
 
     fun execute(actor: Actor, id: Long, text: String?, public: Boolean?) {
-        if (text == null && public == null) {
+        if (text.isNullOrBlank() && public == null) {
             return actor.send(SABMessages.Commands.UpdateProof.usage.replaceVariables().translate())
         }
         val proof = SpicyAzisaBan.instance.connection.proofs.findOne(FindOptions.Builder().addWhere("id", id).build())
@@ -85,6 +85,7 @@ object UpdateProofCommand: Command() {
         if (args.isEmpty()) return emptyList()
         val s = args.last()
         if (!s.contains("=")) return availableArguments.filterArgKeys(args).filtr(s)
+        if (s.startsWith("public=")) return listOf("public=true", "public=false").filtr(args.last())
         return emptyList()
     }
 }

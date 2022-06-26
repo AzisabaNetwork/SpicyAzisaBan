@@ -15,6 +15,7 @@ import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.filterArgKeys
 import net.azisaba.spicyAzisaBan.util.Util.filtr
 import net.azisaba.spicyAzisaBan.util.Util.getServerName
+import net.azisaba.spicyAzisaBan.util.Util.getServerOrGroupName
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
@@ -23,8 +24,9 @@ import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
+import net.azisaba.spicyAzisaBan.util.contexts.getServer
 import util.kt.promise.rewrite.catch
+import xyz.acrylicstyle.util.ArgumentParsedResult
 
 object CautionCommand: Command() {
     override val name = "${SABConfig.prefix}caution"
@@ -37,23 +39,22 @@ object CautionCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.Caution.usage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
-            if (!arguments.parsedRawOptions.containsKey("server")) {
-                val serverName = actor.getServerName()
-                val group = SpicyAzisaBan.instance.connection.getGroupByServer(serverName).complete()
-                arguments.parsedRawOptions["server"] = group ?: serverName
-            }
-            doCaution(actor, arguments)
+            doCaution(actor, arguments, actor.getServerOrGroupName(arguments))
             context.resolve()
         }.catch {
             actor.sendErrorMessage(it)
         }
     }
 
-    internal fun doCaution(actor: Actor, arguments: ArgumentParser) {
+    internal fun doCaution(actor: Actor, arguments: ArgumentParsedResult, serverName: String? = null) {
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
-        val server = arguments.get(Contexts.SERVER, actor).complete().apply { if (!isSuccess) return }
+        val server = if (serverName == null) {
+            arguments.get(Contexts.SERVER, actor)
+        } else {
+            arguments.getServer(actor, serverName, true)
+        }.complete().apply { if (!isSuccess) return }
         val reason = arguments.get(Contexts.REASON, actor).complete()
         doCaution(actor, player, server, reason)
     }

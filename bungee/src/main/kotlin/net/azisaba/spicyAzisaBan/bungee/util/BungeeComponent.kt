@@ -37,4 +37,8 @@ data class BungeeComponent(val component: BaseComponent): Component {
     override fun addChildren(component: Component) {
         this.component.addExtra(component.toBungee())
     }
+
+    override fun setUnderlined() {
+        this.component.isUnderlined = true
+    }
 }

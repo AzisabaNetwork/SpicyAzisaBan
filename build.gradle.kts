@@ -5,6 +5,7 @@ plugins {
     kotlin("kapt") version "1.6.10"
     id("com.github.johnrengelman.shadow") version "7.0.0"
     `maven-publish`
+    `java-library`
 }
 
 group = "net.azisaba.spicyazisaban"
@@ -81,7 +82,7 @@ subprojects {
         plugin("org.jetbrains.kotlin.kapt")
         plugin("com.github.johnrengelman.shadow")
         plugin("maven-publish")
-        //plugin("java-library")
+        plugin("java-library")
     }
 
     publishing {

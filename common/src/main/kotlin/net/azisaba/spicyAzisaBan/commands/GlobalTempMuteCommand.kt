@@ -16,7 +16,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 
 object GlobalTempMuteCommand: Command() {
@@ -29,7 +28,7 @@ object GlobalTempMuteCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.TempMute.globalUsage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             TempMuteCommand.doTempMute(actor, arguments)
             context.resolve()

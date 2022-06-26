@@ -10,7 +10,6 @@ import net.azisaba.spicyAzisaBan.util.Util.async
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 
 object ProofsCommand: Command() {
@@ -22,9 +21,9 @@ object ProofsCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.Proofs.usage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         val id = try {
-            arguments.getString("id")?.toLong() ?: arguments.arguments.getOrNull(0)?.toLong() ?: -1
+            arguments.getArgument("id")?.toLong() ?: arguments.unhandledArguments().getOrNull(0)?.toLong() ?: -1
         } catch (e: NumberFormatException) {
             actor.send(SABMessages.Commands.General.invalidNumber.replaceVariables().translate())
             return

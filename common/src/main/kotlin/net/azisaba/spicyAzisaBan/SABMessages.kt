@@ -87,6 +87,7 @@ object SABMessages {
         val prefix get() = obj.getMessage("prefix", defObj.getMessage("prefix"))
         val missingPermissions get() = obj.getMessage("missingPermissions", defObj.getMessage("missingPermissions"))
         val error get() = obj.getMessage("error", defObj.getMessage("error"))
+        val invalidSyntax get() = obj.getMessage("invalid-syntax", defObj.getMessage("invalid-syntax"))
         val errorDetailed get() = obj.getMessage("errorDetailed", defObj.getMessage("errorDetailed")) // similar to 'error', but with exception details
         val none get() = obj.getMessage("none", defObj.getMessage("none"))
         val global get() = obj.getMessage("global", defObj.getMessage("global"))

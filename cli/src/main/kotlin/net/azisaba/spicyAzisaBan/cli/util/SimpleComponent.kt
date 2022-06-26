@@ -66,6 +66,10 @@ class SimpleComponent(val text: String): Component {
         children.addAll(component.map { it as SimpleComponent })
     }
 
+    override fun setUnderlined() {
+        // no-op
+    }
+
     @JvmName("getTextRecursively")
     fun getText(): String = "${Colors.RESET}$color$text${children.joinToString("", transform = SimpleComponent::getText)}${Colors.RESET}"
 }

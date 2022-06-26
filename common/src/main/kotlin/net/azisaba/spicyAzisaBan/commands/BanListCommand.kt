@@ -23,7 +23,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PunishmentTypeContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import kotlin.math.ceil
@@ -47,16 +46,16 @@ object BanListCommand: Command() {
         if (!actor.hasPermission("sab.banlist")) {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
-        val arguments = ArgumentParser(args.joinToString(" "))
-        if (arguments.contains("help")) {
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
+        if (arguments.containsUnhandledArgument("help")) {
             return actor.send(SABMessages.Commands.BanList.usage.replaceVariables().translate())
         }
         val punishmentType = arguments.get(Contexts.PUNISHMENT_TYPE, actor).complete().apply { if (!isSuccess) return }.type
-        val active = arguments.contains("active")
-        val all = arguments.contains("all")
+        val active = arguments.containsUnhandledArgument("active")
+        val all = arguments.containsUnhandledArgument("all")
         if (active && all) return actor.send(SABMessages.Commands.BanList.invalidArguments.replaceVariables().translate())
-        val page = max(1, arguments.parsedRawOptions["page"]?.toIntOr(1) ?: 1)
-        val server = if (arguments.containsKey("server")) {
+        val page = max(1, arguments.getArgument("page")?.toIntOr(1) ?: 1)
+        val server = if (arguments.containsArgumentKey("server")) {
             arguments.get(Contexts.SERVER_NO_PERM_CHECK, actor).complete().apply { if (!isSuccess) return }.name
         } else {
             null

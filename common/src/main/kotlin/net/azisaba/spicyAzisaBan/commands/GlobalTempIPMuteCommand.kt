@@ -16,7 +16,6 @@ import net.azisaba.spicyAzisaBan.util.contexts.IPAddressContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
 import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
-import util.ArgumentParser
 import util.kt.promise.rewrite.catch
 
 object GlobalTempIPMuteCommand: Command() {
@@ -29,7 +28,7 @@ object GlobalTempIPMuteCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         if (args.isEmpty()) return actor.send(SABMessages.Commands.TempIPMute.globalUsage.replaceVariables().translate())
-        val arguments = ArgumentParser(args.joinToString(" "))
+        val arguments = genericArgumentParser.parse(args.joinToString(" "))
         async<Unit> { context ->
             TempIPMuteCommand.doTempIPMute(actor, arguments)
             context.resolve()

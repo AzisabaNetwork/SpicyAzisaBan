@@ -7,6 +7,7 @@ import net.azisaba.spicyAzisaBan.common.chat.HoverEvent
 import net.azisaba.spicyAzisaBan.velocity.util.VelocityUtil.toVelocity
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.Component as KComponent
 
 data class VelocityComponent(var component: KComponent): Component {
@@ -31,5 +32,9 @@ data class VelocityComponent(var component: KComponent): Component {
 
     override fun addChildren(component: Component) {
         this.component = this.component.children(this.component.children().toMutableList().apply { add(component.toVelocity()) })
+    }
+
+    override fun setUnderlined() {
+        this.component = this.component.decorate(TextDecoration.UNDERLINED)
     }
 }

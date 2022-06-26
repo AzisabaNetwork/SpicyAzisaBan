@@ -22,4 +22,6 @@ interface Component {
     fun setColor(color: ChatColor)
 
     fun addChildren(component: Component)
+
+    fun setUnderlined()
 }

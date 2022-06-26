@@ -10,6 +10,7 @@ import net.azisaba.spicyAzisaBan.SpicyAzisaBan.Companion.PREFIX
 import net.azisaba.spicyAzisaBan.common.Actor
 import net.azisaba.spicyAzisaBan.common.ChatColor
 import net.azisaba.spicyAzisaBan.common.PlayerActor
+import net.azisaba.spicyAzisaBan.common.chat.Component
 import net.azisaba.spicyAzisaBan.common.command.Command
 import net.azisaba.spicyAzisaBan.punishment.Punishment
 import net.azisaba.spicyAzisaBan.util.Util.async
@@ -92,6 +93,10 @@ object SABCommand: Command() {
             return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
         }
         when (args[0].lowercase()) {
+            "debugparser" -> {
+                val s = args.drop(1).joinToString(" ")
+                actor.sendMessage(Component.text(genericArgumentParser.parse(s).toString()))
+            }
             "creategroup" -> {
                 if (args.size <= 1) return actor.sendHelp()
                 executeCreateGroup(actor, args[1])

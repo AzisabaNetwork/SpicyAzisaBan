@@ -8,30 +8,29 @@ import net.azisaba.spicyAzisaBan.punishment.PunishmentType
 import net.azisaba.spicyAzisaBan.struct.PlayerData
 import net.azisaba.spicyAzisaBan.util.Util
 import net.azisaba.spicyAzisaBan.util.Util.async
-import net.azisaba.spicyAzisaBan.util.Util.getNonParamStringAt
 import net.azisaba.spicyAzisaBan.util.Util.isPunishableIP
 import net.azisaba.spicyAzisaBan.util.Util.reconstructIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.translate
-import util.ArgumentParser
 import util.UUIDUtil
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
 import xyz.acrylicstyle.mcutil.common.SimplePlayerProfile
+import xyz.acrylicstyle.util.ArgumentParsedResult
 import java.sql.SQLException
 
 /**
  * Try to get boolean value from options or from arguments. Defaults to false.
  */
-fun ArgumentParser.getFlag(name: String): Boolean =
-    parsedRawOptions[name]?.toBooleanStrictOrNull() ?: arguments.contains(name)
+fun ArgumentParsedResult.getFlag(name: String): Boolean =
+    getArgument(name)?.toBooleanStrictOrNull() ?: containsUnhandledArgument(name)
 
-fun ArgumentParser.isFlagNotSpecified(name: String): Boolean =
-    parsedRawOptions[name] == null && !arguments.contains(name)
+fun ArgumentParsedResult.isFlagNotSpecified(name: String): Boolean =
+    getArgument(name) == null && !containsUnhandledArgument(name)
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Context> ArgumentParser.get(context: Contexts<T>, actor: Actor): Promise<T> {
+fun <T : Context> ArgumentParsedResult.get(context: Contexts<T>, actor: Actor): Promise<T> {
     if (context == Contexts.PLAYER) return getPlayer(actor) as Promise<T>
     if (context == Contexts.SERVER) return getServer(actor, true) as Promise<T>
     if (context == Contexts.SERVER_NO_PERM_CHECK) return getServer(actor, false) as Promise<T>
@@ -42,8 +41,8 @@ fun <T : Context> ArgumentParser.get(context: Contexts<T>, actor: Actor): Promis
     return Promise.reject(IllegalArgumentException("Unknown context: " + context.key))
 }
 
-private fun ArgumentParser.getPlayer(actor: Actor): Promise<PlayerContext> = async { context ->
-    val rawName = parsedRawOptions["player"] ?: getNonParamStringAt(0)
+private fun ArgumentParsedResult.getPlayer(actor: Actor): Promise<PlayerContext> = async { context ->
+    val rawName = getArgument("player") ?: unhandledArguments().getOrNull(0)
     if (rawName == null) {
         actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
         return@async context.resolve(PlayerContext(false, SimplePlayerProfile("", UUIDUtil.NIL)))
@@ -58,9 +57,13 @@ private fun ArgumentParser.getPlayer(actor: Actor): Promise<PlayerContext> = asy
     context.resolve(PlayerContext(true, profile))
 }
 
-private fun ArgumentParser.getServer(actor: Actor, checkPermission: Boolean): Promise<ServerContext> = async { context ->
+private fun ArgumentParsedResult.getServer(actor: Actor, checkPermission: Boolean): Promise<ServerContext> {
+    val server = getArgument("server") ?: "global"
+    return getServer(actor, server, checkPermission)
+}
+
+/*private*/ fun ArgumentParsedResult.getServer(actor: Actor, server: String, checkPermission: Boolean): Promise<ServerContext> = async { context ->
     var isGroup = false
-    val server = parsedRawOptions["server"] ?: "global"
     if (server == "global") {
         if (checkPermission && !actor.hasPermission("sab.punish.global")) {
             actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
@@ -83,13 +86,13 @@ private fun ArgumentParser.getServer(actor: Actor, checkPermission: Boolean): Pr
     return@async context.resolve(ServerContext(true, server, isGroup))
 }
 
-private fun ArgumentParser.getReason(): Promise<ReasonContext> = async { context ->
-    val reason = parsedRawOptions["reason"] ?: getNonParamStringAt(1)
+private fun ArgumentParsedResult.getReason(): Promise<ReasonContext> = async { context ->
+    val reason = getArgument("reason") ?: unhandledArguments().getOrNull(1) // hardcoded :(
     return@async context.resolve(ReasonContext(if (reason.isNullOrBlank()) "none" else reason))
 }
 
-private fun ArgumentParser.getTime(actor: Actor): Promise<TimeContext> = async { context ->
-    val time = parsedRawOptions["time"] ?: getNonParamStringAt(2)
+private fun ArgumentParsedResult.getTime(actor: Actor): Promise<TimeContext> = async { context ->
+    val time = getArgument("time") ?: unhandledArguments().getOrNull(2) // hardcoded :(
     if (time.isNullOrBlank()) return@async context.resolve(TimeContext(true, -1L))
     try {
         return@async context.resolve(TimeContext(true, Util.processTime(time)))
@@ -99,8 +102,8 @@ private fun ArgumentParser.getTime(actor: Actor): Promise<TimeContext> = async {
     }
 }
 
-private fun ArgumentParser.getIPAddress(actor: Actor): Promise<IPAddressContext> = async { context ->
-    val target = parsedRawOptions["target"] ?: getNonParamStringAt(0)
+private fun ArgumentParsedResult.getIPAddress(actor: Actor): Promise<IPAddressContext> = async { context ->
+    val target = getArgument("target") ?: unhandledArguments().getOrNull(0) // hardcoded :(
     if (target == null) {
         actor.send(SABMessages.Commands.General.invalidIPAddress.replaceVariables().translate())
         return@async context.resolve(IPAddressContext(false, ""))
@@ -123,8 +126,8 @@ private fun ArgumentParser.getIPAddress(actor: Actor): Promise<IPAddressContext>
     context.resolve(IPAddressContext(false, ""))
 }
 
-private fun ArgumentParser.getPunishmentType(actor: Actor): PunishmentTypeContext {
-    val type = parsedRawOptions["type"] ?: return PunishmentTypeContext(true, null)
+private fun ArgumentParsedResult.getPunishmentType(actor: Actor): PunishmentTypeContext {
+    val type = getArgument("type") ?: return PunishmentTypeContext(true, null)
     return try {
         val pType = PunishmentType.valueOf(type)
         PunishmentTypeContext(true, pType)

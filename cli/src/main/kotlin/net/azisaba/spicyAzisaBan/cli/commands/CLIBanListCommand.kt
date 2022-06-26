@@ -5,10 +5,10 @@ import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 import net.azisaba.spicyAzisaBan.cli.SpicyAzisaBanCLI
 import net.azisaba.spicyAzisaBan.cli.actor.CLIActor
+import net.azisaba.spicyAzisaBan.cli.util.CLIUtil
 import net.azisaba.spicyAzisaBan.commands.BanListCommand
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
 import kotlin.math.max
 import kotlin.system.exitProcess
 
@@ -25,7 +25,11 @@ object CLIBanListCommand: Subcommand("banlist", "Shows a punishment list") {
         val punishmentType = if (type == null)
             null
         else
-            ArgumentParser("type=$type").get(Contexts.PUNISHMENT_TYPE, CLIActor).complete().apply { if (!isSuccess) exitProcess(1) }.type
+            CLIUtil.genericArgumentParser.parse("type=$type")
+                .get(Contexts.PUNISHMENT_TYPE, CLIActor)
+                .complete()
+                .apply { if (!isSuccess) exitProcess(1) }
+                .type
         val newPage = max(1, page ?: 1)
         BanListCommand.execute(CLIActor, punishmentType, active ?: false, all ?: false, newPage, server).complete()
         exitProcess(0)

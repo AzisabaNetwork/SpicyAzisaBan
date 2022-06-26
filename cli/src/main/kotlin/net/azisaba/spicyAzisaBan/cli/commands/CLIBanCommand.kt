@@ -5,12 +5,12 @@ import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 import net.azisaba.spicyAzisaBan.cli.SpicyAzisaBanCLI
 import net.azisaba.spicyAzisaBan.cli.actor.CLIActor
+import net.azisaba.spicyAzisaBan.cli.util.CLIUtil
 import net.azisaba.spicyAzisaBan.commands.BanCommand
 import net.azisaba.spicyAzisaBan.commands.TempBanCommand
 import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
-import util.ArgumentParser
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalCli::class)
@@ -19,6 +19,7 @@ object CLIBanCommand: Subcommand("ban", "Ban a player") {
     private val reason by argument(ArgType.String, "reason", "Reason for ban")
     private val server by option(ArgType.String, "server", "s", "Server to apply for")
     private val all by option(ArgType.Boolean, "all", "a", "Apply same punishment for players in same IPs")
+    private val force by option(ArgType.Boolean, "force", "f", "Apply punishment even if they are already banned")
     private val time by option(ArgType.String, "time", "t", "Duration for ban")
 
     override fun execute() {
@@ -26,11 +27,11 @@ object CLIBanCommand: Subcommand("ban", "Ban a player") {
         if (time == null) {
             BanCommand.doBan(
                 CLIActor,
-                ArgumentParser("player=$player")
+                CLIUtil.genericArgumentParser.parse("player=$player")
                     .get(Contexts.PLAYER, CLIActor)
                     .complete()
                     .apply { if (!isSuccess) exitProcess(1) },
-                ArgumentParser("server=${server ?: "global"}")
+                CLIUtil.genericArgumentParser.parse("server=${server ?: "global"}")
                     .get(Contexts.SERVER_NO_PERM_CHECK, CLIActor)
                     .complete()
                     .apply { if (!isSuccess) exitProcess(1) },
@@ -40,20 +41,21 @@ object CLIBanCommand: Subcommand("ban", "Ban a player") {
         } else {
             TempBanCommand.doTempBan(
                 CLIActor,
-                ArgumentParser("player=$player")
+                CLIUtil.genericArgumentParser.parse("player=$player")
                     .get(Contexts.PLAYER, CLIActor)
                     .complete()
                     .apply { if (!isSuccess) exitProcess(1) },
-                ArgumentParser("server=${server ?: "global"}")
+                CLIUtil.genericArgumentParser.parse("server=${server ?: "global"}")
                     .get(Contexts.SERVER_NO_PERM_CHECK, CLIActor)
                     .complete()
                     .apply { if (!isSuccess) exitProcess(1) },
                 ReasonContext(reason),
-                ArgumentParser("time=\"$time\"")
+                CLIUtil.genericArgumentParser.parse("time=\"$time\"")
                     .get(Contexts.TIME, CLIActor)
                     .complete()
                     .apply { if (!isSuccess) exitProcess(1) },
                 all ?: false,
+                force ?: false,
             )
         }
         exitProcess(0)
