@@ -43,7 +43,7 @@ object SABConfig {
     }
 
     val version = versionFile.getString("version", "undefined")!!
-    val debugBuild = false//versionFile.getBoolean("debugBuild", false)
+    val debugBuild = versionFile.getBoolean("debugBuild", false)
     val devBuild = versionFile.getBoolean("devBuild", false)
     val enableDebugFeatures = versionFile.getBoolean("enableDebugFeatures", false)
 
