@@ -61,9 +61,6 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
             .filterNotNull()
             .map { file -> JarUtils.remapJarWithClassPrefix(file, "-remapped", "net.azisaba.spicyAzisaBan.libs") }
             .mapNotNull { file -> file.toPath() }
-//        val m = cl::class.java.getDeclaredMethod("addPath", Path::class.java)
-//        m.isAccessible = true
-//        urls.forEach { path -> m.invoke(cl, path) }
     }
 
     @Subscribe

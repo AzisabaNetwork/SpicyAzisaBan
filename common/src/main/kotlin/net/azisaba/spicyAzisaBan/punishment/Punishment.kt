@@ -336,7 +336,7 @@ data class Punishment(
                     PunishmentType.WARNING -> SABMessages.Commands.Warning.layout.replaceVariables(variables).translate()
                     PunishmentType.CAUTION -> SABMessages.Commands.Caution.layout.replaceVariables(variables).translate()
                     PunishmentType.KICK -> SABMessages.Commands.Kick.layout.replaceVariables(variables).translate()
-                    PunishmentType.NOTE -> "RIP Note 2021-2021." // it should not be shown
+                    PunishmentType.NOTE -> "RIP Note 2021-2022." // it should not be shown
                 }
             }
             .catch {

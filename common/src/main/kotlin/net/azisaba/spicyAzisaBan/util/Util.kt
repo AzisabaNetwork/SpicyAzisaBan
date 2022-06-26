@@ -513,7 +513,6 @@ object Util {
     fun InvalidArgumentException.toComponent(): Component {
         val errorComponent = Component.text(SABMessages.General.invalidSyntax.replaceVariables().format(message).translate(), ChatColor.RED)
         val context = this.context ?: return errorComponent
-        //val sb = StringBuilder(super.toString())
         val prev = context.peekWithAmount(-min(context.index(), 15))
         var next = context.peekWithAmount(
             min(
@@ -524,10 +523,8 @@ object Util {
         if (next.isEmpty()) {
             next = " ".repeat(length)
         }
-        //val cursor = min(15, context.index())
         val c = Component.text("")
         c.addChildren(errorComponent)
-        //c.addChildren(Component.text(super.toString()))
         c.addChildren(Component.text("\n"))
         c.addChildren(Component.text(prev, ChatColor.WHITE))
         val left = next.substring(0, length)
@@ -536,13 +533,6 @@ object Util {
         problem.setUnderlined()
         c.addChildren(problem)
         c.addChildren(Component.text(right, ChatColor.WHITE))
-        //sb.append("\n").append(prev).append(next)
-        /*
-        sb.append("\n").append(InvalidArgumentException.repeat(" ", cursor)).append("^").append(
-            InvalidArgumentException.repeat("~", length - 1)
-        )
-        return sb.toString().also { toString = it }
-        */
         return c
     }
 
