@@ -296,6 +296,10 @@ data class Punishment(
         SpicyAzisaBan.instance.connection.proofs.findAll(FindOptions.Builder().addWhere("punish_id", id).build())
             .then { list -> list.map { td -> Proof.fromTableData(this, td) } }
 
+    fun getPublicProofs(): Promise<List<Proof>> =
+        SpicyAzisaBan.instance.connection.proofs.findAll(FindOptions.Builder().addWhere("punish_id", id).addWhere("public", true).build())
+            .then { list -> list.map { td -> Proof.fromTableData(this, td) } }
+
     fun getTargetUUID(): UUID {
         if (type.isIPBased()) {
             throw IllegalArgumentException("This punishment ($id) is not UUID-based ban! (e.g. IP ban)")
@@ -321,10 +325,10 @@ data class Punishment(
             )
         }
 
-    fun getBannedMessage() =
+    fun getBannedMessage(): Promise<String> =
         getVariables()
             .then { variables ->
-                return@then when (type) {
+                var layout = when (type) {
                     PunishmentType.BAN -> SABMessages.Commands.Ban.layout.replaceVariables(variables).translate()
                     PunishmentType.TEMP_BAN -> SABMessages.Commands.TempBan.layout.replaceVariables(variables).translate()
                     PunishmentType.IP_BAN -> SABMessages.Commands.IPBan.layout.replaceVariables(variables).translate()
@@ -336,8 +340,17 @@ data class Punishment(
                     PunishmentType.WARNING -> SABMessages.Commands.Warning.layout.replaceVariables(variables).translate()
                     PunishmentType.CAUTION -> SABMessages.Commands.Caution.layout.replaceVariables(variables).translate()
                     PunishmentType.KICK -> SABMessages.Commands.Kick.layout.replaceVariables(variables).translate()
-                    PunishmentType.NOTE -> "RIP Note 2021-2022." // it should not be shown
+                    else -> throw AssertionError("Cannot get layout for $type")
                 }
+                val proofs = this.getPublicProofs().complete()
+                if (proofs.isNotEmpty()) {
+                    layout += "\n\n"
+                    layout += SABMessages.Commands.General.viewableProofs.replaceVariables(variables).translate() + "\n"
+                    layout += proofs.joinToString("\n") { proof ->
+                        SABMessages.Commands.General.proofEntry.replaceVariables(proof.variables).translate()
+                    }
+                }
+                return@then layout
             }
             .catch {
                 SpicyAzisaBan.LOGGER.warning("Could not fetch player name of $operator")
@@ -527,12 +540,16 @@ data class Punishment(
                     canJoinServer(pd.uuid, null, server).complete() != null) {
                     return@forEach
                 }
-                val p = alsoApplyToPlayer(pd).catch { context.reject(it) }.complete() ?: return@async context.resolve(emptyList())
+                val p = alsoApplyToPlayer(pd).catch { context.reject(it) }.complete()
+                    ?: return@async context.resolve(emptyList())
                 punishments.add(p)
                 if (p.type.isBan()) {
-                    if (canJoinServer(pd.uuid, null, server).complete() != null)
-                    p.getBannedMessage().thenDo { SpicyAzisaBan.instance.getPlayer(pd.uuid)?.kick(it) }
+                    if (canJoinServer(pd.uuid, null, server).complete() != null) {
+                        // kick the player
+                        p.getBannedMessage().thenDo { SpicyAzisaBan.instance.getPlayer(pd.uuid)?.kick(it) }
+                    }
                 } else {
+                    // send the message
                     p.getBannedMessage().thenDo { SpicyAzisaBan.instance.getPlayer(pd.uuid)?.send(it) }
                 }
             }

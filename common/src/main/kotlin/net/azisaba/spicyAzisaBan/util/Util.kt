@@ -191,7 +191,7 @@ object Util {
     /**
      * Translates '&' into section char.
      */
-    fun String.translate() = ChatColor.translateAlternateColorCodes('&', this)
+    fun String.translate(): String = ChatColor.translateAlternateColorCodes('&', this)
 
     fun List<String>.filterArgKeys(args: Array<String>): List<String> {
         val list = args.map { it.replace("(=.*)".toRegex(), "") }

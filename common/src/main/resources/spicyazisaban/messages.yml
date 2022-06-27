@@ -43,14 +43,17 @@ commands:
     # Available variables: default, %PLAYERS% - banned player names, %PLAYERS_COUNT%
     samePunishmentAppliedToSameIPAddress: "&7%PLAYERS_COUNT%人の同じIPアドレスのプレイヤーにも同じ処罰が適用されました: %PLAYERS%"
     alreadyPunished: "%PREFIX%&cこのアカウントはすでに(同じサーバー、同じ種類で)処罰されています!"
-    removedFromServer:
-      - "&cとあるプレイヤーがこの世界から抹消された。"
+    removedFromServer: "&cとあるプレイヤーがこの世界から抹消された。"
     offlinePlayer: "%PREFIX%&cこのプレイヤーはオフラインです。"
     notPunished: "%PREFIX%&cこのアカウントは処罰されていません!"
     noReasonSpecified: "%PREFIX%&c理由が指定されていません!"
     noProofSpecified: "%PREFIX%&c証拠が指定されていません!"
     punishmentNotFound: "%PREFIX%&c処罰#%dが見つかりません!"
     proofNotFound: "%PREFIX%&c証拠#%dが見つかりません!"
+    viewable-proofs: "&c閲覧可能な証拠:"
+
+    # Available variables: %ID% - id of proof, %TEXT% - the text of proof, %PUBLIC% - always true (with color of green)
+    proof-entry: "  &c- &f%TEXT%"
   sab:
     setDebugLevel: "%PREFIX%&aデバッグログレベルを&e%d&aに設定しました。"
     reloadedConfiguration: "%PREFIX%&a設定を再読み込みしました。"
@@ -352,10 +355,6 @@ commands:
       - "&cタイプ &8> &7&o%TYPE%"
       - "&c対象サーバー &8> &7&o%SERVER%"
       - "&c理由 &8> &7&o%REASON%"
-    viewable-proofs: "&c閲覧可能な証拠:"
-
-    # Available variables: %ID% - id of proof, %TEXT% - the text of proof, %PUBLIC% - always true (with color of green)
-    proof-entry: "  &c- &f%TEXT%"
   history:
     usage: "%PREFIX%&a使用法: /%CMD_PREFIX%history <target=Player/IP> [page=...] [--all] [--active]"
     # Available variables: %TARGET%

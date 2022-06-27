@@ -46,15 +46,14 @@ object WarnsCommand: Command() {
             }
             actor.clearTitle()
             val variables = ps.map { it.getVariables().complete() }
-            val proofs = ps.map { it.getProofs().complete() }
+            val proofs = ps.map { it.getPublicProofs().complete() }
             actor.send(SABMessages.Commands.Warns.header.replaceVariables().translate())
             variables.forEachIndexed { index, map ->
                 actor.send(SABMessages.Commands.Warns.layout.replaceVariables(map).translate())
-                val proofList = proofs[index].filter { it.public }
-                if (proofList.isNotEmpty()) {
-                    actor.send(SABMessages.Commands.Warns.viewableProofs.replaceVariables(map).translate())
-                    proofList.forEach { proof ->
-                        actor.send(SABMessages.Commands.Warns.proofEntry.replaceVariables(proof.variables).translate())
+                if (proofs[index].isNotEmpty()) {
+                    actor.send(SABMessages.Commands.General.viewableProofs.replaceVariables(map).translate())
+                    proofs[index].forEach { proof ->
+                        actor.send(SABMessages.Commands.General.proofEntry.replaceVariables(proof.variables).translate())
                     }
                 }
             }
