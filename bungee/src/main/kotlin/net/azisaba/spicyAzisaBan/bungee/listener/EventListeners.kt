@@ -32,6 +32,7 @@ object EventListeners: Listener {
 
     @EventHandler
     fun onServerConnect(e: ServerConnectEvent) {
+        // do NOT call #complete as this will block the connection
         PunishmentChecker.checkLocalBan(ServerInfo(e.target.name, e.target.socketAddress), BungeePlayerActor(e.player)) {
             e.isCancelled = true
         }

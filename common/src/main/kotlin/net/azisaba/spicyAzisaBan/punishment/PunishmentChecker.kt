@@ -20,6 +20,7 @@ import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendDelayed
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import util.kt.promise.rewrite.catch
+import util.promise.rewrite.Promise
 import java.util.concurrent.TimeUnit
 
 object PunishmentChecker {
@@ -110,7 +111,7 @@ object PunishmentChecker {
      * - Creates async context and fetch punishments asynchronously
      * - Reject as "timed out" if punishment could not be fetched in 1500 milliseconds
      */
-    fun checkLocalBan(target: ServerInfo, player: PlayerActor, cancel: () -> Unit) {
+    fun checkLocalBan(target: ServerInfo, player: PlayerActor, cancel: () -> Unit): Promise<Unit> {
         /**
          * the server before connecting to target server
          */
@@ -126,7 +127,7 @@ object PunishmentChecker {
             val p = pair.second // punishment
             if (p == null) {
                 SpicyAzisaBan.debug("(null punishment)", 2)
-                return
+                return Promise.resolve(null)
             }
             SpicyAzisaBan.debug(p.toString(), 2)
             if (p.isExpired()) {
@@ -142,12 +143,12 @@ object PunishmentChecker {
                 } else {
                     player.sendDelayed(100, p.getBannedMessage().complete())
                 }
-                return
+                return Promise.resolve(null)
             }
         } else {
             SpicyAzisaBan.debug("Punishment is not cached for ${player.name} at ${target.name}")
         }
-        Util.async<Boolean> { context ->
+        return Util.async<Boolean> { context ->
             Thread({
                 SpicyAzisaBan.instance.schedule(1500, TimeUnit.MILLISECONDS) {
                     context.resolve(false)
@@ -190,7 +191,7 @@ object PunishmentChecker {
                     "EXCEPTION_MESSAGE" to (it.message ?: "null"),
                 ).translate())
             }
-        }
+        }.then {}
     }
 
     fun checkMute(actor: Actor, message: String, cancel: () -> Unit) {

@@ -39,7 +39,7 @@ object EventListeners {
             VelocityPlayerActor(e.player)
         ) {
             e.result = ServerPreConnectEvent.ServerResult.denied()
-        }
+        }.complete()
     }
 
     @Subscribe
