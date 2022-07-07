@@ -426,7 +426,7 @@ object Util {
         return ChatColor.WHITE
     }
 
-    fun String.toUUID() = try {
+    fun String.toUUIDOrNull() = try {
         UUID.fromString(this)!!
     } catch (e: IllegalArgumentException) {
         null

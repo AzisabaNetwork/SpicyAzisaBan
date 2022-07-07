@@ -17,7 +17,7 @@ import net.azisaba.spicyAzisaBan.util.Util.isValidIPAddress
 import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.util.Util.sendErrorMessage
 import net.azisaba.spicyAzisaBan.util.Util.sendOrSuppressErrorMessage
-import net.azisaba.spicyAzisaBan.util.Util.toUUID
+import net.azisaba.spicyAzisaBan.util.Util.toUUIDOrNull
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import util.kt.promise.rewrite.catch
 import util.promise.rewrite.Promise
@@ -65,7 +65,7 @@ object SeenCommand: Command() {
                 )
             } else {
                 var pd = PlayerData.getByName(target, ambiguous).catch { actor.sendErrorMessage(it) }.complete()
-                if (pd == null && target.toUUID() != null) {
+                if (pd == null && target.toUUIDOrNull() != null) {
                     pd = PlayerData.getByUUID(target).catch { actor.sendOrSuppressErrorMessage<IllegalStateException>(it) }.complete()
                 }
                 if (pd == null) {
