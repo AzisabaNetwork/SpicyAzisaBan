@@ -216,7 +216,7 @@ data class Punishment(
             while (rs.next()) ps.add(fromResultSet(rs))
             SpicyAzisaBan.debug("Result: $ps", 5)
             s.close()
-            return ps
+            return ps.sortedByDescending { it.id }
         }
 
         fun fetchActivePunishmentById(id: Long): Promise<Punishment?> =
