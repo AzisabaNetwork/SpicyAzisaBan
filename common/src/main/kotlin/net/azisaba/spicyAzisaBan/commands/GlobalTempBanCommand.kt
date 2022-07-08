@@ -21,7 +21,7 @@ import util.kt.promise.rewrite.catch
 object GlobalTempBanCommand: Command() {
     override val name = "${SABConfig.prefix}gtempban"
     override val permission = PunishmentType.TEMP_BAN.perm
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "time=", "--all")
+    private val availableArguments = listOf(listOf("player="), listOf("reason=\"\""), listOf("server="), listOf("--all", "-a"), listOf("--force", "-f"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission(PunishmentType.TEMP_BAN.perm)) {
