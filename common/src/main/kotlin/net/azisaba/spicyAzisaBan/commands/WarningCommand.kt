@@ -81,7 +81,14 @@ object WarningCommand: Command() {
             rs.statement.close()
             if (count >= ReloadableSABConfig.BanOnWarning.threshold) {
                 val parsed = genericArgumentParser.parse("time=${ReloadableSABConfig.BanOnWarning.time}")
-                val reasonContext = ReasonContext(ReloadableSABConfig.BanOnWarning.reason.replaceVariables("count" to count.toString()).translate())
+                val reasonContext =
+                    ReasonContext(ReloadableSABConfig.BanOnWarning.reason
+                        .replaceVariables(
+                            "count" to count.toString(),
+                            "original_reason" to reason.text,
+                            "time" to ReloadableSABConfig.BanOnWarning.time,
+                        )
+                        .translate())
                 val timeContext = parsed.get(Contexts.TIME, actor).complete().apply {
                     if (!isSuccess) {
                         SpicyAzisaBan.LOGGER.severe("Failed to parse time: ${ReloadableSABConfig.BanOnWarning.time}")
