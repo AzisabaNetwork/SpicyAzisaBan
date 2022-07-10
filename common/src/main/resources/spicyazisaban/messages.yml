@@ -332,6 +332,7 @@ commands:
     # %SAME_IP_PLAYERS%, %SAME_IP_PLAYERS_COUNT%, %FIRST_LOGIN%, %FIRST_LOGIN_ATTEMPT%, %LAST_LOGIN%, %LAST_LOGIN_ATTEMPT%
     layout:
       - "%PREFIX%&c&o%PLAYER%&eは&c%SINCE%前&eから%STATUS%&eです。"
+      - "&7UUID &8> &e&o%UUID%"
       - "&7最初のログイン &8> &e&o%FIRST_LOGIN%"
       - "&7最近のログイン &8> &e&o%LAST_LOGIN%"
       - "&7過去の名前 &8> &e&o%NAME_HISTORY%"

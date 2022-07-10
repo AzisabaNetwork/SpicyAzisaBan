@@ -92,6 +92,7 @@ object SeenCommand: Command() {
                     SABMessages.Commands.Seen.layout
                         .replaceVariables(
                             "player" to pd.name,
+                            "uuid" to pd.uuid.toString(),
                             "since" to since,
                             "status" to status,
                             "ip" to pd.ip.toString(),
