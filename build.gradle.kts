@@ -108,7 +108,11 @@ subprojects {
 
         publications {
             create<MavenPublication>("mavenJava") {
-                from(components["java"])
+                //from(components["java"])
+                //artifact(tasks.withType<GenerateModuleMetadata>())
+                artifact(tasks["jar"])
+                artifact(tasks["sourcesJar"])
+                artifact(tasks["javadocJar"])
             }
         }
     }
