@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "net.azisaba.spicyazisaban"
-version = "0.2.1-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
+version = "0.2.1-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}-SNAPSHOT"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -87,15 +87,27 @@ subprojects {
     }
 
     publishing {
+        repositories {
+            maven {
+                name = "repo"
+                credentials(PasswordCredentials::class)
+                url = uri(
+                    if (project.version.toString().endsWith("SNAPSHOT"))
+                        project.findProperty("deploySnapshotURL") ?: System.getProperty("deploySnapshotURL", "")
+                    else
+                        project.findProperty("deployReleasesURL") ?: System.getProperty("deployReleasesURL", "")
+                )
+            }
+        }
+
         publications {
             create<MavenPublication>("mavenJava") {
                 from(components["java"])
+                artifact(tasks.getByName("sourcesJar"))
             }
         }
     }
-}
 
-subprojects {
     tasks {
         compileKotlin {
             kotlinOptions.jvmTarget = "17"
