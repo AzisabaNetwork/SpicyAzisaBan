@@ -12,6 +12,7 @@ group = "net.azisaba.spicyazisaban"
 version = "0.2.1-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
 
 java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     withJavadocJar()
     withSourcesJar()
 }
@@ -96,8 +97,8 @@ subprojects {
 
 subprojects {
     tasks {
-        compileKotlin { kotlinOptions.jvmTarget = "16" }
-        compileTestKotlin { kotlinOptions.jvmTarget = "16" }
+        compileKotlin { kotlinOptions.jvmTarget = "17" }
+        compileTestKotlin { kotlinOptions.jvmTarget = "17" }
 
         test {
             useJUnitPlatform()
