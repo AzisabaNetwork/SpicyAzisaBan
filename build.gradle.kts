@@ -97,11 +97,20 @@ subprojects {
 
 subprojects {
     tasks {
-        compileKotlin { kotlinOptions.jvmTarget = "17" }
-        compileTestKotlin { kotlinOptions.jvmTarget = "17" }
+        compileKotlin {
+            kotlinOptions.jvmTarget = "17"
+        }
+
+        compileTestKotlin {
+            kotlinOptions.jvmTarget = "17"
+        }
 
         test {
             useJUnitPlatform()
+        }
+
+        kapt {
+            this.javacOptions { this.option("source", 17) }
         }
 
         processResources {
