@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "net.azisaba.spicyazisaban"
-version = "0.2.1-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}-SNAPSHOT"
+version = "0.2.1-${getBranch()}-${getGitHash()}${if (hasUncommittedChanges()) "-debug" else ""}"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
