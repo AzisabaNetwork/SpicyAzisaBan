@@ -7,10 +7,13 @@ import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.connection.LoginEvent
 import com.velocitypowered.api.event.player.PlayerChatEvent
 import com.velocitypowered.api.event.player.ServerPreConnectEvent
+import com.velocitypowered.api.network.ProtocolVersion
 import com.velocitypowered.api.proxy.Player
 import net.azisaba.spicyAzisaBan.common.ServerInfo
 import net.azisaba.spicyAzisaBan.punishment.PunishmentChecker
 import net.azisaba.spicyAzisaBan.struct.PlayerData
+import net.azisaba.spicyAzisaBan.util.Util.disconnect
+import net.azisaba.spicyAzisaBan.util.Util.send
 import net.azisaba.spicyAzisaBan.velocity.VelocityPlayerActor
 import net.azisaba.spicyAzisaBan.velocity.util.VelocityUtil.toVelocity
 import net.kyori.adventure.text.TextComponent
@@ -44,16 +47,29 @@ object EventListeners {
 
     @Subscribe
     fun onPlayerChat(e: PlayerChatEvent): EventTask = EventTask.async {
-        PunishmentChecker.checkMute(VelocityPlayerActor(e.player), e.message) {
+        val actor = VelocityPlayerActor(e.player)
+        PunishmentChecker.checkMute(actor, e.message) { reason ->
             e.result = PlayerChatEvent.ChatResult.denied()
+            if (e.player.protocolVersion.ordinal >= ProtocolVersion.valueOf("MINECRAFT_1_19_1").ordinal) {
+                actor.disconnect(reason)
+            } else {
+                actor.send(reason)
+            }
         }
     }
 
     @Subscribe
     fun onCommandExecute(e: CommandExecuteEvent): EventTask = EventTask.async {
-        if (e.commandSource !is Player) return@async
-        PunishmentChecker.checkMute(VelocityPlayerActor(e.commandSource as Player), "/${e.command}") {
+        val source = e.commandSource
+        if (source !is Player) return@async
+        val actor = VelocityPlayerActor(source)
+        PunishmentChecker.checkMute(actor, "/${e.command}") { reason ->
             e.result = CommandExecuteEvent.CommandResult.denied()
+            if (source.protocolVersion.ordinal >= ProtocolVersion.valueOf("MINECRAFT_1_19_1").ordinal) {
+                actor.disconnect(reason)
+            } else {
+                actor.send(reason)
+            }
         }
     }
 }

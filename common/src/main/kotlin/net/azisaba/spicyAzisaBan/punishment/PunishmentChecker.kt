@@ -194,7 +194,7 @@ object PunishmentChecker {
         }.then {}
     }
 
-    fun checkMute(actor: Actor, message: String, cancel: () -> Unit) {
+    fun checkMute(actor: Actor, message: String, cancel: (reason: String) -> Unit) {
         if (actor !is PlayerActor) return
         val isCommand = message.startsWith("/")
         if (isCommand &&
@@ -212,16 +212,14 @@ object PunishmentChecker {
                 actor.getServerName()
             ).complete()
             if (p != null && !p.type.hasExemptPermission(actor).complete()) {
-                cancel()
-                actor.send(p.getBannedMessage().complete())
+                cancel(p.getBannedMessage().complete())
             }
             context.resolve(true)
         }.catch {
             SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${actor.uniqueId}")
             it.printStackTrace()
             if (SABConfig.database.failsafe) {
-                cancel()
-                actor.send(SABMessages.General.errorDetailed.replaceVariables(
+                cancel(SABMessages.General.errorDetailed.replaceVariables(
                     "EXCEPTION_CLASS_NAME" to it.javaClass.name,
                     "EXCEPTION_MESSAGE" to (it.message ?: "null"),
                 ).translate())
@@ -230,8 +228,7 @@ object PunishmentChecker {
         if (!res) {
             SpicyAzisaBan.LOGGER.warning("Could not check punishments for ${actor.uniqueId} (Timed out)")
             if (SABConfig.database.failsafe) {
-                cancel()
-                actor.send(SABMessages.General.error.replaceVariables().translate())
+                cancel(SABMessages.General.error.replaceVariables().translate())
             }
         }
     }

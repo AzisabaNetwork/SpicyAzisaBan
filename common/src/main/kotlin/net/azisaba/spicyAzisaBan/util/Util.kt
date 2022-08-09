@@ -45,6 +45,12 @@ object Util {
         }
     }
 
+    fun PlayerActor.disconnect(message: String) {
+        message.split("\\n|\\\\n".toRegex()).forEach { msg ->
+            disconnect(*Component.fromLegacyText(msg.replace("  ", " ${ChatColor.RESET} ${ChatColor.RESET}")))
+        }
+    }
+
     fun Actor.sendDelayed(timeInMillis: Long, message: String) {
         SpicyAzisaBan.instance.schedule(timeInMillis, TimeUnit.MILLISECONDS) { send(message) }
     }
