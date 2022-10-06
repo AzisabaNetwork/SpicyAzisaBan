@@ -44,6 +44,7 @@ class VelocityPlugin @Inject constructor(val server: ProxyServer, private val lo
         maven.addDependency(Dependency.resolve('o' + "rg.json:json:20210307"))
         maven.addDependency(Dependency.resolve("org.yaml:snakeyaml:1.29"))
         maven.addDependency(Dependency.resolve('o' + "rg.mariadb.jdbc:mariadb-java-client:2.7.3"))
+        maven.addExclude("log4j", "log4j")
         var hasError = false
         val files = maven.newFetcher(File(dataFolder, "libraries")).withMessageReporter { msg, throwable ->
             if (throwable == null) {
