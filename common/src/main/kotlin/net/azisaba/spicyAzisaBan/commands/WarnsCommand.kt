@@ -32,6 +32,7 @@ object WarnsCommand: Command() {
                 .complete()
                 .toList()
                 .filter { it.type == PunishmentType.WARNING || it.type == PunishmentType.CAUTION }
+                .filter { it.type != PunishmentType.CAUTION || it.start + (1000 * 60 * 60 * 24 * 30L) > System.currentTimeMillis() } // hide < 30 days old caution
             if (ps.isEmpty()) {
                 actor.send(SABMessages.Commands.Warns.notWarnedYet.replaceVariables().translate())
                 return@async context.resolve()
