@@ -15,12 +15,13 @@ import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
+import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import util.kt.promise.rewrite.catch
 
 object GlobalMuteCommand: Command() {
     override val name = "${SABConfig.prefix}gmute"
     override val permission = PunishmentType.MUTE.perm
-    private val availableArguments = listOf("player=", "reason=\"\"", "server=", "--all")
+    private val availableArguments = listOf(listOf("player="), listOf("reason=\"\""), listOf("server="), listOf("time="), listOf("--all", "-a"), listOf("--force", "-f"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission(PunishmentType.MUTE.perm)) {
@@ -44,6 +45,7 @@ object GlobalMuteCommand: Command() {
         if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
         if (s.startsWith("server=")) return ServerContext.tabComplete(s)
         if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.MUTE, args, "global")
+        if (s.startsWith("time=")) return TimeContext.tabComplete(s)
         return emptyList()
     }
 }

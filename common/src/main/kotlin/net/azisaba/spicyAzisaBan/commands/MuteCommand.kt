@@ -21,6 +21,7 @@ import net.azisaba.spicyAzisaBan.util.contexts.Contexts
 import net.azisaba.spicyAzisaBan.util.contexts.PlayerContext
 import net.azisaba.spicyAzisaBan.util.contexts.ReasonContext
 import net.azisaba.spicyAzisaBan.util.contexts.ServerContext
+import net.azisaba.spicyAzisaBan.util.contexts.TimeContext
 import net.azisaba.spicyAzisaBan.util.contexts.get
 import net.azisaba.spicyAzisaBan.util.contexts.getServer
 import util.kt.promise.rewrite.catch
@@ -29,7 +30,7 @@ import xyz.acrylicstyle.util.ArgumentParsedResult
 object MuteCommand: Command() {
     override val name = "${SABConfig.prefix}mute"
     override val permission = PunishmentType.MUTE.perm
-    private val availableArguments = listOf(listOf("player="), listOf("reason=\"\""), listOf("server="), listOf("--all", "-a"), listOf("--force", "-f"))
+    private val availableArguments = listOf(listOf("player="), listOf("reason=\"\""), listOf("server="), listOf("time="), listOf("--all", "-a"), listOf("--force", "-f"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission(PunishmentType.MUTE.perm)) {
@@ -46,6 +47,14 @@ object MuteCommand: Command() {
     }
 
     internal fun doMute(actor: Actor, arguments: ArgumentParsedResult, serverName: String? = null) {
+        // Use TempMuteCommand if time argument is present
+        if (arguments.getArgument("time") != null || arguments.unhandledArguments().getOrNull(2) != null) {
+            if (!actor.hasPermission(PunishmentType.TEMP_MUTE.perm)) {
+                return actor.send(SABMessages.General.missingPermissions.replaceVariables().translate())
+            }
+            return TempMuteCommand.doTempMute(actor, arguments, serverName)
+        }
+        // do permanent mute
         val player = arguments.get(Contexts.PLAYER, actor).complete().apply { if (!isSuccess) return }
         val server = if (serverName == null) {
             arguments.get(Contexts.SERVER, actor)
@@ -86,6 +95,7 @@ object MuteCommand: Command() {
         if (s.startsWith("player=")) return PlayerContext.tabComplete(s)
         if (s.startsWith("server=")) return ServerContext.tabComplete(s)
         if (s.startsWith("reason=")) return ReasonContext.tabComplete(PunishmentType.MUTE, args, actor.getServerName())
+        if (s.startsWith("time=")) return TimeContext.tabComplete(s)
         return emptyList()
     }
 }
