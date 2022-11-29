@@ -26,7 +26,7 @@ import java.net.InetAddress
 object SeenCommand: Command() {
     override val name = "${SABConfig.prefix}seen"
     override val permission = "sab.seen"
-    private val availableArguments = listOf(listOf("--ambiguous"))
+    private val availableArguments = listOf(listOf("--ambiguous"), listOf("--include-dummy"))
 
     override fun execute(actor: Actor, args: Array<String>) {
         if (!actor.hasPermission("sab.seen")) {
@@ -37,11 +37,12 @@ object SeenCommand: Command() {
         }
         val list = args.toMutableList()
         val ambiguous = list.remove("--ambiguous")
+        val includeDummy = list.remove("--include-dummy")
         val target = list[0]
-        doSeen(actor, target, ambiguous)
+        doSeen(actor, target, ambiguous, includeDummy)
     }
 
-    fun doSeen(actor: Actor, target: String, ambiguous: Boolean): Promise<Unit> =
+    fun doSeen(actor: Actor, target: String, ambiguous: Boolean, includeDummy: Boolean): Promise<Unit> =
         async<Unit> { context ->
             actor.send(SABMessages.Commands.Seen.searching.replaceVariables().translate())
             if (target.isValidIPAddress()) {
@@ -68,7 +69,7 @@ object SeenCommand: Command() {
                 if (pd == null && target.toUUIDOrNull() != null) {
                     pd = PlayerData.getByUUID(target).catch { actor.sendOrSuppressErrorMessage<IllegalStateException>(it) }.complete()
                 }
-                if (pd == null) {
+                if (pd == null || (!includeDummy && pd.firstLogin == 0L && pd.firstLoginAttempt == 0L && pd.lastLogin == 0L && pd.lastLoginAttempt == 0L)) {
                     actor.send(SABMessages.Commands.General.invalidPlayer.replaceVariables().translate())
                     return@async context.resolve()
                 }

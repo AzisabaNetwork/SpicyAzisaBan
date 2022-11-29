@@ -74,17 +74,27 @@ data class PlayerData(
             if (!rs.next()) {
                 MojangAPI.getUniqueId(name)
                     .then { uuid ->
-                        insertNoId {
-                            SpicyAzisaBan.instance.connection.players.insert(
-                                InsertOptions.Builder()
-                                    .addValue("uuid", uuid.toString())
+                        val pd = getByUUID(uuid).catch { }.complete()
+                        if (pd == null) {
+                            insertNoId {
+                                SpicyAzisaBan.instance.connection.players.insert(
+                                    InsertOptions.Builder()
+                                        .addValue("uuid", uuid.toString())
+                                        .addValue("name", name)
+                                        .addValue("ip", "1.1.1.1")
+                                        .addValue("last_seen", System.currentTimeMillis())
+                                        .build()
+                                ).complete()
+                            }
+                        } else {
+                            SpicyAzisaBan.instance.connection.players.update(
+                                UpsertOptions.Builder()
                                     .addValue("name", name)
-                                    .addValue("ip", "1.1.1.1")
-                                    .addValue("last_seen", System.currentTimeMillis())
+                                    .addWhere("uuid", uuid.toString())
                                     .build()
                             ).complete()
                         }
-                        PlayerData(uuid, name, "1.1.1.1", System.currentTimeMillis(), -1, -1, -1, -1)
+                        PlayerData(uuid, name, "1.1.1.1", System.currentTimeMillis(), 0, 0, 0, 0)
                     }
                     .catch { context.reject(IllegalArgumentException("no player data found for $name")) }
                     .complete()
