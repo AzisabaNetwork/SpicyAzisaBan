@@ -70,7 +70,7 @@ object PunishmentChecker {
         Util.async<Boolean> { context ->
             Thread {
                 val start = System.currentTimeMillis()
-                SpicyAzisaBan.instance.schedule(1500, TimeUnit.MILLISECONDS) {
+                SpicyAzisaBan.instance.schedule(3000, TimeUnit.MILLISECONDS) {
                     context.resolve(false)
                 }
                 val p = Punishment.canJoinServer(
@@ -150,7 +150,7 @@ object PunishmentChecker {
         }
         return Util.async<Boolean> { context ->
             Thread({
-                SpicyAzisaBan.instance.schedule(1500, TimeUnit.MILLISECONDS) {
+                SpicyAzisaBan.instance.schedule(3000, TimeUnit.MILLISECONDS) {
                     context.resolve(false)
                 }
                 val p = Punishment.canJoinServer(player.uniqueId, ipAddress, target.name.lowercase()).complete()
