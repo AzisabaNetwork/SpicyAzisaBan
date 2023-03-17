@@ -92,31 +92,6 @@ subprojects {
         withSourcesJar()
     }
 
-    publishing {
-        repositories {
-            maven {
-                name = "repo"
-                credentials(PasswordCredentials::class)
-                url = uri(
-                    if (project.version.toString().endsWith("SNAPSHOT"))
-                        project.findProperty("deploySnapshotURL") ?: System.getProperty("deploySnapshotURL", "")
-                    else
-                        project.findProperty("deployReleasesURL") ?: System.getProperty("deployReleasesURL", "")
-                )
-            }
-        }
-
-        publications {
-            create<MavenPublication>("mavenJava") {
-                //from(components["java"])
-                //artifact(tasks.withType<GenerateModuleMetadata>())
-                artifact(tasks["jar"])
-                artifact(tasks["sourcesJar"])
-                artifact(tasks["javadocJar"])
-            }
-        }
-    }
-
     tasks {
         compileKotlin {
             kotlinOptions.jvmTarget = "17"
@@ -198,9 +173,7 @@ subprojects {
             archiveFileName.set("SpicyAzisaBan-${project.version}.jar")
         }
     }
-}
 
-subprojects {
     dependencies {
         implementation("xyz.acrylicstyle.util:maven:0.16.6")
         implementation("net.blueberrymc:native-util:2.1.0")
@@ -220,6 +193,33 @@ subprojects {
         }
         compileOnly("org.mariadb.jdbc:mariadb-java-client:2.7.3")
         testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    }
+}
+
+allprojects {
+    publishing {
+        repositories {
+            maven {
+                name = "repo"
+                credentials(PasswordCredentials::class)
+                url = uri(
+                    if (project.version.toString().endsWith("SNAPSHOT"))
+                        project.findProperty("deploySnapshotURL") ?: System.getProperty("deploySnapshotURL", "https://repo.azisaba.net/repository/maven-snapshots/")
+                    else
+                        project.findProperty("deployReleasesURL") ?: System.getProperty("deployReleasesURL", "https://repo.azisaba.net/repository/maven-releases/")
+                )
+            }
+        }
+
+        publications {
+            create<MavenPublication>("mavenJava") {
+                //from(components["java"])
+                //artifact(tasks.withType<GenerateModuleMetadata>())
+                artifact(tasks["jar"])
+                artifact(tasks["sourcesJar"])
+                artifact(tasks["javadocJar"])
+            }
+        }
     }
 }
 

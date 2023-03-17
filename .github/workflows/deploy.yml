@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+    paths-ignore:
+      - "**.md"
+      - "renovate.json"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Prepare gradle.properties
+        run: |
+          mkdir -p $HOME/.gradle
+          echo "repoUsername=${{ secrets.REPO_USERNAME }}" >> $HOME/.gradle/gradle.properties
+          echo "repoPassword=${{ secrets.REPO_PASSWORD }}" >> $HOME/.gradle/gradle.properties
+      - name: Deploy
+        run: ./gradlew clean test publish
