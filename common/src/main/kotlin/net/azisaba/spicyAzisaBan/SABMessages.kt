@@ -386,5 +386,11 @@ object SABMessages {
             val lockdown get() = obj.getMessage("lockdown", defObj.getMessage("lockdown"))
             val lockdownJoinAttempt get() = obj.getMessage("lockdownJoinAttempt", defObj.getMessage("lockdownJoinAttempt"))
         }
+
+        object NameHistory {
+            private val defObj get() = Commands.defObj.getObj("namehistory")
+            private val obj get() = Commands.obj.getObj("namehistory")
+            val usage get() = obj.getMessage("usage", defObj.getMessage("usage"))
+        }
     }
 }

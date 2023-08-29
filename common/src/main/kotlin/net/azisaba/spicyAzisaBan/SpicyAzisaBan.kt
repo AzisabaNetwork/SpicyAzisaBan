@@ -25,6 +25,7 @@ import net.azisaba.spicyAzisaBan.commands.IPMuteCommand
 import net.azisaba.spicyAzisaBan.commands.KickCommand
 import net.azisaba.spicyAzisaBan.commands.LockdownCommand
 import net.azisaba.spicyAzisaBan.commands.MuteCommand
+import net.azisaba.spicyAzisaBan.commands.NameHistoryCommand
 import net.azisaba.spicyAzisaBan.commands.NoteCommand
 import net.azisaba.spicyAzisaBan.commands.ProofsCommand
 import net.azisaba.spicyAzisaBan.commands.SABCommand
@@ -68,7 +69,7 @@ abstract class SpicyAzisaBan {
     lateinit var connection: SQLConnection
     lateinit var settings: Settings
     var lockdown = false
-    
+
     companion object {
         val LOGGER: Logger = Logger.getLogger("SpicyAzisaBan")
         @JvmStatic
@@ -82,7 +83,7 @@ abstract class SpicyAzisaBan {
         private val startTime = System.currentTimeMillis()
         @JvmStatic
         fun getUptime(): String = Util.unProcessTime(System.currentTimeMillis() - startTime)
-        
+
         // Range: 0 - 99999
         //     0: off
         //     1: on
@@ -134,7 +135,7 @@ abstract class SpicyAzisaBan {
             LOGGER.info("Connected.")
         }
     }
-    
+
     open fun doEnable() {
         if (SABConfig.debugBuild) debugLevel = 5
         if (SABConfig.prefix.contains("\\s+".toRegex())) throw IllegalArgumentException("prefix (in config.yml) contains whitespace")
@@ -198,8 +199,9 @@ abstract class SpicyAzisaBan {
         instance.registerCommand(DelProofCommand)
         instance.registerCommand(ProofsCommand)
         instance.registerCommand(LockdownCommand)
+        instance.registerCommand(NameHistoryCommand)
     }
-    
+
     fun shutdownTimer() {
         timer.cancel()
     }

@@ -28,6 +28,10 @@ class SQLConnection(host: String, name: String, user:String, password: String): 
             SpicyAzisaBan.debug("Executed SQL: $s (took $time ms)", 3)
         }
 
+        fun logSql(s: String, time: Long, vararg params: Any) {
+            SpicyAzisaBan.debug("Executed SQL: '$s' with params: ${params.toList()} (took $time ms)", 3)
+        }
+
         fun logSql(s: String, params: Array<out Any>) {
             SpicyAzisaBan.debug("Executing SQL: '$s' with params: ${params.toList()}", 3)
         }

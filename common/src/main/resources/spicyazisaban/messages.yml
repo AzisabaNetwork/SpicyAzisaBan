@@ -433,3 +433,5 @@ commands:
     # Available variables for (enabled|disabled)Lockdown: default, %ACTOR% (actor who toggled the lockdown)
     enabledLockdown: "%PREFIX%&e&o%ACTOR%&r&7がサーバーロックダウンを&e有効&7にしました。"
     disabledLockdown: "%PREFIX%&e&o%ACTOR%&r&7がサーバーロックダウンを&e無効&7にしました。"
+  namehistory:
+    usage: "%PREFIX%&a使用法: /%CMD_PREFIX%namehistory <player>"

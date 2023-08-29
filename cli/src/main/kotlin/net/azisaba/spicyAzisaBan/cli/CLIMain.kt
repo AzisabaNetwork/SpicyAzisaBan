@@ -11,6 +11,7 @@ import net.azisaba.spicyAzisaBan.cli.commands.CLICautionCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIGroupCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIKickCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIMuteCommand
+import net.azisaba.spicyAzisaBan.cli.commands.CLINameHistoryCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLISeenCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLISimpleAsyncCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIUnpunishCommand
@@ -40,6 +41,7 @@ object CLIMain {
                 CLISeenCommand,
                 CLIUnpunishCommand,
                 CLIWarningCommand,
+                CLINameHistoryCommand,
             )
             parser.parse(args)
         } catch (e: Throwable) {
