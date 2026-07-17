@@ -1,3 +1,7 @@
+repositories {
+    maven("https://hub.spigotmc.org/nexus/content/repositories/public/")
+}
+
 dependencies {
     implementation(project(":common"))
     compileOnly("net.md-5:bungeecord-api:1.17-R0.1-SNAPSHOT")
