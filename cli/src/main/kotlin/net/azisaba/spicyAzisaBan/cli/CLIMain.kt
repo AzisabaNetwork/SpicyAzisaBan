@@ -9,6 +9,7 @@ import net.azisaba.spicyAzisaBan.cli.commands.CLIBanCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIBanListCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLICautionCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIGroupCommand
+import net.azisaba.spicyAzisaBan.cli.commands.CLIHistoryCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIKickCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLIMuteCommand
 import net.azisaba.spicyAzisaBan.cli.commands.CLINameHistoryCommand
@@ -36,6 +37,7 @@ object CLIMain {
                 CLIBanListCommand,
                 CLICautionCommand,
                 CLIGroupCommand,
+                CLIHistoryCommand,
                 CLIKickCommand,
                 CLIMuteCommand,
                 CLISeenCommand,

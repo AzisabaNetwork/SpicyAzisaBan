@@ -24,6 +24,7 @@ import net.azisaba.spicyAzisaBan.util.Util.toIntOr
 import net.azisaba.spicyAzisaBan.util.Util.translate
 import net.azisaba.spicyAzisaBan.util.contexts.IPAddressContext
 import util.kt.promise.rewrite.catch
+import util.promise.rewrite.Promise
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -58,11 +59,28 @@ object HistoryCommand: Command() {
         val ipOpt = arguments.containsUnhandledArgument("ip") || arguments.containsShortArgument('i')
         val only = arguments.containsUnhandledArgument("only") || arguments.containsShortArgument('o')
         if (active && all) return actor.send(SABMessages.Commands.History.invalidArguments.replaceVariables().translate())
-        var page = max(1, arguments.getArgument("page")?.toIntOr(1) ?: 1)
+        val page = max(1, arguments.getArgument("page")?.toIntOr(1) ?: 1)
+        execute(actor, target, active, all, page, ipOpt, only)
+    }
+
+    fun execute(
+        actor: Actor,
+        target: String,
+        active: Boolean,
+        all: Boolean,
+        requestedPage: Int,
+        ipOpt: Boolean,
+        only: Boolean,
+    ): Promise<Unit> {
+        if (active && all) {
+            actor.send(SABMessages.Commands.History.invalidArguments.replaceVariables().translate())
+            return Promise.resolve(null)
+        }
+        var page = max(1, requestedPage)
         val tableName = if (active) "punishments" else "punishmentHistory"
         val left = if (!all) "LEFT OUTER JOIN unpunish ON ($tableName.id = unpunish.punish_id)" else ""
         val extraWhere = if (!all) "AND unpunish.punish_id IS NULL" else ""
-        async<Unit> { context ->
+        return async<Unit> { context ->
             val punishments = if (ipOpt || target.isValidIPAddress()) {
                 val ip = if (target.isValidIPAddress()) {
                     target
